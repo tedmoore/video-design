@@ -19,7 +19,7 @@
 
 class Mesh: public VisualContent {
 public:
-    void setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_);
+    void setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, float linewidth, float pointsize);
     //void update() override;
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT)  override;
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) override;
@@ -36,8 +36,13 @@ public:
     int waveformEffectDim = 0;
     bool useFF = false, useFFmaster = true;
     float xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize;
-    int maxLines = 9000;
+    int maxLines = 15000;
     PointTM* points;
+    
+    float line_width = 1;
+    float point_size = 1;
+    
+    LagUD jitterMag;
 };
 
 #endif /* Mesh_hpp */

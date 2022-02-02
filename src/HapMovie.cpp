@@ -8,7 +8,7 @@
 #include "HapMovie.hpp"
 #include "defines.h"
 
-void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT){
+void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_){
     n_mag = n_mag_;
     mag_len = mag_len_;
     mags = mags_;
@@ -16,6 +16,8 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
     points[1] = pt1;
     points[2] = pt2;
     points[3] = pt3;
+    
+    ff = ff_;
     
     ofDirectory dir(path);
     
@@ -27,7 +29,7 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         player.setVolume(0);
         //texture = new ofTexture;
         cout << "player w h: " << player.getWidth() << " " << player.getHeight() << "\n";
-        texture.allocate(player.getWidth(),player.getHeight(),GL_RGBA);
+        //texture.allocate(player.getWidth(),player.getHeight(),GL_RGBA);
 
         cout << "\nmini movie:\n" << dir.getAbsolutePath() + "/mini_me_scaleToFill.mp4\n\n";
         mini_vid.load(dir.getAbsolutePath() + "/mini_me_scaleToFill.mp4");
@@ -48,6 +50,8 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         
         mini_img.allocate(mini_width, mini_height, OF_IMAGE_COLOR);
         mini_pix.allocate(mini_width, mini_height, OF_PIXELS_RGBA);
+        
+        total_frames = MIN(bitexact_tiffs.size(),tiffs.size());
     }
     
     cluster_freq = TARGET_FRAME_RATE * ofRandom(15,25);
@@ -58,33 +62,38 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
     for(int i = 0; i < N_CLUSTERS; i++){
         center_color_indices[i] = ofRandom(mag_len);
     }
+    
+    nMoviePoints = mini_width * mini_height;
+    
+    moviePoints = new MoviePoint[nMoviePoints];
+    for(int i = 0; i < mini_width; i++){
+        for(int j = 0; j < mini_height; j++){
+            MoviePoint *mp = new MoviePoint;
+            mp->setup(i / float(mini_width),j / float(mini_height));
+            moviePoints[(j * mini_width) + i] = *mp;
+        }
+    }
 }
 
 void HapMovie::update(bool isNRT){
     if(!isNRT){
         //cout << "mini vid updated\n";
         mini_vid.update();
+    } else {
+        nrt_playhead += speed;
+        while(nrt_playhead < 0) nrt_playhead += total_frames;
+        while(nrt_playhead >= total_frames) nrt_playhead -= total_frames;
     }
 }
 
 void HapMovie::display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
-    bool cluster_this_round = false;
-    
-    //    cout << ofGetFrameNum() + 1 << " " << TARGET_FRAME_RATE * 20 << " " << (ofGetFrameNum() + 1) % (TARGET_FRAME_RATE * 20) << "\n";
-    cluster_counter++;
-//    if((cluster_counter++ % cluster_freq) == 0){
-//        cluster_this_round = true;
-//        //cout << "cluster this round\n";
-//        center_colors.clear();
-//    }
-    
-    // is nrt
     
     // show hap
+    //cout << "play head: " << nrt_playhead << ", as int: " << int(nrt_playhead) << ", n tiffs: " << tiffs.size() << ", n small tiffs: " << bitexact_tiffs.size() << endl;
     
     if(showHap){
         if(isNRT){
-            img.load(tiffs[cluster_counter % tiffs.size()].getAbsolutePath());
+            img.load(tiffs[int(nrt_playhead)].getAbsolutePath());
             texture = img.getTexture();
         } else {
             texture = *player.getTexture();
@@ -97,12 +106,12 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
     // show rects
     // cluster this round
     
-    if(cluster_this_round || showRects){
+    if(showRects){
         
         // just getting the pixels
         if(isNRT){
-            string path = bitexact_tiffs[frame_num % bitexact_tiffs.size()].getAbsolutePath();
-            cout << path << "\n";
+            string path = bitexact_tiffs[int(nrt_playhead)].getAbsolutePath();
+//            cout << path << "\n";
             mini_img.load(path);
             mini_pix = mini_img.getPixels();
         } else {
@@ -112,16 +121,18 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
         ofSetLineWidth(1);
         int i_counter = 0;
         float summingmag = 0;
-        int rec_w = (width / mini_width) * rect_w_mul;
-        int rec_h = (height / mini_height) * rect_h_mul;
-        int x = 0;
+        float rec_w = (width / mini_width) * rect_w_mul;
+        float rec_h = (height / mini_height) * rect_h_mul;
+//        float rec_w = width * rect_w_mul;
+//        float rec_h = height * rect_h_mul;
+        int i = 0;
         int x_pos_scaled = 0;
-        while(x < mini_width && x_pos_scaled < width){
-            int y = 0;
+        while(i < mini_width && x_pos_scaled < width){
+            int j = 0;
             int y_pos_scaled = 0;
-            while(y < mini_height && y_pos_scaled < height){
+            while(j < mini_height && y_pos_scaled < height){
 //                ofColor col = mini_pix.getColor((y * mini_width) + x);
-                ofColor col = mini_pix.getColor(x,y);
+                ofColor col = mini_pix.getColor(i,j);
                 
                 for(int i = 0; i < N_CLUSTERS; i++){
                     if(center_color_indices[i] == i_counter){
@@ -130,36 +141,55 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
                         break;
                     }
                 }
-                //cout << col << "\n";
                 if(showRects){
-                    //cout << x << " " << y << "\n";
+                    // showing the rectangles
+                    
+                    // figure out the alpha
                     float local_mag = mags[0][i_counter];
                     summingmag += local_mag;
                     float local_alpha = ofMap(pow(local_mag,0.5),0.f,1.f,-10.f,255.f);
                     
+                    int x = x_pos_scaled;
+                    int y = y_pos_scaled;
+                    int z = 0;
+                
+                    // get the point at this i, j and apply the force from the ff
+                    MoviePoint &mp = moviePoints[(j * mini_width) + i];
+                    if(useFF && useFFMaster){
+                        ofVec3f force = ff->getOrientationFromPos(mp.pos);
+                        force.normalize();
+                        force.operator*=(common_features->at("specCentroid") * 0.002);
+                        force.z = 0.0005 * common_features->at("specFlatness");
+                        mp.applyForce(&force);
+                        mp.move(common_features->at("amplitude") * 0.05);
+                        x = mp.pos.x * rect_w_mul * width;
+                        y = mp.pos.y * rect_h_mul * height;
+                        z = mp.pos.z * rect_h_mul * height * zDir;
+                    }
+                    
+                    ofPushMatrix();
+                    ofTranslate(x, y, z);
+                    
+                    // move to the point on the screen that we want to put the rectangle
+                    
                     if(ofRandom(1.f) < 0.9999) ofFill();
                     ofFill();
                     ofSetColor(col,local_alpha);
-                    ofDrawRectangle(x_pos_scaled, y_pos_scaled,rec_w, rec_h);
-                    //ofSetColor(255, 0, 0);
-                    //ofDrawBitmapString(ofToString(x) + "," + ofToString(y), x * rec_w, (y * rec_h) + 12);
+                    ofDrawRectangle(0, 0, rec_w, rec_h);
                     
                     if(local_mag > avg_mag){
                         if(ofRandom(1.f) < 0.9999) ofNoFill();
-                        ofSetColor(255,255);
-                        ofDrawRectangle(x_pos_scaled, y_pos_scaled,rec_w, rec_h);
+                        ofSetColor(255,mp.rect_outline_alpha.update(255));
+                        ofDrawRectangle(0, 0,rec_w, rec_h);
                     }
-                }
-                if(cluster_this_round){
-                    color_points[i_counter][0] = float(col.r);
-                    color_points[i_counter][1] = float(col.g);
-                    color_points[i_counter][2] = float(col.b);
+                    
+                    ofPopMatrix();
                 }
                 i_counter++;
-                y++;
+                j++;
                 y_pos_scaled += rec_h;
             }
-            x++;
+            i++;
             x_pos_scaled += rec_w;
         }
         
@@ -172,40 +202,6 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
 //            cout << "summing mag: " << summingmag << "\n";
             //cout << "avg mag:     " << avg_mag << "\n\n";
         }
-        
-//        if(cluster_this_round){
-//
-//
-//            cv::Mat points(N_MINI_COLOR_POINTS,3,CV_32F,color_points);
-//            //        points.convertTo(points,CV_32F);
-//            //        cout << color_points << "\n";
-//            //        cout << points << "\n";
-//
-//            cv::Mat centers(N_CLUSTERS,3,CV_32F);
-//            //cv::Mat labels(N_MINI_COLOR_POINTS,1,CV_8U);
-//            vector<int> labels;
-//            cv::kmeans(points,N_CLUSTERS,labels,cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS,1000,1),10,cv::KmeansFlags::KMEANS_RANDOM_CENTERS,centers);
-//            //        cout << centers << "\n";
-//
-//            for(int i = 0; i < N_CLUSTERS; i++){
-//                ofColor col(centers.at<float>(i,0),centers.at<float>(i,1),centers.at<float>(i,2));
-//                center_colors.push_back(col);
-//                //            cout << center_colors[i] << "\n";
-//            }
-//
-//            ofSort(center_colors,[](ofColor &a, ofColor &b) -> bool {
-//                return a.getBrightness() < b.getBrightness();
-//            });
-//
-//            for(int i = 0; i < N_CLUSTERS; i++){
-//                center_colors[i].setSaturation(center_colors[i].getSaturation() * 1.4);
-//                center_colors[i].setBrightness(center_colors[i].getBrightness() * 1.1);
-//                //ofSetColor(center_colors[i]);
-//                //ofDrawRectangle(i * wid, 0, wid, wid);
-//            }
-//
-//            clustered = true;
-//        }
     }
 }
 
@@ -216,6 +212,12 @@ void HapMovie::newParams(int width, int height, float** vecHistory, int vector_l
     showRects = ofRandom(1.f) < 0.4;
     rect_w_mul = ofRandom(1.0,3.0);
     rect_h_mul = ofRandom(1.0,3.0);
+    
+    useFF = ofRandom(1.f) < 0.28;
+    
+    for(int i = 0; i < nMoviePoints; i ++){
+        moviePoints[i].resetPos();
+    }
     
     for(int i = 0; i < N_CLUSTERS; i++){
         center_color_indices[i] = ofRandom(mag_len);
@@ -232,13 +234,30 @@ void HapMovie::receiveOSC(int width, int height, std::string label, float val){
 }
 
 void HapMovie::screenResize(int w, int h){
-    ofVec3f* pt0 = new ofVec3f(0,0,0);
-    ofVec3f* pt1 = new ofVec3f(w,0,0);
-    ofVec3f* pt2 = new ofVec3f(w,h,0);
-    ofVec3f* pt3 = new ofVec3f(0,h,0);
+    int displayX = 0;
+    int displayW = 0;
+    float displayRatio;
+    int displayH = 0;
+    int displayY = 0;
     
-    points[0] = *pt0;
-    points[1] = *pt1;
-    points[2] = *pt2;
-    points[3] = *pt3;
+    if(((float)texture.getWidth() / (float)w) > ((float)texture.getHeight() / (float)h)){
+//        cout << "the width is closer to display than height is" << endl;
+        displayX = 0;
+        displayW = w;
+        displayRatio = (float)w / (float)texture.getWidth();
+        displayH = texture.getHeight() * displayRatio;
+        displayY = (ofGetHeight() - displayH) * 0.5;
+    } else {
+//        cout << "height is closer to display than width is" << endl;
+        displayY = 0;
+        displayH = h;
+        displayRatio = (float)h / (float)texture.getHeight();
+        displayW = texture.getWidth() * displayRatio;
+        displayX = (w-displayW) * 0.5;
+    }
+    
+    points[0].set(displayX,displayY,0);
+    points[1].set(displayX + displayW,displayY,0);
+    points[2].set(displayX + displayW,displayY + displayH,0);
+    points[3].set(displayX,displayY + displayH,0);
 }

@@ -6,9 +6,17 @@ void ofApp::setup(){
     int width = 0;
     int height = 0;
     
+    float mesh_line_width = 1;
+    float mesh_point_size = 1;
+    float lissajous_line_width = 1;
+    
     if(nrtRender){
         width = 3840; // 4k
         height = 2160;// 4k
+        
+        mesh_line_width = 2;
+        mesh_point_size = 2;
+        lissajous_line_width = 2;
     } else {
         width = ofGetWidth();
         height = ofGetHeight();
@@ -100,13 +108,13 @@ void ofApp::setup(){
         
     Waveform* wf = new Waveform;
     //int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull
-    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full);
+    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
     visual_contents[vc_counter++] = wf;
     
     ff.setup(20, xmin, xmax, ymin, ymax, zmin, zmax);
     
     Mesh* mesh = new Mesh;
-    mesh->setup(500, &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize);
+    mesh->setup(500, &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
     visual_contents[vc_counter++] = mesh;
     
     Lines* lines0 = new Lines;
@@ -121,8 +129,8 @@ void ofApp::setup(){
     lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
     visual_contents[vc_counter++] = lines2;
     
-    newHapMovie("sun_and_fish",vc_counter++,initialPoints);
-    newHapMovie("dolphins", vc_counter++, initialPoints);
+    newHapMovie("sun_and_fish",vc_counter++,initialPoints,width,height);
+    newHapMovie("dolphins", vc_counter++, initialPoints,width,height);
     //newHapMovie("IMG_1837_hap.mov", vc_counter++, initialPoints,"IMG_1837_mini_bitexact.mp4");
     
     nVisualContents = vc_counter;
@@ -165,9 +173,10 @@ void ofApp::setup(){
         //*******************************************************************************************************************
         
         // this is just for rendering chebyshev
-//        onsetSwitchProb = 0;
-//        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
-//        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
+        onsetSwitchProb = 0;
+        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
+        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
+        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
         
         //*******************************************************************************************************************
         //*******************************************************************************************************************
@@ -181,16 +190,17 @@ void ofApp::setup(){
         int max_frames = INT_MAX;
         
         // loading in the data
-        string csv_path = "210607_001300_startSec=46.csv";
+//        string csv_path = "210617_030618_startSec=46.csv";
+        
         
         string line;
         ifstream data;
         data.open(ofToDataPath(csv_path));
-        int line_length = 8815;
+        int line_length = 8303;// 8308
         float* csv_line_fl = new float[line_length];
         
         // stuff for rendering
-        string new_dir_path = "/Volumes/T7/noise_gate/oF_renders/" + ofGetTimestampString();
+        string new_dir_path = "/Volumes/T7/noise_gate/oF_renders/" + ofGetTimestampString() + "_testing pca and kmeans vecs";
         ofDirectory new_dir(new_dir_path);
         new_dir.create();
         
@@ -206,6 +216,11 @@ void ofApp::setup(){
             
             vector<string> csv_line = ofSplitString(line,",");
             
+            if(csv_line.size() != line_length){
+                cout << "csv line is not expected length. expected: " << line_length << ", found: " << csv_line.size() << endl;
+                break;
+            }
+            
             for(int i = 0; i < line_length; i++){
                 csv_line_fl[i] = ofToFloat(csv_line[i]);
             }
@@ -214,11 +229,17 @@ void ofApp::setup(){
             
             setValsFromCSV(width,height,csv_line_fl);
             
+            cout << "frame num: " << frame_num;
+//            cout << "\tcsv line size: " << csv_line.size();
+//            cout << " pca: " << pcas[0] << " " << pcas[1] << " " << pcas[2] << " " << pcas[3];
+//            cout << " kmeans: " << kmeans[0] << " " << kmeans[1] << " " << kmeans[2] << " " << kmeans[3];
+            cout << endl;
+            
             for(int i = 0; i < nVisualContents; i++){
                 visual_contents[i]->update(true);
             }
             
-            cout << "frame num: " << frame_num << "\n";
+            
 //            cout << "amp:       " << common_features["amplitude"] << "\n";
             
             //            for(int i = 0; i < 100; i++){
@@ -271,13 +292,51 @@ void ofApp::setValsFromCSV(int width, int height, float* csv_data){
     common_features["zeroCrossing"] = vector_data[13];
     
     for(int i = 0; i < magnitude_len; i++){
-        magnitudes[0][i] = csv_data[i + 110];
+        magnitudes[0][i] = csv_data[110 + i];
     }
     
     for(int i = 0; i < waveform_len; i++){
-        waveforms[0][i] = csv_data[i + 1135];
-        waveforms[1][i] = csv_data[i + 4975];
+        waveforms[0][i] = csv_data[623 + i];
+        waveforms[1][i] = csv_data[4463 + i];
     }
+    
+    for(int i = 0; i < nPCAs; i++){
+        pcas[i] = ofLerp(pcas[i],csv_data[8303 + i],0.14);
+    }
+    
+    setKmeansVec(csv_data[8307],true);
+}
+
+void ofApp::setKmeansVec(int cluster,bool check_confidence){
+    curr_cluster = cluster;
+    
+    if(previous_cluster == curr_cluster){
+        kmeans_confidence++;
+    } else {
+        kmeans_confidence = 0;
+    }
+    
+    if(check_confidence){ // increase the 0 to require a higher confidence;
+        if(kmeans_confidence > 0){
+            for(int i = 0; i < kClusters; i++){
+                if(i == curr_cluster){
+                    kmeans[i] = 1.f;
+                } else {
+                    kmeans[i] = 0.f;
+                }
+            }
+        }
+    } else {
+        for(int i = 0; i < kClusters; i++){
+            if(i == curr_cluster){
+                kmeans[i] = 1.f;
+            } else {
+                kmeans[i] = 0.f;
+            }
+        }
+    }
+    
+    previous_cluster = curr_cluster;
 }
 
 void ofApp::incrementVecHistoryCounter(){
@@ -288,9 +347,10 @@ void ofApp::incrementVecHistoryCounter(){
     vec_history_counter = (vec_history_counter + 1) % vec_history_length;
 }
 
-void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts){
+void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height){
     HapMovie* vc = new HapMovie;
-    vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender);
+    vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff);
+    vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full);
     visual_contents[index] = vc;
 }
 
@@ -329,14 +389,7 @@ void ofApp::update(){
             float val = oscMsg.getArgAsFloat(2);
             visual_contents[index]->receiveOSC(ofGetWidth(),ofGetHeight(),str, val);
         } else if (address == "/kmeans"){
-            curr_cluster = oscMsg.getArgAsInt(0);
-            for(int i = 0; i < kClusters; i++){
-                if(i == curr_cluster){
-                    kmeans[i] = 1.f;
-                } else {
-                    kmeans[i] = 0.f;
-                }
-            }
+            setKmeansVec(oscMsg.getArgAsInt(0),false);
         } else if (address == "/pca"){
             for(int i = 0; i < nPCAs; i++){
                 pcas[i] = oscMsg.getArgAsFloat(i);
@@ -415,6 +468,9 @@ void ofApp::onsetOccured(int width, int height){
 
 void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     if(!debug){
+        
+        ff.update(frameNum, &common_features);
+        
         for(int i = 0; i < max_active_vc; i++){
             int index = active_vc_i[i];
             if(index >= 0){

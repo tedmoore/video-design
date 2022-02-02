@@ -73,7 +73,8 @@ void Lines::display(int width, int height, int frame_num, std::unordered_map<std
     h = height / vec_len;
     
     for (int i = 0; i < vec_len; i++) {
-        float alpha = pow(vec[i], 0.75) * 255.f;
+        float alpha = 0;
+        if(vec[i] > 0) alpha = pow(vec[i], 0.75) * 255.f;
         //cout << "alpha: " << alpha << "\n";
         if (alpha > alphaThresh) {
             if(is_borrow_colors && can_borrow_colors){
@@ -83,9 +84,6 @@ void Lines::display(int width, int height, int frame_num, std::unordered_map<std
                 ofSetColor(255, 255,255,alpha);
             }
             drawLine(width,height,i);
-        } else {
-            //println("alpha below thresh");
-            //drawLine(i, alpha, color(0,255,0));
         }
     }
     

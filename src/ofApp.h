@@ -28,7 +28,7 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-    void newHapMovie(std::string path, int index, ofVec3f* initPts);
+    void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height);
     void displayIncomingData(int width, int height);
     void onsetOccured(int width, int height);
     void drawScreen(int width, int height, int frameNum, bool isNRT);
@@ -53,7 +53,7 @@ public:
     
     // mags
     int n_magnitudes = 1;
-    int magnitude_len = 1025;
+    int magnitude_len = 513;
     float** magnitudes;
     
     // vector data
@@ -71,6 +71,9 @@ public:
     int kClusters = 4;
     int curr_cluster = 0;
     float kmeans[4];
+    void setKmeansVec(int cluster,bool check_confidence);
+    int previous_cluster = -1;
+    int kmeans_confidence = 0;
 
     float xsize;
     float ysize;
@@ -90,5 +93,5 @@ public:
     bool onset_occured = false;
     float onsetSwitchProb = 1.f;
   
-    bool nrtRender = false;
+    bool nrtRender = true;
 };

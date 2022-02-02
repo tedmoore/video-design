@@ -72,7 +72,7 @@ void FlowField::setup(int res, float xmin_, float xmax_, float ymin_, float ymax
 //        }
 //    }
     
-    timeMul.setup(1.0, 0.001, 0);
+    timeMul.setup(1.0, 0.14, 0);
 }
 
 int FlowField::ijk2offset(int i, int j, int k){
@@ -82,11 +82,12 @@ int FlowField::ijk2offset(int i, int j, int k){
 ofVec3f FlowField::getOrientationFromPos(ofVec3f pos) {
     //println(width,height);
     //println(pos);
+   // cout << pos << "\n";
     int xI = ofClamp(int(resolution * ((pos.x - xmin) / xrange)), 0, resolution-1);
     int yI = ofClamp(int(resolution * ((pos.y - ymin) / yrange)), 0, resolution-1);
     int zI = ofClamp(int(resolution * ((pos.z - zmin) / zrange)), 0, resolution-1);
 //    cout << "FlowField resolution: " << resolution << "\n";
-//    cout << xI << " " << yI << " " << zI << "\n";
+    //cout << xI << " " << yI << " " << zI << "\n\n";
     return points[ijk2offset(xI, yI, zI)].orientation;
 }
 

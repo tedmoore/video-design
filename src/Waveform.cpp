@@ -7,7 +7,8 @@
 
 #include "Waveform.hpp"
 
-void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, float lissajous_line_width_){
+    lissajous_line_width = lissajous_line_width_;
     n_waveforms = n_waveforms_;
     length = length_;
     waveforms = waveforms_;
@@ -44,7 +45,7 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
         {
             ofSetColor(255);
             ofNoFill();
-            ofSetLineWidth(1);
+            ofSetLineWidth(lissajous_line_width);
             float w = width / 2.f;
             ofBeginShape();
             for (int i = 0; i < length * 0.1; i++) {
@@ -65,7 +66,7 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
         case IKEDA:
         {
             int half_w = width / 2;
-            ofSetColor(255,255);
+            ofSetColor(255,pow(common_features->at("amplitude"),0.5) * 255); // what should the ikeda alpha be
             ofSetLineWidth(1);
             float runningsum = 0;
             for (int i = 0; i < n_waveforms; i++) {
@@ -106,7 +107,7 @@ void Waveform::displayWaveform(int wf_int, int x, int y, int z, float hmul2){
     ofNoFill();
     ofSetLineWidth(1);
     ofBeginShape();
-    cout << "wf int: " << wf_int << "\t" << x << "\t" << y << "\t" << z << "\t" << hmul2 << "\n";
+    //cout << "wf int: " << wf_int << "\t" << x << "\t" << y << "\t" << z << "\t" << hmul2 << "\n";
     for (int i = 0; i < length; i++) {
       float y2 = y + (waveforms[wf_int][i] * h * hmul2);
       float x2 = x + i;

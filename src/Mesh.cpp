@@ -7,7 +7,10 @@
 
 #include "Mesh.hpp"
 
-void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_) {
+void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, float linewidth, float pointsize) {
+    line_width = linewidth;
+    point_size = pointsize;
+    
     xmin = xmin_;
     xmax = xmax_;
     ymin = ymin_;
@@ -30,7 +33,8 @@ void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float y
         points[i] = *pt;
     }
     
-    velLimit.setup(1, 0.01, 0);
+    velLimit.setup(1, 0.14, 0);
+    jitterMag.setup(1,0.14,0);
 }
 
 void Mesh::newPointLocs(float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
@@ -64,7 +68,7 @@ void Mesh::newPointLocs(float** vecHistory, int vector_length, int history_lengt
 void Mesh::newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
     newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
     
-    if (ofRandom(1.0) > 0.5) {
+    if (ofRandom(1.0) < 0.8) {
         useFF = true;
     } else {
         useFF = false;
@@ -81,30 +85,33 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     ofSetColor(255,255,255,255);
     float amp = common_features->at("amplitude");
     float sensDis = common_features->at("sensoryDissonance");
-    float jitterMag = amp * 0.01;//MIN(0.01, amp);
+    jitterMag.update(amp * 0.12);//amp * 0.01;//MIN(0.01, amp);
     //float jitterMag = 1;
-    float distThresh = 0.0275 + (sensDis * 0.25);
+    float distThresh = 0.02 + (sensDis * 0.15);
     //println(specFlatness);
     float speedMul = 0.025; // 0.0075
     int n_lines = 0;
+    
+    velLimit.update(amp * speedMul);
+    
     for (int i = 0; i < nPoints; i++) {
         
         if (useFF && useFFmaster) {
             ofVec3f ori = ff->getOrientationFromPos(points[i].pos);
             ori.normalize();
-            ori.operator*=(speedMul); // this float multiplier changes the amount that the flow field affects the point's direction
+            ori.operator*=(speedMul * 0.1); // this float multiplier changes the amount that the flow field affects the point's direction
             points[i].applyForce(&ori);
         }
         if (!waveformTracking) {
-            points[i].move(jitterMag, velLimit.update(amp * speedMul));
+            points[i].move(jitterMag.value, velLimit.value);
         } else {
-            points[i].move(jitterMag * 0.1, velLimit.update(amp * speedMul));
+            points[i].move(jitterMag.value * 0.1, velLimit.value);
         }
         
         //println(velLimit.value);
         
         points[i].checkEdges();
-        points[i].display(width,height,1);
+        points[i].display(width,height,point_size);
         
         if (i < nPoints - 1 && n_lines < maxLines) {
             int i_lines = 0;
@@ -126,13 +133,10 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     }
     
     waveformTracking = false;
-    
-    if (useFF && useFFmaster) ff->update(frame_num, common_features);
-    //ff.display();
 }
 
 void Mesh::drawLine(PointTM* a, PointTM* b, float dist, int width, int height) {
-    ofSetLineWidth(1);
+    ofSetLineWidth(line_width);
     //float alpha = 5.0 / ((dist * dist) + 1);
     //println(alpha);
     //ofSetColor(255, alpha);

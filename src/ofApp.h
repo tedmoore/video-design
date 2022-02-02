@@ -6,6 +6,7 @@
 #include "HapMovie.hpp"
 #include "Waveform.hpp"
 #include "Mesh.hpp"
+#include "Turtle.hpp"
 #include "Lines.hpp"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"

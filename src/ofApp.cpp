@@ -189,10 +189,6 @@ void ofApp::setup(){
         //int max_frames = 600; // 600 frames = 20 seconds
         int max_frames = INT_MAX;
         
-        // loading in the data
-//        string csv_path = "210617_030618_startSec=46.csv";
-        
-        
         string line;
         ifstream data;
         data.open(ofToDataPath(csv_path));
@@ -200,7 +196,13 @@ void ofApp::setup(){
         float* csv_line_fl = new float[line_length];
         
         // stuff for rendering
-        string new_dir_path = "/Volumes/T7/noise_gate/oF_renders/" + ofGetTimestampString() + "_testing pca and kmeans vecs";
+        
+        string new_dir_path;
+        ofFileDialogResult result = ofSystemSaveDialog("", "Choose location to save frames");
+        if(result.bSuccess) {
+          new_dir_path = result.getPath();
+        }
+        
         ofDirectory new_dir(new_dir_path);
         new_dir.create();
         
@@ -230,23 +232,11 @@ void ofApp::setup(){
             setValsFromCSV(width,height,csv_line_fl);
             
             cout << "frame num: " << frame_num;
-//            cout << "\tcsv line size: " << csv_line.size();
-//            cout << " pca: " << pcas[0] << " " << pcas[1] << " " << pcas[2] << " " << pcas[3];
-//            cout << " kmeans: " << kmeans[0] << " " << kmeans[1] << " " << kmeans[2] << " " << kmeans[3];
             cout << endl;
             
             for(int i = 0; i < nVisualContents; i++){
                 visual_contents[i]->update(true);
             }
-            
-            
-//            cout << "amp:       " << common_features["amplitude"] << "\n";
-            
-            //            for(int i = 0; i < 100; i++){
-            //                cout << magnitudes[0][i] << " ";
-            //            }
-            //            cout << "\nwf val:  " << waveforms[0][0] << "\n";
-//            cout << "data frame len:  " << csv_line.size() << "\n";
             
             fbo.begin();
             ofClear(0,0,0,0);
@@ -396,6 +386,7 @@ void ofApp::update(){
             }
         } else if (address == "/waveform") {
             int index = oscMsg.getArgAsInt(0);
+//            cout << "received waveform: " << index << endl;
             for(int i = 0; i < waveform_len; i++){
                 waveforms[index][i] = oscMsg.getArgAsFloat(i+1);
             }
@@ -410,9 +401,11 @@ void ofApp::update(){
         } else if (address == "/vector") {
             for(int i = 0; i < vector_len; i++){
                 float val = oscMsg.getArgAsFloat(i);
+//                cout << val << " ";
                 vector_data[i] = val;
                 vec_history[vec_history_counter][i] = val;
             }
+            cout << endl;
             
             incrementVecHistoryCounter();
             

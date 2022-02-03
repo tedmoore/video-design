@@ -38,7 +38,7 @@ void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_
 
 void Waveform::display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
     
-    //cout << "type " << wfType << "\n";
+    cout << "n waveforms " << n_waveforms << "\n";
     
     switch(wfType){
         case LISSAJOUS:
@@ -83,23 +83,6 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
         }
             break;
     }
-//    if (lissajous) {
-//        ofSetColor(255);
-//        ofNoFill();
-//        ofSetLineWidth(2);
-//        float w = width / 2;
-//        ofBeginShape();
-//        for (int i = 0; i < length * 0.1; i++) {
-//            ofVertex(xoff[1] + w + (waveforms[0][i] * h), yoff[1] + (waveforms[1][i] * h));
-//        }
-//        ofEndShape();
-//    } else {
-//        for (int i = 0; i < n_waveforms; i++) {
-//            if (show[i]) {
-//                displayWaveform(i % maxNWaveforms, xoff[i], yoff[i], zoff[i], hmul[i]);
-//            }
-//        }
-//    }
 }
 
 void Waveform::displayWaveform(int wf_int, int x, int y, int z, float hmul2){

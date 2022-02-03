@@ -93,5 +93,5 @@ public:
     bool onset_occured = false;
     float onsetSwitchProb = 1.f;
   
-    bool nrtRender = true;
+    bool nrtRender = false;
 };

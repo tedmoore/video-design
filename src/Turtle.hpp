@@ -8,29 +8,43 @@
 #ifndef Turtle_hpp
 #define Turtle_hpp
 
-#include "VisualContent.hpp"
+#include <stdio.h>
 #include "ofMain.h"
+#include "VisualContent.hpp"
 
-class Turtle: public VisualContent {
+class Turtle : public VisualContent {
 public:
     
-    void setup(float* vec_, int offset_, int vec_len_, bool can_borrow_colors_, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull);
+    VIS_TYPE type = TURTLE;
+    vector<ofVec3f> path;
+    float divisor = 7;
     
-    void interact(VisualContent* other){};
-    
-    void receiveOSC(int width, int height, std::string label, float val){
+    void interact(VisualContent* other){
+        
     }
     
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){}
+    void receiveOSC(int width, int height, std::string label, float val){
+        
+    }
     
-    void screenResize(int w, int h){}
+    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+        
+    }
     
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
-
-    void update(bool isNRT){}
+    void screenResize(int w, int h){
+        
+    }
+    
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        divisor = int(ofRandom(7));
+        path.clear();
+        path.push_back(ofVec3f(ofRandom(width),ofRandom(height),ofRandom(height));
+    }
+    
+    void update(bool isNRT){
+        
+    }
+    
 };
-
-
-#include <stdio.h>
 
 #endif /* Turtle_hpp */

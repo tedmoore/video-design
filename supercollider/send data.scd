@@ -18,6 +18,7 @@ s.waitForBoot({
 			arg msg;
 			var vec = ["/vector"] ++ msg[3..];
 			vec.postln;
+			vec.size.postln;
 			~oF.sendMsg(*vec);
 		},"/vector");
 
@@ -35,7 +36,7 @@ s.waitForBoot({
 			var frame = PulseCount.kr(trig) - 1;
 			var spec = FluidSpectralShape.kr(sig_mono);
 			var pitch = FluidPitch.kr(sig_mono);
-			var mfcc = FluidMFCC.kr(sig_mono,40);
+			var mfcc = FluidMFCC.kr(sig_mono,40,maxNumCoeffs:40);
 			var loudness = FluidLoudness.kr(sig_mono);
 			var chroma = FluidChroma.kr(sig_mono,maxNumChroma:12);
 			var melbands = FluidMelBands.kr(sig_mono,maxNumBands:40);

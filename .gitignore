@@ -1,3 +1,5 @@
 bin/modular_video_02Debug.app
 bin/data
 modular_video_02.xcodeproj
+build
+obj

@@ -13,7 +13,7 @@
 #include <unordered_map>
 //#include "ofMain.h"
 
-enum VIS_TYPE { NONE, HAP, WAVEFORM, MESH , LINES };
+enum VIS_TYPE { NONE, HAP, WAVEFORM, MESH , LINES , TURTLE };
 
 class VisualContent {
 public:

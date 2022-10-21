@@ -109,29 +109,33 @@ void ofApp::setup(){
     Waveform* wf = new Waveform;
     //int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull
     wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
-    visual_contents[vc_counter++] = wf;
+    visual_contents[vc_counter++] = wf; // 0
     
     ff.setup(20, xmin, xmax, ymin, ymax, zmin, zmax);
     
     Mesh* mesh = new Mesh;
     mesh->setup(500, &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
-    visual_contents[vc_counter++] = mesh;
+    visual_contents[vc_counter++] = mesh; // 1
     
     Lines* lines0 = new Lines;
     lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines0;
+    visual_contents[vc_counter++] = lines0; // 2
     
-    Lines* lines1 = new Lines;
-    lines1->setup(pcas,0,4, true,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines1;
+//    Lines* lines1 = new Lines;
+//    lines1->setup(pcas,0,4, true,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+//    visual_contents[vc_counter++] = lines1; // 3
+//
+//    Lines* lines2 = new Lines;
+//    lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
+//    visual_contents[vc_counter++] = lines2; // 4
     
-    Lines* lines2 = new Lines;
-    lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines2;
-    
-    newHapMovie("sun_and_fish",vc_counter++,initialPoints,width,height);
-    newHapMovie("dolphins", vc_counter++, initialPoints,width,height);
+    newHapMovie("sun_and_fish",vc_counter++,initialPoints,width,height); // 5
+    newHapMovie("dolphins", vc_counter++, initialPoints,width,height); // 6
     //newHapMovie("IMG_1837_hap.mov", vc_counter++, initialPoints,"IMG_1837_mini_bitexact.mp4");
+    
+    Turtle* turtle0 = new Turtle;
+    turtle0->setup(ofGetWidth(),ofGetHeight(),vec_history,vector_len,vec_history_length,vec_history_full);
+    visual_contents[vc_counter++] = turtle0;  // 7
     
     nVisualContents = vc_counter;
     
@@ -157,7 +161,7 @@ void ofApp::setup(){
     
     // =========================== INITIALIZATION =====================
     // initialize to none active
-    active_vc_i[0] = 0;
+    active_vc_i[0] = -1;
     active_vc_i[1] = -1;
     active_vc_i[2] = -1;
     active_vc_i[3] = -1;
@@ -173,10 +177,10 @@ void ofApp::setup(){
         //*******************************************************************************************************************
         
         // this is just for rendering chebyshev
-        onsetSwitchProb = 0;
-        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
-        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
-        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
+//        onsetSwitchProb = 0;
+//        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
+//        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
+//        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
         
         //*******************************************************************************************************************
         //*******************************************************************************************************************
@@ -353,7 +357,7 @@ void ofApp::update(){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
 
-        //cout << oscMsg << "\n";
+//        cout << oscMsg << "\n";
 
         string address = oscMsg.getAddress();
         
@@ -449,6 +453,8 @@ void ofApp::onsetOccured(int width, int height){
                     found = true;
                     chosen_i.push_back(result);
                     active_vc_i[i] = result; // the module's index
+                    
+//                    cout << "result " << result << endl;
                     
                     if(result >= 0 && visual_contents[result]->newParamsProb > ofRandom(1.f)){
                         visual_contents[result]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full);

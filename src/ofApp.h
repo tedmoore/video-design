@@ -40,7 +40,7 @@ public:
 //    int height;
     
     int nVisualContents;
-    VisualContent* visual_contents[7];
+    VisualContent* visual_contents[8];
     vector<int> vc_i_options;
     
     int max_active_vc = 4;

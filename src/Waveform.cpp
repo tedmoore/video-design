@@ -38,7 +38,7 @@ void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_
 
 void Waveform::display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
     
-    cout << "n waveforms " << n_waveforms << "\n";
+//    cout << "n waveforms " << n_waveforms << "\n";
     
     switch(wfType){
         case LISSAJOUS:

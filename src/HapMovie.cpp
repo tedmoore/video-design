@@ -241,14 +241,12 @@ void HapMovie::screenResize(int w, int h){
     int displayY = 0;
     
     if(((float)texture.getWidth() / (float)w) > ((float)texture.getHeight() / (float)h)){
-//        cout << "the width is closer to display than height is" << endl;
         displayX = 0;
         displayW = w;
         displayRatio = (float)w / (float)texture.getWidth();
         displayH = texture.getHeight() * displayRatio;
         displayY = (ofGetHeight() - displayH) * 0.5;
     } else {
-//        cout << "height is closer to display than width is" << endl;
         displayY = 0;
         displayH = h;
         displayRatio = (float)h / (float)texture.getHeight();

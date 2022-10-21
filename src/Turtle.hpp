@@ -19,7 +19,8 @@ public:
     vector<ofVec3f> path;
     int divisor_i = 0;
     vector<int> divisors = {3,4,6,8};
-    float stepSize = 15;
+    int angle = 0;
+    float stepSize = 30;
     
     void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
@@ -33,16 +34,39 @@ public:
 //
 //    }
     
+    bool onScreen(ofVec3f pt, int width, int height){
+        bool a = pt.x >= 0;
+        bool b = pt.x < width;
+        bool c = pt.y >= 0;
+        bool d = pt.y < height;
+        
+        cout << "is onscreen: " << (a && b && c && d) << endl;
+        
+        return a && b && c && d;
+    }
+    
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         
+        float angle = 360.f / divisors[divisor_i];
+        
+        // make n (=5) steps
         for(int i = 0; i < 5; i++){
             
-            float angle = (int(ofRandom(1) * divisors[divisor_i]) / float(divisors[divisor_i])) * 360;
+            // using degrees
+            int turns = int(ofRandom(divisors[divisor_i]));// how many turns of "angle" degrees to make;
             
             ofVec3f newvec(stepSize * int(ofRandom(1,4)),0,0);
+            
+            for(int j = 0; j < turns; j++){
+                newvec.rotate(0,0,angle);
+            }
 
-            newvec.rotate(0,0,angle);
-            newvec.operator+=(path[path.size() - 1]);
+            while(!onScreen(newvec + path[path.size() - 1],width,height)){
+                newvec.rotate(0,0,angle);
+            }
+
+            newvec += path[path.size() - 1];
+
             path.push_back(newvec);
         }
         
@@ -60,6 +84,7 @@ public:
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
+        angle = 360 / divisors[divisor_i];
         path.clear();
         path.push_back(ofVec3f(ofRandom(width),ofRandom(height),0));
     }

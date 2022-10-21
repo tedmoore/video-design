@@ -18,8 +18,8 @@ s.waitForBoot({
 		OSCdef(\send_data,{
 			arg msg;
 			var vec = ["/vector"] ++ msg[3..];
-			vec.postln;
-			vec.size.postln;
+			// vec.postln;
+			// vec.size.postln;
 			~oF.sendMsg(*vec);
 		},"/vector");
 

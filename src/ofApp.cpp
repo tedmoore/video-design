@@ -84,66 +84,62 @@ void ofApp::setup(){
     zmin = 0;
     zmax = ysize;
     
-//    cout << "xsize\t" << xsize << "\n";
-//    cout << "ysize\t" << ysize << "\n";
-//    cout << "x_size_mul\t" << x_size_mul << "\n";
-//    cout << "y_size_mul\t" << y_size_mul << "\n";
-//    cout << "xmin\t" << xmin << "\n";
-//    cout << "xmax\t" << xmax << "\n";
-//    cout << "ymin\t" << ymin << "\n";
-//    cout << "ymax\t" << ymax << "\n";
-//    cout << "zmin\t" << zmin << "\n";
-//    cout << "zmax\t" << zmax << "\n";
-    
-    // movies
+    // movies points
     ofVec3f initialPoints[4];
     initialPoints[0].set(0,0,-1);
     initialPoints[1].set(width,0,-1);
     initialPoints[2].set(width,height,-1);
     initialPoints[3].set(0,height,-1);
-//    initialPoints[0].set(0,0,0);
-//    initialPoints[1].set(xsize,0,0);
-//    initialPoints[2].set(xsize,ysize,0);
-//    initialPoints[3].set(0,ysize,0);
-        
-    Waveform* wf = new Waveform;
-    //int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull
-    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
-    visual_contents[vc_counter++] = wf; // 0
     
+    // setup flow field
     ff.setup(20, xmin, xmax, ymin, ymax, zmin, zmax);
     
+    // ============ setup modules ===============
+    
+    // 0: waveform
+    Waveform* wf = new Waveform;
+    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
+    visual_contents[vc_counter] = wf;
+    vc_counter = addVCOptions(vc_counter,3);
+
+    // 1: mesh
     Mesh* mesh = new Mesh;
     mesh->setup(500, &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
-    visual_contents[vc_counter++] = mesh; // 1
+    visual_contents[vc_counter] = mesh;
+    vc_counter = addVCOptions(vc_counter,3);
     
+    // 2: mag lines
     Lines* lines0 = new Lines;
     lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines0; // 2
+    visual_contents[vc_counter] = lines0;
+    vc_counter = addVCOptions(vc_counter,2);
     
-//    Lines* lines1 = new Lines;
-//    lines1->setup(pcas,0,4, true,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-//    visual_contents[vc_counter++] = lines1; // 3
-//
-//    Lines* lines2 = new Lines;
-//    lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
-//    visual_contents[vc_counter++] = lines2; // 4
-    
-    newHapMovie("sun_and_fish",vc_counter++,initialPoints,width,height); // 5
-    newHapMovie("dolphins", vc_counter++, initialPoints,width,height); // 6
-    //newHapMovie("IMG_1837_hap.mov", vc_counter++, initialPoints,"IMG_1837_mini_bitexact.mp4");
-    
+    // 3: turtle
     Turtle* turtle0 = new Turtle;
     turtle0->setup(ofGetWidth(),ofGetHeight(),vec_history,vector_len,vec_history_length,vec_history_full);
-    visual_contents[vc_counter++] = turtle0;  // 7
+    visual_contents[vc_counter] = turtle0;
+    vc_counter = addVCOptions(vc_counter,1);
     
-    nVisualContents = vc_counter;
+    // 4: movie
+    newHapMovie("sun_and_fish",vc_counter,initialPoints,width,height);
+    vc_counter = addVCOptions(vc_counter,2);
     
-    vc_i_options.reserve(nVisualContents + 1);
+    // 5: movie
+    newHapMovie("dolphins", vc_counter, initialPoints,width,height);
+    vc_counter = addVCOptions(vc_counter,2);
     
-    for(int i = 0; i < nVisualContents + 1; i++){
-        vc_i_options.push_back(i - 1);
-        //cout << vc_i_options[i] << "<-- vc i option\n";
+    // add null options to vc options
+    for(int i = 0; i < 1; i++){
+        vc_i_options.push_back(-1);
+    }
+    
+    // minus one because we just added one in the last addVCOptions call
+    nVisualContents = vc_counter - 1;
+    
+    cout << "vc_counter: " << vc_counter << "\n";
+    cout << "vc_i_options size: " << vc_i_options.size() << "\n";
+    for(int i = 0; i < vc_i_options.size(); i++){
+        cout << "vc_i_options " << i << ": " << vc_i_options[i] << "\n";
     }
     
     // ============ setup vecHistory
@@ -180,7 +176,7 @@ void ofApp::setup(){
 //        onsetSwitchProb = 0;
 //        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
 //        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
-//        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
+        
         
         //*******************************************************************************************************************
         //*******************************************************************************************************************
@@ -409,7 +405,7 @@ void ofApp::update(){
                 vector_data[i] = val;
                 vec_history[vec_history_counter][i] = val;
             }
-            cout << endl;
+//            cout << endl;
             
             incrementVecHistoryCounter();
             

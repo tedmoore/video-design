@@ -14,6 +14,11 @@
 class ofApp : public ofBaseApp{
     
 public:
+    
+    // =============== config items ==================
+    string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
+    // ===============================================
+    
     void setup();
     void update();
     void draw();
@@ -36,8 +41,13 @@ public:
     void setValsFromCSV(int width, int height, float* csv_data);
     void incrementVecHistoryCounter();
     
-//    int width;
-//    int height;
+    int addVCOptions(int counter, int num){
+        for(int i = 0; i < num; i++){
+            vc_i_options.push_back(counter);
+        };
+        
+        return counter + 1;
+    }
     
     int nVisualContents;
     VisualContent* visual_contents[8];

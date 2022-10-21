@@ -40,7 +40,7 @@ public:
         bool c = pt.y >= 0;
         bool d = pt.y < height;
         
-        cout << "is onscreen: " << (a && b && c && d) << endl;
+//        cout << "is onscreen: " << (a && b && c && d) << endl;
         
         return a && b && c && d;
     }

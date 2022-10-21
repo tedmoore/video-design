@@ -6,3 +6,4 @@ build
 modular_video_02.xcodeproj
 obj
 modular_video_02.xcodeproj
+*.mov

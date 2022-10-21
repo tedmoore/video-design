@@ -121,13 +121,13 @@ void ofApp::setup(){
     lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
     visual_contents[vc_counter++] = lines0; // 2
     
-    Lines* lines1 = new Lines;
-    lines1->setup(pcas,0,4, true,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines1; // 3
-    
-    Lines* lines2 = new Lines;
-    lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
-    visual_contents[vc_counter++] = lines2; // 4
+//    Lines* lines1 = new Lines;
+//    lines1->setup(pcas,0,4, true,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+//    visual_contents[vc_counter++] = lines1; // 3
+//
+//    Lines* lines2 = new Lines;
+//    lines2->setup(kmeans, 0, 4, true, width, height, vec_history, vector_len, vec_history_length, vec_history_full);
+//    visual_contents[vc_counter++] = lines2; // 4
     
     newHapMovie("sun_and_fish",vc_counter++,initialPoints,width,height); // 5
     newHapMovie("dolphins", vc_counter++, initialPoints,width,height); // 6
@@ -161,7 +161,7 @@ void ofApp::setup(){
     
     // =========================== INITIALIZATION =====================
     // initialize to none active
-    active_vc_i[0] = 7;
+    active_vc_i[0] = -1;
     active_vc_i[1] = -1;
     active_vc_i[2] = -1;
     active_vc_i[3] = -1;
@@ -177,10 +177,10 @@ void ofApp::setup(){
         //*******************************************************************************************************************
         
         // this is just for rendering chebyshev
-        onsetSwitchProb = 0;
-        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
-        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
-        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
+//        onsetSwitchProb = 0;
+//        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
+//        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
+//        string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
         
         //*******************************************************************************************************************
         //*******************************************************************************************************************
@@ -357,7 +357,7 @@ void ofApp::update(){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
 
-        //cout << oscMsg << "\n";
+//        cout << oscMsg << "\n";
 
         string address = oscMsg.getAddress();
         

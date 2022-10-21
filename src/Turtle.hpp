@@ -18,7 +18,7 @@ public:
     VIS_TYPE type = TURTLE;
     vector<ofVec3f> path;
     int divisor_i = 0;
-    vector<int> divisors = {3,4,6,8,9,10,12};
+    vector<int> divisors = {3,4,6,8};
     float stepSize = 15;
     
     void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
@@ -34,18 +34,13 @@ public:
 //    }
     
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
-//        float amp = common_features->at("amplitude");
-        
         
         for(int i = 0; i < 5; i++){
             
             float angle = (int(ofRandom(1) * divisors[divisor_i]) / float(divisors[divisor_i])) * 360;
             
-            cout << "angle: " << angle << endl;
-            cout << "divisor: " << divisors[divisor_i] << endl;
-            
             ofVec3f newvec(stepSize * int(ofRandom(1,4)),0,0);
-//            newvec.normalize();
+
             newvec.rotate(0,0,angle);
             newvec.operator+=(path[path.size() - 1]);
             path.push_back(newvec);
@@ -56,17 +51,11 @@ public:
         
         ofBeginShape();
         for (int i = 0; i < path.size(); i++) {
-//            cout << path[i] << endl;
             ofVertex(path[i]);
         }
         ofEndShape();
-        
-//        cout << "path size: " << path.size() << endl;
     }
     
-//    void screenResize(int w, int h){
-//
-//    }
     
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         divisor_i = int(ofRandom(divisors.size()));

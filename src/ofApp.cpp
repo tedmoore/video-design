@@ -21,6 +21,9 @@ void ofApp::setup(){
         width = ofGetWidth();
         height = ofGetHeight();
     }
+
+    main_fbo.allocate(width, height);
+    postGlitch.setup(&main_fbo);
     
     waveform_len = width;
     
@@ -116,7 +119,7 @@ void ofApp::setup(){
     
     // 3: turtle
     Turtle* turtle0 = new Turtle;
-    turtle0->setup(ofGetWidth(),ofGetHeight(),vec_history,vector_len,vec_history_length,vec_history_full);
+    turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full);
     visual_contents[vc_counter] = turtle0;
     vc_counter = addVCOptions(vc_counter,1);
     
@@ -206,9 +209,6 @@ void ofApp::setup(){
         ofDirectory new_dir(new_dir_path);
         new_dir.create();
         
-        ofFbo fbo;
-        fbo.allocate(width, height); // 4k
-        
         ofPixels pix;
         
         int frame_num = 0;
@@ -238,11 +238,11 @@ void ofApp::setup(){
                 visual_contents[i]->update(true);
             }
             
-            fbo.begin();
+            main_fbo.begin();
             ofClear(0,0,0,0);
-            drawScreen(fbo.getWidth(), fbo.getHeight(), frame_num, true);
-            fbo.end();
-            fbo.readToPixels(pix);
+            drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
+            main_fbo.end();
+            main_fbo.readToPixels(pix);
             ofSaveImage(pix, new_dir_path+"/"+ofToString(global_frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
             
             frame_num++;
@@ -422,13 +422,20 @@ void ofApp::update(){
             
         } else if (address == "/onset"){
             onset_occured = true;
-            onsetOccured(ofGetWidth(),ofGetHeight());
+            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
         }
     }
     
     for(int i = 0; i < nVisualContents; i++){
         visual_contents[i]->update(false);
     }
+    
+    main_fbo.begin();
+    ofClear(0,0,0,255);
+    drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
+    main_fbo.end();
+    
+    postGlitch.generateFx();
 }
 
 void ofApp::onsetOccured(int width, int height){
@@ -484,7 +491,8 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    drawScreen(ofGetWidth(),ofGetHeight(),ofGetFrameNum(),false);
+    
+    main_fbo.draw(0,0);
     
     //ofSetColor(255,0,0);
     //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
@@ -655,11 +663,51 @@ void ofApp::keyPressed(int key){
     if(key == 'd'){
         debug = !debug;
     }
+    
+    // post glitch manual controls
+    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , true);
+    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , true);
+    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , true);
+    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , true);
+    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , true);
+    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , true);
+    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , true);
+    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , true);
+    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , true);
+    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , true);
+
+    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, true);
+    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , true);
+    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , true);
+    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , true);
+    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
+    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
+    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
+    // post glitch manual controls
+    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , false);
+    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , false);
+    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , false);
+    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , false);
+    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , false);
+    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , false);
+    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , false);
+    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , false);
+    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , false);
+    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , false);
+
+    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, false);
+    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , false);
+    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , false);
+    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , false);
+    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , false);
+    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , false);
+    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , false);
 }
 
 //--------------------------------------------------------------
@@ -694,8 +742,7 @@ void ofApp::mouseExited(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-//    width = ofGetWidth();
-//    height = ofGetHeight();
+    main_fbo.allocate(w, h);
     for(int i = 0; i < nVisualContents; i++){
         visual_contents[i]->screenResize(w, h);
     }

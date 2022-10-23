@@ -10,6 +10,7 @@
 #include "Lines.hpp"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
+#include "ofxPostGlitch.h"
 
 class ofApp : public ofBaseApp{
     
@@ -105,4 +106,7 @@ public:
     float onsetSwitchProb = 1.f;
   
     bool nrtRender = false;
+    
+    ofFbo main_fbo;
+    ofxPostGlitch postGlitch;
 };

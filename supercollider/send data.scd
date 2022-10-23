@@ -11,7 +11,7 @@ s.waitForBoot({
 		var frame_rate = 30;
 		var start_sec = 0;
 
-		var test_buf = Buffer.read(s,"/Users/macprocomputer/Desktop/sound collecting 210715/11 noisy proper --- series of gestures good fat sounds.wav");
+		// var test_buf = Buffer.read(s,"/Users/macprocomputer/Desktop/sound collecting 210715/11 noisy proper --- series of gestures good fat sounds.wav");
 		s.sync;
 
 		~oF = NetAddr("127.0.0.1",11000);
@@ -31,8 +31,8 @@ s.waitForBoot({
 		},"/onset");
 
 		synth = {
-			var sig = PlayBuf.ar(2,test_buf,BufRateScale.ir(test_buf),startPos:test_buf.sampleRate * start_sec,loop:1);
-			// var sig = SoundIn.ar([2,3]);
+			// var sig = PlayBuf.ar(2,test_buf,BufRateScale.ir(test_buf),startPos:test_buf.sampleRate * start_sec,loop:1);
+			var sig = SoundIn.ar([2,3]);
 			var sig_mono = Mix(sig) * 0.5;
 			var fft = FFT(LocalBuf(2048),sig_mono);
 			var trig = Impulse.kr(frame_rate);
@@ -53,7 +53,7 @@ s.waitForBoot({
 			SendReply.kr(onsets,"/onset");
 
 			Out.ar(analysis_bus,sig);
-			Out.ar(0,sig * -20.dbamp);
+			// Out.ar(0,sig * -20.dbamp);
 		}.play;
 		s.sync;
 		WaveformToOSC(s,analysis_bus,0,~oF,0,false);

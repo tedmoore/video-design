@@ -22,12 +22,16 @@ public:
     vector<int> divisors;
     int angle = 0;
     float stepSize = 30;
+    int max_frames = 20;
+    int frame_counter = 0;
     
     void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
         
         for(int i = 0; i < config["modules"]["turtle"]["divisors"].size(); i++){
             divisors.push_back(config["modules"]["turtle"]["divisors"][i].as<int>());
         }
+        
+        max_frames = config["modules"]["turtle"]["max-frames"].as<int>();
         
         newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
     }
@@ -53,28 +57,32 @@ public:
     
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         
-        float angle = 360.f / divisors[divisor_i];
-        
-        // make n (=5) steps
-        for(int i = 0; i < 5; i++){
+        if(frame_counter < max_frames){
+            float angle = 360.f / divisors[divisor_i];
             
-            // using degrees
-            int turns = int(ofRandom(divisors[divisor_i]));// how many turns of "angle" degrees to make;
-            
-            ofVec3f newvec(stepSize * int(ofRandom(1,4)),0,0);
-            
-            for(int j = 0; j < turns; j++){
-                newvec.rotate(0,0,angle);
+            // make n (=5) steps
+            for(int i = 0; i < 5; i++){
+                
+                // using degrees
+                int turns = int(ofRandom(divisors[divisor_i]));// how many turns of "angle" degrees to make;
+                
+                ofVec3f newvec(stepSize * int(ofRandom(1,4)),0,0);
+                
+                for(int j = 0; j < turns; j++){
+                    newvec.rotate(0,0,angle);
+                }
+                
+                while(!onScreen(newvec + path[path.size() - 1],width,height)){
+                    newvec.rotate(0,0,angle);
+                }
+                
+                newvec += path[path.size() - 1];
+                
+                path.push_back(newvec);
             }
-
-            while(!onScreen(newvec + path[path.size() - 1],width,height)){
-                newvec.rotate(0,0,angle);
-            }
-
-            newvec += path[path.size() - 1];
-
-            path.push_back(newvec);
         }
+        
+        frame_counter++;
         
         ofSetColor(255);
         ofNoFill();
@@ -88,6 +96,7 @@ public:
     
     
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        frame_counter = 0;
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
         angle = 360 / divisors[divisor_i];

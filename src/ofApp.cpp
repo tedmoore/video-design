@@ -177,6 +177,11 @@ void ofApp::setup(){
     // =========== NRT RENDERING
     if(nrtRender){
         
+        string csv_path = config["csv-path"].as<string>();
+        
+        //int max_frames = 600; // 600 frames = 20 seconds
+        int max_frames = config["max-frames"].as<int>();
+        
         
         //*******************************************************************************************************************
         //*******************************************************************************************************************
@@ -196,15 +201,10 @@ void ofApp::setup(){
         //*******************************************************************************************************************
         //*******************************************************************************************************************
         
-        
-        
-        //int max_frames = 600; // 600 frames = 20 seconds
-        int max_frames = INT_MAX;
-        
         string line;
         ifstream data;
         data.open(ofToDataPath(csv_path));
-        int line_length = 8303;// 8308
+        int line_length = 8308;// 8308
         float* csv_line_fl = new float[line_length];
         
         // stuff for rendering

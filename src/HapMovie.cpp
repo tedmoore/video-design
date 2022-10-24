@@ -21,8 +21,8 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
     ofDirectory dir(path);
     
     if(!isNRT){ // is real-time
-        cout << "\nhap movie:\n" << dir.getAbsolutePath() + "/hap_avf.mov\n\n";
-        player.load(dir.getAbsolutePath() + "/hap_avf.mov");
+        cout << "\nhap movie:\n" << dir.getAbsolutePath() + "/hap.mov\n\n";
+        player.load(dir.getAbsolutePath() + "/hap.mov");
         player.setLoopState(OF_LOOP_NORMAL);
         player.play();
         player.setVolume(0);
@@ -30,19 +30,19 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         cout << "player w h: " << player.getWidth() << " " << player.getHeight() << "\n";
         //texture.allocate(player.getWidth(),player.getHeight(),GL_RGBA);
 
-        cout << "\nmini movie:\n" << dir.getAbsolutePath() + "/mini_me_scaleToFill.mp4\n\n";
-        mini_vid.load(dir.getAbsolutePath() + "/mini_me_scaleToFill.mp4");
+        cout << "\nmini movie:\n" << dir.getAbsolutePath() + "/mini.mp4\n\n";
+        mini_vid.load(dir.getAbsolutePath() + "/mini.mp4");
         mini_vid.setVolume(0);
         mini_vid.setLoopState(OF_LOOP_NORMAL);
         mini_vid.play();
         mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),OF_PIXELS_RGBA);
     } else { // is non-real-time
-        ofDirectory tiffs_dir(dir.getAbsolutePath() + "/tiffs");
+        ofDirectory tiffs_dir(dir.getAbsolutePath() + "/frames");
         cout << tiffs_dir.getAbsolutePath() << "\n";
         tiffs_dir.sort();
         tiffs = tiffs_dir.getFiles();
     
-        ofDirectory bitexact_tiffs_dir(dir.getAbsolutePath() + "/mini_bitexact_tiffs");
+        ofDirectory bitexact_tiffs_dir(dir.getAbsolutePath() + "/mini-frames");
         cout << bitexact_tiffs_dir.getAbsolutePath() << "\n";
         bitexact_tiffs_dir.sort();
         bitexact_tiffs = bitexact_tiffs_dir.getFiles();

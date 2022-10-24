@@ -17,10 +17,6 @@ class ofApp : public ofBaseApp{
     
 public:
     
-    // =============== config items ==================
-    string csv_path = "210606_134419_startSec=263_swapped_waveform.csv";
-    // ===============================================
-    
     void setup();
     void update();
     void draw();

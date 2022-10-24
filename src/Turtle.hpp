@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "VisualContent.hpp"
+#include "ofxYAML.h"
 
 class Turtle : public VisualContent {
 public:
@@ -18,11 +19,16 @@ public:
     VIS_TYPE type = TURTLE;
     vector<ofVec3f> path;
     int divisor_i = 0;
-    vector<int> divisors = {3,4,6,8};
+    vector<int> divisors;
     int angle = 0;
     float stepSize = 30;
     
-    void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
+        
+        for(int i = 0; i < config["modules"]["turtle"]["divisors"].size(); i++){
+            divisors.push_back(config["modules"]["turtle"]["divisors"][i].as<int>());
+        }
+        
         newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
     }
     

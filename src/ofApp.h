@@ -11,6 +11,7 @@
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
 #include "ofxPostGlitch.h"
+#include "ofxYAML.h"
 
 class ofApp : public ofBaseApp{
     
@@ -109,4 +110,8 @@ public:
     
     ofFbo main_fbo;
     ofxPostGlitch postGlitch;
+    float postGlitchProbs[17] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    float postGlitchChangeProb = 0.5;
+    
+    ofxYAML config;
 };

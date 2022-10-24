@@ -3,20 +3,46 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    config.load("config.yaml");
+    
+    nrtRender = config["nrt-render"].as<bool>();
+    
+    ofSetFrameRate(config["target-framerate"].as<int>());
+    
+    postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
+    
+    postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
+    postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
+    postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
+    postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].as<float>();
+    postGlitchProbs[4] = config["post-glitch"]["twist-prob"].as<float>();
+    postGlitchProbs[5] = config["post-glitch"]["outline-prob"].as<float>();
+    postGlitchProbs[6] = config["post-glitch"]["noise-prob"].as<float>();
+    postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].as<float>();
+    postGlitchProbs[8] = config["post-glitch"]["swell-prob"].as<float>();
+    postGlitchProbs[9] = config["post-glitch"]["invert-prob"].as<float>();
+    postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].as<float>();
+    postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].as<float>();
+    postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].as<float>();
+    postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].as<float>();
+    postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].as<float>();
+    postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].as<float>();
+    postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].as<float>();
+        
     int width = 0;
     int height = 0;
     
-    float mesh_line_width = 1;
-    float mesh_point_size = 1;
-    float lissajous_line_width = 1;
+    float mesh_line_width = config["modules"]["mesh"]["line-width"].as<float>();
+    float mesh_point_size = config["modules"]["mesh"]["point-size"].as<float>();
+    float lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
     
     if(nrtRender){
         width = 3840; // 4k
         height = 2160;// 4k
         
-        mesh_line_width = 2;
-        mesh_point_size = 2;
-        lissajous_line_width = 2;
+        mesh_line_width *= 2;
+        mesh_point_size *= 2;
+        lissajous_line_width *= 2;
     } else {
         width = ofGetWidth();
         height = ofGetHeight();
@@ -31,22 +57,12 @@ void ofApp::setup(){
     active_vc_i = new int[max_active_vc];
     
     ofBackground(0);
-    ofSetFrameRate(30);
     ofEnableAntiAliasing();
     //ofEnableDepthTest();
     //ofEnableAlphaBlending();
 
     // ================ DATA STRUCTURES ========================
-    //    float amplitude;
-    //    float fftCrest;
-    //    float fftSlope;
-    //    float fftSpread;
-    //    float loudness;
-    //    float sensoryDissonance;
-    //    float specCentroid;
-    //    float specFlatness;
-    //    float specPcile;
-    //    float zeroCrossing;
+
     common_features["amplitude"] = 0;
     common_features["fftCrest"] = 0;
     common_features["fftSlope"] = 0;
@@ -73,10 +89,7 @@ void ofApp::setup(){
 
     // ================== VISUAL CONTENTS ==========================
     int vc_counter = 0;
-//    xsize = width;
-//    ysize = height;
     xsize = 1;
-    //ysize = (float)width/(float)height;
     ysize = 1;
     x_size_mul = 0.6;
     y_size_mul = 0.6;
@@ -103,46 +116,42 @@ void ofApp::setup(){
     Waveform* wf = new Waveform;
     wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
     visual_contents[vc_counter] = wf;
-    vc_counter = addVCOptions(vc_counter,3);
+    vc_counter = addVCOptions(vc_counter,config["modules"]["waveform"]["prob"].as<int>());
 
     // 1: mesh
     Mesh* mesh = new Mesh;
-    mesh->setup(500, &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
+    mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
     visual_contents[vc_counter] = mesh;
-    vc_counter = addVCOptions(vc_counter,3);
+    vc_counter = addVCOptions(vc_counter,config["modules"]["mesh"]["prob"].as<int>());
     
     // 2: mag lines
     Lines* lines0 = new Lines;
     lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
     visual_contents[vc_counter] = lines0;
-    vc_counter = addVCOptions(vc_counter,2);
+    vc_counter = addVCOptions(vc_counter,config["modules"]["mag-lines"]["prob"].as<int>());
     
     // 3: turtle
     Turtle* turtle0 = new Turtle;
-    turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full);
+    turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,config);
     visual_contents[vc_counter] = turtle0;
-    vc_counter = addVCOptions(vc_counter,1);
+    vc_counter = addVCOptions(vc_counter,config["modules"]["turtle"]["prob"].as<int>());
     
-    // 4: movie
-    newHapMovie("sun_and_fish",vc_counter,initialPoints,width,height);
-    vc_counter = addVCOptions(vc_counter,2);
-    
-    // 5: movie
-    newHapMovie("dolphins", vc_counter, initialPoints,width,height);
-    vc_counter = addVCOptions(vc_counter,2);
-    
-    // add null options to vc options
-    for(int i = 0; i < 1; i++){
-        vc_i_options.push_back(-1);
+    // load videos
+    for(int i = 0; i < config["videos"].size(); i++){
+        
+        string name = config["videos"][i]["name"].as<string>();
+        int prob = config["videos"][i]["prob"].as<int>();
+        
+        newHapMovie(name,vc_counter,initialPoints,width,height);
+        vc_counter = addVCOptions(vc_counter,prob);
     }
     
     // minus one because we just added one in the last addVCOptions call
     nVisualContents = vc_counter - 1;
     
-    cout << "vc_counter: " << vc_counter << "\n";
-    cout << "vc_i_options size: " << vc_i_options.size() << "\n";
-    for(int i = 0; i < vc_i_options.size(); i++){
-        cout << "vc_i_options " << i << ": " << vc_i_options[i] << "\n";
+    // add null options to vc options
+    for(int i = 0; i < 1; i++){
+        vc_i_options.push_back(-1);
     }
     
     // ============ setup vecHistory
@@ -238,10 +247,8 @@ void ofApp::setup(){
                 visual_contents[i]->update(true);
             }
             
-            main_fbo.begin();
-            ofClear(0,0,0,0);
             drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
-            main_fbo.end();
+
             main_fbo.readToPixels(pix);
             ofSaveImage(pix, new_dir_path+"/"+ofToString(global_frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
             
@@ -429,26 +436,16 @@ void ofApp::update(){
     for(int i = 0; i < nVisualContents; i++){
         visual_contents[i]->update(false);
     }
-    
-    main_fbo.begin();
-    ofClear(0,0,0,255);
-    drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
-    main_fbo.end();
-    
-    postGlitch.generateFx();
 }
 
 void ofApp::onsetOccured(int width, int height){
-    //cout << "onset occured\n";
+
     // new active vc i
     if(onsetSwitchProb > ofRandom(1.f)){
         vector<int> chosen_i;
         for(int i = 0; i < max_active_vc; i++){ // go through the max number that we'll display
-            //cout << i << "\n";
             bool found = false;
             while(!found){
-                //            cout << i << " while loop\n";
-                //            cout << vc_i_options.size() << " <-- vc options . size\n";
                 // options array is the big pool of options (has duplicates based on probs)
                 int rand_int = ofRandom(1.f) * vc_i_options.size(); // random int the size of the options array
                 int result = vc_i_options[rand_int]; // the int in the from the options array (which is the index for the modules array)
@@ -457,8 +454,6 @@ void ofApp::onsetOccured(int width, int height){
                     chosen_i.push_back(result);
                     active_vc_i[i] = result; // the module's index
                     
-//                    cout << "result " << result << endl;
-                    
                     if(result >= 0 && visual_contents[result]->newParamsProb > ofRandom(1.f)){
                         visual_contents[result]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full);
                     }
@@ -466,9 +461,25 @@ void ofApp::onsetOccured(int width, int height){
             }
         }
     }
+    
+    // ofx post glitch
+    for(int i = 0; i < GLITCH_NUM; i++){
+        if(ofRandom(1.f) < postGlitchChangeProb){
+            if(ofRandom(1.f) < postGlitchProbs[i]){
+                postGlitch.setFx((ofxPostGlitchType)i,true);
+            } else {
+                postGlitch.setFx((ofxPostGlitchType)i,false);
+            }
+        }
+    }
 }
 
 void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
+    
+    main_fbo.begin();
+    
+    ofClear(0,0,0,255);
+    
     if(!debug){
         
         ff.update(frameNum, &common_features);
@@ -487,11 +498,16 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     } else {
         displayIncomingData(width,height);
     }
+    
+    main_fbo.end();
+    
+    postGlitch.generateFx();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
+    drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     main_fbo.draw(0,0);
     
     //ofSetColor(255,0,0);

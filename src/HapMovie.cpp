@@ -1,6 +1,5 @@
 //
 //  HapMovie.cpp
-//  fonema video
 //
 //  Created by Ted Moore on 12/26/20.
 //
@@ -21,7 +20,7 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
     
     ofDirectory dir(path);
     
-    if(!isNRT){
+    if(!isNRT){ // is real-time
         cout << "\nhap movie:\n" << dir.getAbsolutePath() + "/hap_avf.mov\n\n";
         player.load(dir.getAbsolutePath() + "/hap_avf.mov");
         player.setLoopState(OF_LOOP_NORMAL);
@@ -37,7 +36,7 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         mini_vid.setLoopState(OF_LOOP_NORMAL);
         mini_vid.play();
         mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),OF_PIXELS_RGBA);
-    } else {
+    } else { // is non-real-time
         ofDirectory tiffs_dir(dir.getAbsolutePath() + "/tiffs");
         cout << tiffs_dir.getAbsolutePath() << "\n";
         tiffs_dir.sort();

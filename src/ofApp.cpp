@@ -114,7 +114,7 @@ void ofApp::setup(){
     
     // 0: waveform
     Waveform* wf = new Waveform;
-    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,lissajous_line_width);
+    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,config);
     visual_contents[vc_counter] = wf;
     vc_counter = addVCOptions(vc_counter,config["modules"]["waveform"]["prob"].as<int>());
 
@@ -146,8 +146,7 @@ void ofApp::setup(){
         vc_counter = addVCOptions(vc_counter,prob);
     }
     
-    // minus one because we just added one in the last addVCOptions call
-    nVisualContents = vc_counter - 1;
+    nVisualContents = vc_counter;
     
     // add null options to vc options
     for(int i = 0; i < 1; i++){
@@ -181,25 +180,6 @@ void ofApp::setup(){
         
         //int max_frames = 600; // 600 frames = 20 seconds
         int max_frames = config["max-frames"].as<int>();
-        
-        
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
-        //****************************** some optional and useful presets for different renders ***************************
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
-        
-        // this is just for rendering chebyshev
-//        onsetSwitchProb = 0;
-//        visual_contents[0]->receiveOSC(width,height,"setWaveformType", 1.0); // set to lissajous
-//        visual_contents[0]->receiveOSC(width,height,"resetLissajousXY", 1.0); // make sure it's in the middle
-        
-        
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
-        //*******************************************************************************************************************
         
         string line;
         ifstream data;

@@ -21,21 +21,16 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
     ofDirectory dir(path);
     
     if(!isNRT){ // is real-time
-        cout << "\nhap movie:\n" << dir.getAbsolutePath() + "/hap.mov\n\n";
         player.load(dir.getAbsolutePath() + "/hap.mov");
         player.setLoopState(OF_LOOP_NORMAL);
         player.play();
         player.setVolume(0);
-        //texture = new ofTexture;
-        cout << "player w h: " << player.getWidth() << " " << player.getHeight() << "\n";
-        //texture.allocate(player.getWidth(),player.getHeight(),GL_RGBA);
 
-        cout << "\nmini movie:\n" << dir.getAbsolutePath() + "/mini.mp4\n\n";
         mini_vid.load(dir.getAbsolutePath() + "/mini.mp4");
         mini_vid.setVolume(0);
         mini_vid.setLoopState(OF_LOOP_NORMAL);
         mini_vid.play();
-        mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),OF_PIXELS_RGBA);
+        mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),mini_vid.getPixelFormat());
     } else { // is non-real-time
         ofDirectory tiffs_dir(dir.getAbsolutePath() + "/frames");
         cout << tiffs_dir.getAbsolutePath() << "\n";
@@ -205,7 +200,7 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
 }
 
 void HapMovie::newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
-    speed = ofMap(pow(ofRandom(1.f),4),0,1,0.9 ,10) * dir_options[int(ofRandom(2.f))];
+    speed = ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))];
     player.setSpeed(speed);
     showHap = ofRandom(1.f) < 0.2;
     showRects = ofRandom(1.f) < 0.4;

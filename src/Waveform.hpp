@@ -11,10 +11,11 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include <VisualContent.hpp>
+#include "ofxYAML.h"
 
 class Waveform: public VisualContent {
 public:
-    void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, float lissajous_line_width_);
+    void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config);
     //void update() override;
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) override;
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) override;
@@ -38,7 +39,8 @@ public:
     int* zoff;
     float* hmul;
     bool* show;
-    float lissajous_line_width = 1;
+    float lissajous_line_width = 1.f;
+    float waveform_line_width = 1.f;
     float ikeda_avg = 0.2;
     
 //    bool lissajous = false;

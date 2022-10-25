@@ -7,8 +7,9 @@
 
 #include "Waveform.hpp"
 
-void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, float lissajous_line_width_){
-    lissajous_line_width = lissajous_line_width_;
+void Waveform::setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
+    lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
+    waveform_line_width = config["modules"]["waveform"]["waveform-line-width"].as<float>();
     n_waveforms = n_waveforms_;
     length = length_;
     waveforms = waveforms_;
@@ -88,7 +89,7 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
 void Waveform::displayWaveform(int wf_int, int x, int y, int z, float hmul2){
     ofSetColor(255,255,255,255);
     ofNoFill();
-    ofSetLineWidth(1);
+    ofSetLineWidth(waveform_line_width);
     ofBeginShape();
     //cout << "wf int: " << wf_int << "\t" << x << "\t" << y << "\t" << z << "\t" << hmul2 << "\n";
     for (int i = 0; i < length; i++) {

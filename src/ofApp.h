@@ -106,7 +106,7 @@ public:
     
     ofFbo main_fbo;
     ofxPostGlitch postGlitch;
-    float postGlitchProbs[17] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    float postGlitchProbs[GLITCH_NUM] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     float postGlitchChangeProb = 0.5;
     
     ofxYAML config;

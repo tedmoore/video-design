@@ -1,0 +1,58 @@
+nrt-render: false
+
+csv-path: "210617_030618_startSec=46.csv"
+max-frames: 1800 # 99999 = 55.55 minutes
+
+target-framerate: 30
+
+modules:
+  waveform:
+    prob: 4 # int because it's how many times to put it in the pool of options
+    lissajous-line-width: 1.0 # must be a float
+    waveform-line-width: 1.0 # must be a float
+    ikeda-prob: 0.2
+    max-waveforms: 2
+  mesh:
+    prob: 4 # int because it's how many times to put it in the pool of options
+    line-width: 1.0 # must be a float
+    point-size: 2.0 # must be a float
+    n-points: 500
+  mag-lines:
+    prob: 3 # int because it's how many times to put it in the pool of options
+  turtle:
+    divisors: [ 3, 4, 6 ]
+    prob: 1 # int because it's how many times to put it in the pool of options
+    max-frames: 20
+
+videos:
+  - 
+    name: "eye4720"
+    prob: 3 # int because it's how many times to put it in the pool of options
+  -
+    name: "eye4948"
+    prob: 3
+  -
+    name: "canola-radial-blur"
+    prob: 3
+
+post-glitch:
+  change-prob: 0.75
+  convergence-prob:  0.05
+  glow-prob:         0.2
+  shaker-prob:       0.01
+  cutslider-prob:    0.01
+  twist-prob:        0.01
+  outline-prob:      0.04
+  noise-prob:        0.05
+  slitscan-prob:     0.01
+  swell-prob:        0.01
+  invert-prob:       0.04
+  highcontrast-prob: 0.01
+  blueraise-prob:    0.005
+  redraise-prob:     0.005
+  greenraise-prob:   0.005
+  redinvert-prob:    0.005
+  blueinvert-prob:   0.005
+  greeninvert-prob:  0.005
+  rgb2422-prob: 0.0
+  phong-prob: 0.01

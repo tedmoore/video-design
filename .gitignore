@@ -1,6 +1,10 @@
 bin/*.app
-bin/data
 build
 .vscode
 obj
 *.mov
+*.mp4
+*.mxf
+*.png
+*.tif
+*.tiff

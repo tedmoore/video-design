@@ -28,6 +28,13 @@ void ofApp::setup(){
     postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].as<float>();
     postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].as<float>();
     postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].as<float>();
+    
+    for(int i = 0; i < config["blend-mode-probs"].size(); i++){
+        int n = config["blend-mode-probs"][i].as<int>();
+        for(int j = 0; j < n; j++){
+            blendModePool.push_back(i);
+        }
+    }
         
     int width = 0;
     int height = 0;
@@ -35,6 +42,9 @@ void ofApp::setup(){
     float mesh_line_width = config["modules"]["mesh"]["line-width"].as<float>();
     float mesh_point_size = config["modules"]["mesh"]["point-size"].as<float>();
     float lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
+    
+    feedback_prob = config["feedback-prob"].as<float>();
+    feedback_max = config["feedback-max"].as<int>();
     
     if(nrtRender){
         width = 3840; // 4k
@@ -58,8 +68,8 @@ void ofApp::setup(){
     
     ofBackground(0);
     ofEnableAntiAliasing();
-    //ofEnableDepthTest();
-    //ofEnableAlphaBlending();
+//    ofEnableDepthTest(); this should be off!
+    ofEnableAlphaBlending();
 
     // ================ DATA STRUCTURES ========================
 
@@ -112,17 +122,23 @@ void ofApp::setup(){
     
     // ============ setup modules ===============
     
+    vc_i_options.clear();
+    
     // 0: waveform
     Waveform* wf = new Waveform;
     wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,config);
     visual_contents[vc_counter] = wf;
     vc_counter = addVCOptions(vc_counter,config["modules"]["waveform"]["prob"].as<int>());
 
+    cout << "waveform loaded vc_i_options.size(): " << vc_i_options.size() << endl;
+    
     // 1: mesh
     Mesh* mesh = new Mesh;
     mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
     visual_contents[vc_counter] = mesh;
     vc_counter = addVCOptions(vc_counter,config["modules"]["mesh"]["prob"].as<int>());
+    
+    cout << "mesh loaded vc_i_options.size(): " << vc_i_options.size() << endl;
     
     // 2: mag lines
     Lines* lines0 = new Lines;
@@ -130,20 +146,30 @@ void ofApp::setup(){
     visual_contents[vc_counter] = lines0;
     vc_counter = addVCOptions(vc_counter,config["modules"]["mag-lines"]["prob"].as<int>());
     
+    cout << "maglines loaded vc_i_options.size(): " << vc_i_options.size() << endl;
+    
     // 3: turtle
     Turtle* turtle0 = new Turtle;
     turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,config);
     visual_contents[vc_counter] = turtle0;
     vc_counter = addVCOptions(vc_counter,config["modules"]["turtle"]["prob"].as<int>());
     
+    cout << "turtle loaded vc_i_options.size(): " << vc_i_options.size() << endl;
+    
     // load videos
+    cout << "config['videos'].size(): " << config["videos"].size() << endl;
     for(int i = 0; i < config["videos"].size(); i++){
         
         string name = config["videos"][i]["name"].as<string>();
         int prob = config["videos"][i]["prob"].as<int>();
-        
+        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
+        cout << "vc_counter: " << vc_counter << endl;
         newHapMovie(name,vc_counter,initialPoints,width,height);
+        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
+        cout << "vc_counter: " << vc_counter << endl;
         vc_counter = addVCOptions(vc_counter,prob);
+        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
+        cout << "vc_counter: " << vc_counter << endl;
     }
     
     nVisualContents = vc_counter;
@@ -152,6 +178,12 @@ void ofApp::setup(){
     for(int i = 0; i < 1; i++){
         vc_i_options.push_back(-1);
     }
+    
+    cout << "vc_i_options: ";
+    for(int i = 0; i < vc_i_options.size(); i++){
+        cout << vc_i_options[i] << " (size=" << vc_i_options.size() << ") ";
+    }
+    cout << endl;
     
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;
@@ -326,6 +358,7 @@ void ofApp::incrementVecHistoryCounter(){
 
 void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height){
     HapMovie* vc = new HapMovie;
+    cout << "ofApp::newHapMovie loading " << path << endl;
     vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff);
     vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full);
     visual_contents[index] = vc;
@@ -442,6 +475,12 @@ void ofApp::onsetOccured(int width, int height){
         }
     }
     
+    // blend mode
+    int blendMode_i = int(ofRandom(blendModePool.size()));
+    blendMode = blendModes[blendModePool[blendMode_i]];
+    
+    feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
+    
     // ofx post glitch
     for(int i = 0; i < GLITCH_NUM; i++){
         if(ofRandom(1.f) < postGlitchChangeProb){
@@ -458,7 +497,13 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     main_fbo.begin();
     
-    ofClear(0,0,0,255);
+//    main_fbo.draw(0,0);
+    ofSetColor(0,255 - feedback_amt); // alpha of 255 = no feedback, alpha of 0 = full feedback
+    ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
+
+//    ofClear(0,0,0,0);
+    
+    ofEnableBlendMode(blendMode);
     
     if(!debug){
         
@@ -488,7 +533,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
 void ofApp::draw(){
     
     drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
-    main_fbo.draw(0,0);
+    main_fbo.draw(0,0,ofGetWidth(),ofGetHeight()    );
     
     //ofSetColor(255,0,0);
     //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
@@ -739,6 +784,7 @@ void ofApp::mouseExited(int x, int y){
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
     main_fbo.allocate(w, h);
+    postGlitch.setup(&main_fbo);
     for(int i = 0; i < nVisualContents; i++){
         visual_contents[i]->screenResize(w, h);
     }

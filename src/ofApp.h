@@ -48,7 +48,7 @@ public:
     }
     
     int nVisualContents;
-    VisualContent* visual_contents[8];
+    VisualContent* visual_contents[9];
     vector<int> vc_i_options;
     
     int max_active_vc = 4;
@@ -106,8 +106,18 @@ public:
     
     ofFbo main_fbo;
     ofxPostGlitch postGlitch;
-    float postGlitchProbs[GLITCH_NUM] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    float postGlitchProbs[GLITCH_NUM];
     float postGlitchChangeProb = 0.5;
     
     ofxYAML config;
+    
+    ofBlendMode blendMode = OF_BLENDMODE_DISABLED;
+    
+    ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD,OF_BLENDMODE_ALPHA,OF_BLENDMODE_SCREEN,OF_BLENDMODE_DISABLED,OF_BLENDMODE_MULTIPLY,OF_BLENDMODE_SUBTRACT};
+    
+    vector<int> blendModePool;
+    
+    int feedback_amt = 0;
+    float feedback_prob = 0.f;
+    int feedback_max = 255;
 };

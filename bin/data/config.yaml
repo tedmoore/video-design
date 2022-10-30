@@ -4,21 +4,24 @@ csv-path: "210617_030618_startSec=46.csv"
 max-frames: 1800 # 99999 = 55.55 minutes
 
 target-framerate: 30
+blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
+feedback-prob: 0.25
+feedback-max: 254
 
 modules:
   waveform:
-    prob: 4 # int because it's how many times to put it in the pool of options
+    prob: 5 # int because it's how many times to put it in the pool of options
     lissajous-line-width: 1.0 # must be a float
     waveform-line-width: 1.0 # must be a float
     ikeda-prob: 0.2
     max-waveforms: 2
   mesh:
-    prob: 4 # int because it's how many times to put it in the pool of options
+    prob: 5 # int because it's how many times to put it in the pool of options
     line-width: 1.0 # must be a float
     point-size: 2.0 # must be a float
     n-points: 500
   mag-lines:
-    prob: 3 # int because it's how many times to put it in the pool of options
+    prob: 4 # int because it's how many times to put it in the pool of options
   turtle:
     divisors: [ 3, 4, 6 ]
     prob: 1 # int because it's how many times to put it in the pool of options
@@ -27,13 +30,19 @@ modules:
 videos:
   - 
     name: "eye4720"
-    prob: 3 # int because it's how many times to put it in the pool of options
+    prob: 2 # int because it's how many times to put it in the pool of options
   -
     name: "eye4948"
-    prob: 3
+    prob: 2
   -
     name: "canola-radial-blur"
-    prob: 3
+    prob: 1
+  - 
+    name: "oil-water-1283-denoised-HQ1080"
+    prob: 1
+  -
+    name: "oil-water-1286-HQ720"
+    prob: 1
 
 post-glitch:
   change-prob: 0.75

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <unordered_map>
+#include "ofxYAML.h"
 //#include "ofMain.h"
 
 enum VIS_TYPE { NONE, HAP, WAVEFORM, MESH , LINES , TURTLE };
@@ -30,6 +31,8 @@ public:
     virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
     
     virtual void update(bool isNRT){}
+    
+    virtual void processConfigFile(ofxYAML& config){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

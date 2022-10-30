@@ -1,5 +1,5 @@
+# if doing a non-real-time render
 nrt-render: false
-
 csv-path: "210617_030618_startSec=46.csv"
 max-frames: 1800 # 99999 = 55.55 minutes
 
@@ -7,6 +7,7 @@ target-framerate: 30
 blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
 feedback-prob: 0.25
 feedback-max: 254
+flow-field-resolution: 12 # this was originally 20
 
 modules:
   waveform:
@@ -16,10 +17,13 @@ modules:
     ikeda-prob: 0.2
     max-waveforms: 2
   mesh:
-    prob: 5 # int because it's how many times to put it in the pool of options
+    prob: 50 # int because it's how many times to put it in the pool of options
     line-width: 1.0 # must be a float
     point-size: 2.0 # must be a float
+    flow-field-influence: 0.2
     n-points: 500
+    speed: 0.04
+    min-speed: 0.0005
   mag-lines:
     prob: 4 # int because it's how many times to put it in the pool of options
   turtle:

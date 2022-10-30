@@ -39,6 +39,11 @@ public:
     void setValsFromCSV(int width, int height, float* csv_data);
     void incrementVecHistoryCounter();
     
+    void processConfigFile(string path){
+        config.load(path);
+        visual_contents[1]->processConfigFile(config);
+    }
+    
     int addVCOptions(int counter, int num){
         for(int i = 0; i < num; i++){
             vc_i_options.push_back(counter);

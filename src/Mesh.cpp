@@ -7,9 +7,17 @@
 
 #include "Mesh.hpp"
 
-void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, float linewidth, float pointsize) {
-    line_width = linewidth;
-    point_size = pointsize;
+void Mesh::processConfigFile(ofxYAML& config){
+    line_width = config["modules"]["mesh"]["line-width"].as<float>();
+    point_size = config["modules"]["mesh"]["point-size"].as<float>();
+    flow_field_influence = config["modules"]["mesh"]["flow-field-influence"].as<float>();
+    speed = config["modules"]["mesh"]["speed"].as<float>();
+    minSpeed = config["modules"]["mesh"]["min-speed"].as<float>();
+}
+
+void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, ofxYAML& config) {
+
+    processConfigFile(config);
     
     xmin = xmin_;
     xmax = xmax_;
@@ -85,21 +93,20 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     ofSetColor(255,255,255,255);
     float amp = common_features->at("amplitude");
     float sensDis = common_features->at("sensoryDissonance");
-    jitterMag.update(amp * 0.12);//amp * 0.01;//MIN(0.01, amp);
+    jitterMag.update(amp * 0.012);//amp * 0.01;//MIN(0.01, amp);
     //float jitterMag = 1;
     float distThresh = 0.02 + (sensDis * 0.15);
     //println(specFlatness);
-    float speedMul = 0.025; // 0.0075
     int n_lines = 0;
     
-    velLimit.update(amp * speedMul);
+    velLimit.update((amp * speed) + minSpeed);
     
     for (int i = 0; i < nPoints; i++) {
         
         if (useFF && useFFmaster) {
             ofVec3f ori = ff->getOrientationFromPos(points[i].pos);
             ori.normalize();
-            ori.operator*=(speedMul * 0.1); // this float multiplier changes the amount that the flow field affects the point's direction
+            ori.operator*=(speed * flow_field_influence); // this float multiplier changes the amount that the flow field affects the point's direction
             points[i].applyForce(&ori);
         }
         if (!waveformTracking) {

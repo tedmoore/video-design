@@ -39,20 +39,12 @@ void ofApp::setup(){
     int width = 0;
     int height = 0;
     
-    float mesh_line_width = config["modules"]["mesh"]["line-width"].as<float>();
-    float mesh_point_size = config["modules"]["mesh"]["point-size"].as<float>();
-    float lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
-    
     feedback_prob = config["feedback-prob"].as<float>();
     feedback_max = config["feedback-max"].as<int>();
     
     if(nrtRender){
         width = 3840; // 4k
         height = 2160;// 4k
-        
-        mesh_line_width *= 2;
-        mesh_point_size *= 2;
-        lissajous_line_width *= 2;
     } else {
         width = ofGetWidth();
         height = ofGetHeight();
@@ -118,7 +110,7 @@ void ofApp::setup(){
     initialPoints[3].set(0,height,-1);
     
     // setup flow field
-    ff.setup(20, xmin, xmax, ymin, ymax, zmin, zmax);
+    ff.setup(config["flow-field-resolution"].as<int>(), xmin, xmax, ymin, ymax, zmin, zmax);
     
     // ============ setup modules ===============
     
@@ -134,7 +126,7 @@ void ofApp::setup(){
     
     // 1: mesh
     Mesh* mesh = new Mesh;
-    mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,mesh_line_width,mesh_point_size);
+    mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,config);
     visual_contents[vc_counter] = mesh;
     vc_counter = addVCOptions(vc_counter,config["modules"]["mesh"]["prob"].as<int>());
     
@@ -724,6 +716,8 @@ void ofApp::keyPressed(int key){
     if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
     if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
     if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
+    
+    if (key == 'c') processConfigFile("config.yaml");
     
 }
 

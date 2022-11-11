@@ -36,7 +36,7 @@ public:
     void displayIncomingData(int width, int height);
     void onsetOccured(int width, int height);
     void drawScreen(int width, int height, int frameNum, bool isNRT);
-    void setValsFromCSV(int width, int height, float* csv_data);
+    void setValsFromCSV(int width, int height, vector<float>& csv_data);
     void incrementVecHistoryCounter();
     
     void processConfigFile(string path){
@@ -72,22 +72,12 @@ public:
     
     // vector data
     int vector_len = 106;
-    float vector_data[106];
+    float vector_data[106]; // 106 not including the onsets at the end
     std::unordered_map<std::string, float> common_features;
     float** vec_history;
     int vec_history_length;
     bool vec_history_full = false;
     int vec_history_counter = 0;
-    
-    // other data
-    int nPCAs = 4;
-    float pcas[4];
-    int kClusters = 4;
-    int curr_cluster = 0;
-    float kmeans[4];
-    void setKmeansVec(int cluster,bool check_confidence);
-    int previous_cluster = -1;
-    int kmeans_confidence = 0;
 
     float xsize;
     float ysize;

@@ -200,17 +200,22 @@ void ofApp::setup(){
     // =========== NRT RENDERING
     if(nrtRender){
         
-        string csv_path = config["csv-path"].as<string>();
+        string csv_folder = config["csv-folder"].as<string>();
         
         //int max_frames = 600; // 600 frames = 20 seconds
         int max_frames = config["max-frames"].as<int>();
         
         string line;
-        ifstream data;
-        data.open(ofToDataPath(csv_path));
-        int line_length = 8308;// 8308
-        float* csv_line_fl = new float[line_length];
         
+        ifstream descriptors_file;
+        descriptors_file.open(csv_folder + "descriptors.csv");
+        ifstream waveform0_file;
+        waveform0_file.open(csv_folder + "waveform-0.csv");
+        ifstream waveform1_file;
+        waveform1_file.open(csv_folder + "waveform-1.csv");
+        ifstream mags_file;
+        mags_file.open(csv_folder + "mags.csv");
+
         // stuff for rendering
         
         string new_dir_path;
@@ -226,23 +231,47 @@ void ofApp::setup(){
         
         int frame_num = 0;
         
-        while(!data.eof() && frame_num < max_frames){
-            getline(data,line);
+        vector<string> csv_line;
+        
+        while(!descriptors_file.eof() && frame_num < max_frames){
             
-            vector<string> csv_line = ofSplitString(line,",");
-            
-            if(csv_line.size() != line_length){
-                cout << "csv line is not expected length. expected: " << line_length << ", found: " << csv_line.size() << endl;
-                break;
-            }
-            
-            for(int i = 0; i < line_length; i++){
+            // descriptors
+            line.clear();
+            getline(descriptors_file,line);
+            csv_line.clear();
+            csv_line = ofSplitString(line,",");
+            vector<float> csv_line_fl(csv_line.size());
+            for(int i = 0; i < csv_line.size(); i++){
                 csv_line_fl[i] = ofToFloat(csv_line[i]);
             }
             
-            int global_frame_num = (int)csv_line_fl[0];
-            
             setValsFromCSV(width,height,csv_line_fl);
+            
+            // waveforms
+            line.clear();
+            getline(waveform0_file,line);
+            csv_line.clear();
+            csv_line = ofSplitString(line,",");
+            for(int i = 0; i < csv_line.size(); i++){
+                waveforms[0][i] = ofToFloat(csv_line[i]);
+            }
+            
+            line.clear();
+            getline(waveform1_file,line);
+            csv_line.clear();
+            csv_line = ofSplitString(line,",");
+            for(int i = 0; i < csv_line.size(); i++){
+                waveforms[1][i] = ofToFloat(csv_line[i]);
+            }
+                        
+            // mags
+            line.clear();
+            getline(mags_file,line);
+            csv_line.clear();
+            csv_line = ofSplitString(line,",");
+            for(int i = 0; i < csv_line.size(); i++){
+                magnitudes[0][i] = ofToFloat(csv_line[i]);
+            }
             
             cout << "frame num: " << frame_num;
             cout << endl;
@@ -254,90 +283,51 @@ void ofApp::setup(){
             drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
 
             main_fbo.readToPixels(pix);
-            ofSaveImage(pix, new_dir_path+"/"+ofToString(global_frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
+            ofSaveImage(pix, new_dir_path+"/"+ofToString(frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
             
             frame_num++;
         }
         
-        data.close();
+        descriptors_file.close();
+        waveform0_file.close();
+        waveform1_file.close();
+        mags_file.close();
         
         ofExit();
     }
 }
 
-void ofApp::setValsFromCSV(int width, int height, float* csv_data){
+void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
+    
+    common_features["specCentroid"] = vector_data[0];
+    common_features["specSpread"] = vector_data[1];
+    common_features["specSkewness"] = vector_data[2];
+    common_features["specKurtosis"] = vector_data[3];
+    common_features["specRolloff"] = vector_data[4];
+    common_features["specFlatness"] = vector_data[5];
+    common_features["specCrest"] = vector_data[6];
+    common_features["pitch"] = vector_data[7];
+    common_features["pitchConfidence"] = vector_data[8];
+    common_features["loudness"] = vector_data[9];
+    common_features["truePeak"] = vector_data[10];
+    common_features["amplitude"] = vector_data[11];
+    common_features["sensoryDissonance"] = vector_data[12];
+    common_features["zeroCrossing"] = vector_data[13];
+    
     onset_occured = false;
     
-    if(csv_data[3] > 0){
+    if(csv_data[csv_data.size() - 1] > 0){
         onset_occured = true;
         onsetOccured(width,height); // onsets
     }
     
-    for (int i = 0; i < vector_len; i++){
-        float val = csv_data[i + 4];
+    for (int i = 0; i < csv_data.size() - 1; i++){
+        float val = csv_data[i];
         vector_data[i] = val;
         vec_history[vec_history_counter][i] = val;
     }
     
     incrementVecHistoryCounter();
-    
-    common_features["amplitude"] = vector_data[11];
-    common_features["fftCrest"] = vector_data[6];
-    common_features["fftSlope"] = vector_data[4];
-    common_features["fftSpread"] = vector_data[1];
-    common_features["loudness"] = vector_data[9];
-    common_features["sensoryDissonance"] = vector_data[12];
-    common_features["specCentroid"] = vector_data[0];
-    common_features["specFlatness"] = vector_data[5];
-    common_features["specPcile"] = vector_data[6];
-    common_features["zeroCrossing"] = vector_data[13];
-    
-    for(int i = 0; i < magnitude_len; i++){
-        magnitudes[0][i] = csv_data[110 + i];
-    }
-    
-    for(int i = 0; i < waveform_len; i++){
-        waveforms[0][i] = csv_data[623 + i];
-        waveforms[1][i] = csv_data[4463 + i];
-    }
-    
-    for(int i = 0; i < nPCAs; i++){
-        pcas[i] = ofLerp(pcas[i],csv_data[8303 + i],0.14);
-    }
-    
-    setKmeansVec(csv_data[8307],true);
-}
-
-void ofApp::setKmeansVec(int cluster,bool check_confidence){
-    curr_cluster = cluster;
-    
-    if(previous_cluster == curr_cluster){
-        kmeans_confidence++;
-    } else {
-        kmeans_confidence = 0;
-    }
-    
-    if(check_confidence){ // increase the 0 to require a higher confidence;
-        if(kmeans_confidence > 0){
-            for(int i = 0; i < kClusters; i++){
-                if(i == curr_cluster){
-                    kmeans[i] = 1.f;
-                } else {
-                    kmeans[i] = 0.f;
-                }
-            }
-        }
-    } else {
-        for(int i = 0; i < kClusters; i++){
-            if(i == curr_cluster){
-                kmeans[i] = 1.f;
-            } else {
-                kmeans[i] = 0.f;
-            }
-        }
-    }
-    
-    previous_cluster = curr_cluster;
 }
 
 void ofApp::incrementVecHistoryCounter(){
@@ -390,12 +380,6 @@ void ofApp::update(){
             std::string str = oscMsg.getArgAsString(1);
             float val = oscMsg.getArgAsFloat(2);
             visual_contents[index]->receiveOSC(ofGetWidth(),ofGetHeight(),str, val);
-        } else if (address == "/kmeans"){
-            setKmeansVec(oscMsg.getArgAsInt(0),false);
-        } else if (address == "/pca"){
-            for(int i = 0; i < nPCAs; i++){
-                pcas[i] = oscMsg.getArgAsFloat(i);
-            }
         } else if (address == "/waveform") {
             int index = oscMsg.getArgAsInt(0);
 //            cout << "received waveform: " << index << endl;
@@ -525,7 +509,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
 void ofApp::draw(){
     
     drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
-    main_fbo.draw(0,0,ofGetWidth(),ofGetHeight()    );
+    main_fbo.draw(0,0,ofGetWidth(),ofGetHeight());
     
     //ofSetColor(255,0,0);
     //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
@@ -652,42 +636,6 @@ void ofApp::displayIncomingData(int width, int height){
             ofVertex(xpt,ypt);
         }
         ofEndShape();
-    }
-    
-    // pca
-    xoff = width * 0.35;
-    int edgeLen = 70;
-    yoff = height / 2;
-    for(int i = 0; i < nPCAs; i++){
-        ofSetLineWidth(0);
-        ofSetColor(0,ofMap(i,0,nPCAs-1,0,255),ofMap(i,0,nPCAs-1,255,0),pow(pcas[i],0.5) * 255);
-        ofFill();
-        ofDrawRectangle(xoff, yoff, edgeLen, edgeLen);
-        
-        ofNoFill();
-        ofSetLineWidth(2);
-        ofSetColor(255);
-        ofDrawRectangle(xoff, yoff, edgeLen, edgeLen);
-        
-        xoff += edgeLen * 1.1;
-    }
-    
-    // kmeans
-    xoff = width * 0.35;
-    yoff += edgeLen * 1.2;
-    for(int i = 0; i < kClusters; i++){
-        if(curr_cluster == i){
-            ofSetLineWidth(0);
-            ofSetColor(ofMap(i,0,nPCAs-1,0,255),ofMap(i,0,nPCAs-1,255,0),0);
-            ofFill();
-            ofDrawRectangle(xoff, yoff, edgeLen, edgeLen);
-        }
-        ofNoFill();
-        ofSetLineWidth(2);
-        ofSetColor(255);
-        ofDrawRectangle(xoff, yoff, edgeLen, edgeLen);
-        
-        xoff += edgeLen * 1.1;
     }
 }
 

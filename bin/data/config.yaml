@@ -1,6 +1,6 @@
 # if doing a non-real-time render
 nrt-render: false
-csv-path: "210617_030618_startSec=46.csv"
+csv-folder: None
 max-frames: 1800 # 99999 = 55.55 minutes
 
 target-framerate: 30

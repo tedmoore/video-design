@@ -155,7 +155,7 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
                         force.operator*=(common_features->at("specCentroid") * 0.002);
                         force.z = 0.0005 * common_features->at("specFlatness");
                         mp.applyForce(&force);
-                        mp.move(common_features->at("amplitude") * 0.05);
+                        mp.move(common_features->at("loudness") * 0.05);
                         x = mp.pos.x * rect_w_mul * width;
                         y = mp.pos.y * rect_h_mul * height;
                         z = mp.pos.z * rect_h_mul * height * zDir;

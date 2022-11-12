@@ -50,6 +50,8 @@ public:
     float speed = 0.025; // 0.0075
     float minSpeed = 0.01;
     LagUD jitterMag;
+    float jitter_mul = 0.006;
+    float dist_thresh_mul = 0.15;
 };
 
 #endif /* Mesh_hpp */

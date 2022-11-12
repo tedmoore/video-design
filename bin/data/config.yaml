@@ -1,7 +1,7 @@
 # if doing a non-real-time render
 nrt-render: false
-csv-folder: None
-max-frames: 1800 # 99999 = 55.55 minutes
+csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221112_114814
+max-frames: 99999 # = 55.55 minutes
 
 target-framerate: 30
 blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
@@ -17,13 +17,15 @@ modules:
     ikeda-prob: 0.2
     max-waveforms: 2
   mesh:
-    prob: 50 # int because it's how many times to put it in the pool of options
+    prob: 5 # int because it's how many times to put it in the pool of options
     line-width: 1.0 # must be a float
     point-size: 2.0 # must be a float
-    flow-field-influence: 0.2
+    flow-field-influence: 0.16
     n-points: 500
-    speed: 0.04
+    speed: 0.012
     min-speed: 0.0005
+    jitter-mul: 0.003
+    dist-thresh-mul: 0.015 # 0.15
   mag-lines:
     prob: 4 # int because it's how many times to put it in the pool of options
   turtle:
@@ -67,5 +69,3 @@ post-glitch:
   redinvert-prob:    0.005
   blueinvert-prob:   0.005
   greeninvert-prob:  0.005
-  rgb2422-prob: 0.0
-  phong-prob: 0.01

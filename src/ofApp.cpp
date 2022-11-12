@@ -65,15 +65,19 @@ void ofApp::setup(){
 
     // ================ DATA STRUCTURES ========================
 
-    common_features["amplitude"] = 0;
-    common_features["fftCrest"] = 0;
-    common_features["fftSlope"] = 0;
-    common_features["fftSpread"] = 0;
-    common_features["loudness"] = 0;
-    common_features["sensoryDissonance"] = 0;
     common_features["specCentroid"] = 0;
+    common_features["specSpread"] = 0;
+    common_features["specSkewness"] = 0;
+    common_features["specKurtosis"] = 0;
+    common_features["specRolloff"] = 0;
     common_features["specFlatness"] = 0;
-    common_features["specPcile"] = 0;
+    common_features["specCrest"] = 0;
+    common_features["pitch"] = 0;
+    common_features["pitchConfidence"] = 0;
+    common_features["loudness"] = 0;
+    common_features["truePeak"] = 0;
+    common_features["amplitude"] = 0;
+    common_features["sensoryDissonance"] = 0;
     common_features["zeroCrossing"] = 0;
     
     // wavforms
@@ -405,20 +409,26 @@ void ofApp::update(){
             
             incrementVecHistoryCounter();
             
-            common_features["amplitude"] = vector_data[11];
-            common_features["fftCrest"] = vector_data[6];
-            common_features["fftSlope"] = vector_data[4];
-            common_features["fftSpread"] = vector_data[1];
-            common_features["loudness"] = vector_data[9];
-            common_features["sensoryDissonance"] = vector_data[12];
             common_features["specCentroid"] = vector_data[0];
+            common_features["specSpread"] = vector_data[1];
+            common_features["specSkewness"] = vector_data[2];
+            common_features["specKurtosis"] = vector_data[3];
+            common_features["specRolloff"] = vector_data[4];
             common_features["specFlatness"] = vector_data[5];
-            common_features["specPcile"] = vector_data[6];
+            common_features["specCrest"] = vector_data[6];
+            common_features["pitch"] = vector_data[7];
+            common_features["pitchConfidence"] = vector_data[8];
+            common_features["loudness"] = vector_data[9];
+            common_features["truePeak"] = vector_data[10];
+            common_features["amplitude"] = vector_data[11];
+            common_features["sensoryDissonance"] = vector_data[12];
             common_features["zeroCrossing"] = vector_data[13];
             
-        } else if (address == "/onset"){
-            onset_occured = true;
-            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
+            onset_occured = oscMsg.getArgAsFloat(106) > 0.5;
+            if(onset_occured){
+                onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
+            }
+            
         }
     }
     

@@ -67,7 +67,7 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
         case IKEDA:
         {
             int half_w = width / 2;
-            ofSetColor(255,pow(common_features->at("amplitude"),0.5) * 255); // what should the ikeda alpha be
+            ofSetColor(255,pow(common_features->at("loudness"),2) * 255); // what should the ikeda alpha be
             ofSetLineWidth(1);
             float runningsum = 0;
             for (int i = 0; i < n_waveforms; i++) {

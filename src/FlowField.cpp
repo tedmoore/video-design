@@ -101,7 +101,7 @@ void FlowField::display() {
 }
 
 void FlowField::update(int frame_num, std::unordered_map<std::string, float>* common_features) {
-    float amp = common_features->at("amplitude");
+    float amp = common_features->at("loudness");
     float diss = common_features->at("sensoryDissonance");
     float time = (frame_num * 0.0065 * timeMul.update(diss * amp)) + 0.0001;
     float thetaRot = fmod(frame_num * 0.007,TWO_PI);

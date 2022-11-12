@@ -13,6 +13,8 @@ void Mesh::processConfigFile(ofxYAML& config){
     flow_field_influence = config["modules"]["mesh"]["flow-field-influence"].as<float>();
     speed = config["modules"]["mesh"]["speed"].as<float>();
     minSpeed = config["modules"]["mesh"]["min-speed"].as<float>();
+    jitter_mul = config["modules"]["mesh"]["jitter-mul"].as<float>();
+    dist_thresh_mul = config["modules"]["mesh"]["dist-thresh-mul"].as<float>();
 }
 
 void Mesh::setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, ofxYAML& config) {
@@ -91,11 +93,11 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     ofFill();
     ofSetLineWidth(0);
     ofSetColor(255,255,255,255);
-    float amp = common_features->at("amplitude");
+    float amp = common_features->at("loudness");
     float sensDis = common_features->at("sensoryDissonance");
-    jitterMag.update(amp * 0.012);//amp * 0.01;//MIN(0.01, amp);
+    jitterMag.update(amp * jitter_mul);//amp * 0.01;//MIN(0.01, amp);
     //float jitterMag = 1;
-    float distThresh = 0.02 + (sensDis * 0.15);
+    float distThresh = 0.02 + (sensDis * dist_thresh_mul);
     //println(specFlatness);
     int n_lines = 0;
     

@@ -8,14 +8,13 @@ s.options.device_("Fireface UC Mac (24006457)");
 s.waitForBoot({
 	Task({
 		var analysis_bus = Bus.audio(s,2);
-		var synth;
 		var frame_rate = 30;
 		var start_sec = 0;
 
 		var outpath = folder+/+Date.localtime.stamp;
-		var outfile, render_data = true;
+		var outfile, render_data = false;
 
-		var test_buf = Buffer.read(s,"/Users/macprocomputer/Desktop/sound collecting 210715/11 noisy proper --- series of gestures good fat sounds.wav");
+		// var test_buf = Buffer.read(s,"/Users/macprocomputer/Desktop/sound collecting 210715/11 noisy proper --- series of gestures good fat sounds.wav");
 
 		if(render_data){
 			outpath.mkdir;
@@ -36,20 +35,21 @@ s.waitForBoot({
 			~oF.sendMsg(*vec);
 		},"/vector");
 
-		synth = {
-			var sig = PlayBuf.ar(2,test_buf,BufRateScale.ir(test_buf),startPos:test_buf.sampleRate * start_sec,loop:1 - render_data.asInteger,doneAction:2);
-			// var sig = SoundIn.ar([2,3]);
+		~synth = {
+			arg t_force_onset = 0, onset_thresh = 0.5, allow_onsets = 1;
+			// var sig = PlayBuf.ar(2,test_buf,BufRateScale.ir(test_buf),startPos:test_buf.sampleRate * start_sec,loop:1 - render_data.asInteger,doneAction:2);
+			var sig = SoundIn.ar([2,3]);
 			var sig_mono = Mix(sig) * 0.5;
 			var fft = FFT(LocalBuf(2048),sig_mono);
 			var trig = Impulse.kr(frame_rate);
 			var spec = FluidSpectralShape.kr(sig_mono);
 			var pitch = FluidPitch.kr(sig_mono);
 			var mfcc = FluidMFCC.kr(sig_mono,40);
-			var loudness = FluidLoudness.kr(sig_mono);
+			var loudness = max(FluidLoudness.kr(sig_mono),-90);
 			var chroma = FluidChroma.kr(sig_mono);
 			var melbands = FluidMelBands.kr(sig_mono);
 			var scdesc = [Amplitude.kr(sig_mono),SensoryDissonance.kr(fft),A2K.kr(ZeroCrossing.ar(sig_mono))];
-			var onsets = Onsets.kr(fft,0.5);
+			var onsets = (Onsets.kr(fft,onset_thresh) * allow_onsets) + t_force_onset;
 			var vector = spec ++ pitch ++ loudness ++ scdesc ++ mfcc ++ melbands ++ chroma ++ [Trig.kr(onsets,frame_rate.reciprocal)];
 
 			vector = MinMaxScaler.kr(vector);
@@ -59,13 +59,14 @@ s.waitForBoot({
 			// Out.ar(0,sig * -20.dbamp);
 		}.play;
 		// s.sync;
-		WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:outpath+/+"waveform-0.csv");
-		WaveformToOSC(s,analysis_bus,1,~oF,1,false,outfile:outpath+/+"waveform-1.csv");
-		MagsToOSC(s,analysis_bus,2,~oF,0,outfile:outpath+/+"mags.csv");
+		WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil});
+		WaveformToOSC(s,analysis_bus,1,~oF,1,false,outfile:if(render_data){outpath+/+"waveform-1.csv"}{nil});
+		MagsToOSC(s,analysis_bus,2,~oF,0,outfile:if(render_data){outpath+/+"mags.csv"}{nil});
 	},SystemClock).play;
 });
 )
 
-~oF.sendMsg("/setActiveIndices",-1,4,3);
-
-~oF.sendMsg("/onset");
+~synth.set(\t_force_onset,1);
+~synth.set(\onset_thresh,0.4);
+~synth.set(\allow_onsets,0);
+~synth.set(\allow_onsets,1);

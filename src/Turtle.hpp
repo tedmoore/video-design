@@ -59,6 +59,7 @@ public:
         
         if(frame_counter < max_frames){
             float angle = 360.f / divisors[divisor_i];
+            float scale_factor = height / 1080.f; // 1080 is native so we scale based off that... *shrug emoji*
             
             // make n (=5) steps
             for(int i = 0; i < 5; i++){
@@ -66,7 +67,7 @@ public:
                 // using degrees
                 int turns = int(ofRandom(divisors[divisor_i]));// how many turns of "angle" degrees to make;
                 
-                ofVec3f newvec(stepSize * int(ofRandom(1,4)),0,0);
+                ofVec3f newvec(stepSize * int(ofRandom(1,4) * scale_factor),0,0);
                 
                 for(int j = 0; j < turns; j++){
                     newvec.rotate(0,0,angle);

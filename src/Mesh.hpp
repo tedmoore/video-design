@@ -28,9 +28,7 @@ public:
     void interact(VisualContent* other) override;
     void receiveOSC(int width, int height, std::string label, float val) override;
     void newPointLocs(float** vecHistory, int vector_length, int history_length, bool vecHistoryFull);
-    void drawLine(PointTM* a, PointTM* b, float dist, int width, int height);
-    
-    
+    void drawLine(PointTM* a, PointTM* b, float dist, int width, int height, float scale_factor);
     
     int nPoints;
     bool waveformTracking = false;

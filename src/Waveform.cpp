@@ -66,16 +66,18 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
             break;
         case IKEDA:
         {
-            int half_w = width / 2;
+            int w = width / n_waveforms;
+            float rect_height = (float)height / length;
             ofSetColor(255,pow(common_features->at("loudness"),2) * 255); // what should the ikeda alpha be
-            ofSetLineWidth(1);
+            ofSetLineWidth(0);
             float runningsum = 0;
             for (int i = 0; i < n_waveforms; i++) {
-                for(int y = 0; y < height; y++){
+                for(int y = 0; y < length; y++){
                     float absval = abs(waveforms[i][y]);
                     runningsum += absval;
                     if(absval > ikeda_avg){
-                        ofDrawLine(half_w * i, y, half_w * (i + 1), y);
+//                        ofDrawLine(half_w * i, y, half_w * (i + 1), y);
+                        ofDrawRectangle(w * i, y * rect_height, w, rect_height);
                     }
                 }
             }

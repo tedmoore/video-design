@@ -7,7 +7,12 @@
 #include "HapMovie.hpp"
 #include "defines.h"
 
-void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_){
+void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
+    
+    show_hap_prob = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
+    show_rects_prob = config["videos"][videoIndex]["show-rects-prob"].as<float>(); // 0.4
+    use_ff_prob = config["videos"][videoIndex]["use-ff-prob"].as<float>(); // 0.28
+    
     n_mag = n_mag_;
     mag_len = mag_len_;
     mags = mags_;
@@ -33,12 +38,14 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),mini_vid.getPixelFormat());
     } else { // is non-real-time
         ofDirectory tiffs_dir(dir.getAbsolutePath() + "/frames");
-        cout << tiffs_dir.getAbsolutePath() << "\n";
+        cout << "\t\t" << tiffs_dir.getAbsolutePath() << "\n";
+        tiffs_dir.listDir();
         tiffs_dir.sort();
         tiffs = tiffs_dir.getFiles();
     
         ofDirectory bitexact_tiffs_dir(dir.getAbsolutePath() + "/mini-frames");
-        cout << bitexact_tiffs_dir.getAbsolutePath() << "\n";
+        cout << "\t\t" << bitexact_tiffs_dir.getAbsolutePath() << "\n";
+        bitexact_tiffs_dir.listDir();
         bitexact_tiffs_dir.sort();
         bitexact_tiffs = bitexact_tiffs_dir.getFiles();
         
@@ -202,12 +209,12 @@ void HapMovie::display(int width, int height, int frame_num, std::unordered_map<
 void HapMovie::newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
     speed = ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))];
     player.setSpeed(speed);
-    showHap = ofRandom(1.f) < 0.2;
-    showRects = ofRandom(1.f) < 0.4;
+    showHap = ofRandom(1.f) < show_hap_prob; // 0.2
+    showRects = ofRandom(1.f) < show_rects_prob; // 0.4
     rect_w_mul = ofRandom(1.0,3.0);
     rect_h_mul = ofRandom(1.0,3.0);
     
-    useFF = ofRandom(1.f) < 0.28;
+    useFF = ofRandom(1.f) < use_ff_prob; // 0.28
     
     for(int i = 0; i < nMoviePoints; i ++){
         moviePoints[i].resetPos();

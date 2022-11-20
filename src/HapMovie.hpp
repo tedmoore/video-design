@@ -20,7 +20,7 @@
 
 class HapMovie: public VisualContent {
 public:
-    void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag, int mag_len, bool isNRT,FlowField *ff_);
+    void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag, int mag_len, bool isNRT,FlowField *ff_, ofxYAML& config, int videoIndex);
     void update(bool isNRT) override;
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) override;
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) override;
@@ -81,6 +81,10 @@ public:
     
     float nrt_playhead = 0;
     int total_frames = 0;
+    
+    float show_hap_prob = 0.2; // 0.2
+    float show_rects_prob = 0.4; // 0.4
+    float use_ff_prob = 0.28; // 0.28
 };
 
 #endif /* HapMovie_hpp */

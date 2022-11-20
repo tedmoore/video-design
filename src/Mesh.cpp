@@ -103,6 +103,8 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     
     velLimit.update((amp * speed) + minSpeed);
     
+    float scale_factor = height / 1080.f; // 1080 is the native so we'll scale based on that
+    
     for (int i = 0; i < nPoints; i++) {
         
         if (useFF && useFFmaster) {
@@ -120,7 +122,7 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
         //println(velLimit.value);
         
         points[i].checkEdges();
-        points[i].display(width,height,point_size);
+        points[i].display(width,height,point_size * scale_factor);
         
         if (i < nPoints - 1 && n_lines < maxLines) {
             int i_lines = 0;
@@ -132,7 +134,7 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
                         float alpha = ofMap(dist,0.f,distThresh,255.f,0.f);
                         //cout << dist << "\t" << distThresh << "\t" << alpha << "\n";
                         ofSetColor(255,alpha);
-                        drawLine(&points[i], &points[j], dist, width, height);
+                        drawLine(&points[i], &points[j], dist, width, height, scale_factor);
                         n_lines++;
                         i_lines++;
                     }
@@ -144,8 +146,8 @@ void Mesh::display(int width, int height, int frame_num, std::unordered_map<std:
     waveformTracking = false;
 }
 
-void Mesh::drawLine(PointTM* a, PointTM* b, float dist, int width, int height) {
-    ofSetLineWidth(line_width);
+void Mesh::drawLine(PointTM* a, PointTM* b, float dist, int width, int height, float scale_factor) {
+    ofSetLineWidth(line_width * scale_factor);
     //float alpha = 5.0 / ((dist * dist) + 1);
     //println(alpha);
     //ofSetColor(255, alpha);

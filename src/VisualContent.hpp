@@ -14,7 +14,7 @@
 #include "ofxYAML.h"
 //#include "ofMain.h"
 
-enum VIS_TYPE { NONE, HAP, WAVEFORM, MESH , LINES , TURTLE };
+enum VIS_TYPE { NONE , HAP , WAVEFORM, MESH , LINES , TURTLE };
 
 class VisualContent {
 public:

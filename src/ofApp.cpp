@@ -11,6 +11,8 @@ void ofApp::setup(){
     
     postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
     
+    use_sc_onsets = config["use-sc-onsets"].as<bool>();
+    
     postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
     postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
     postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
@@ -52,8 +54,6 @@ void ofApp::setup(){
 
     main_fbo.allocate(width, height);
     postGlitch.setup(&main_fbo);
-    
-    waveform_len = width;
     
     int max_active_vc = 2;
     active_vc_i = new int[max_active_vc];
@@ -153,33 +153,34 @@ void ofApp::setup(){
     cout << "turtle loaded vc_i_options.size(): " << vc_i_options.size() << endl;
     
     // load videos
-    cout << "config['videos'].size(): " << config["videos"].size() << endl;
+    cout << "\n\nconfig['videos'].size(): " << config["videos"].size() << endl;
     for(int i = 0; i < config["videos"].size(); i++){
-        
         string name = config["videos"][i]["name"].as<string>();
         int prob = config["videos"][i]["prob"].as<int>();
-        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
-        cout << "vc_counter: " << vc_counter << endl;
-        newHapMovie(name,vc_counter,initialPoints,width,height);
-        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
-        cout << "vc_counter: " << vc_counter << endl;
+        cout << "\tabout to load video " << i << ": " << name << "\n";
+        cout << "\t\tvc_counter = " << vc_counter << "\n";
+        newHapMovie(name,vc_counter,initialPoints,width,height,config,i);
         vc_counter = addVCOptions(vc_counter,prob);
-        cout << "video " << i << " loaded (prob=" << prob << ") vc_i_options.size(): " << vc_i_options.size() << endl;
-        cout << "vc_counter: " << vc_counter << endl;
+        cout << "\tvideo " << i << " loaded: " << name << "\t(prob=" << prob << ")\n";
+        cout << "\t\tvc_counter = " << vc_counter << "\n\n";
     }
     
     nVisualContents = vc_counter;
+    
+    for(int i = 0; i < nVisualContents; i++){
+        cout << "vc index: " << i << visual_contents[i]->type << endl;
+    }
     
     // add null options to vc options
     for(int i = 0; i < 1; i++){
         vc_i_options.push_back(-1);
     }
     
-    cout << "vc_i_options: ";
-    for(int i = 0; i < vc_i_options.size(); i++){
-        cout << vc_i_options[i] << " (size=" << vc_i_options.size() << ") ";
-    }
-    cout << endl;
+//    cout << "vc_i_options: ";
+//    for(int i = 0; i < vc_i_options.size(); i++){
+//        cout << vc_i_options[i] << " (size=" << vc_i_options.size() << ") ";
+//    }
+//    cout << endl;
     
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;
@@ -195,11 +196,13 @@ void ofApp::setup(){
     osc_receiver.setup(11000);
     
     // =========================== INITIALIZATION =====================
-    // initialize to none active
-    active_vc_i[0] = -1;
-    active_vc_i[1] = -1;
-    active_vc_i[2] = -1;
-    active_vc_i[3] = -1;
+    for(int i = 0; i < max_active_vc; i++){
+        active_vc_i[i] = config["initial-active-modules"][i].as<int>();
+    }
+    
+    if(config["initial-onset"].as<bool>()){
+        onsetOccured(width, height);
+    }
     
     // =========== NRT RENDERING
     if(nrtRender){
@@ -209,16 +212,14 @@ void ofApp::setup(){
         //int max_frames = 600; // 600 frames = 20 seconds
         int max_frames = config["max-frames"].as<int>();
         
-        string line;
-        
         ifstream descriptors_file;
-        descriptors_file.open(csv_folder + "descriptors.csv");
+        descriptors_file.open(csv_folder + "/descriptors.csv");
         ifstream waveform0_file;
-        waveform0_file.open(csv_folder + "waveform-0.csv");
+        waveform0_file.open(csv_folder + "/waveform-0.csv");
         ifstream waveform1_file;
-        waveform1_file.open(csv_folder + "waveform-1.csv");
+        waveform1_file.open(csv_folder + "/waveform-1.csv");
         ifstream mags_file;
-        mags_file.open(csv_folder + "mags.csv");
+        mags_file.open(csv_folder + "/mags.csv");
 
         // stuff for rendering
         
@@ -226,6 +227,8 @@ void ofApp::setup(){
         ofFileDialogResult result = ofSystemSaveDialog("", "Choose location to save frames");
         if(result.bSuccess) {
           new_dir_path = result.getPath();
+        } else {
+            ofExit();
         }
         
         ofDirectory new_dir(new_dir_path);
@@ -235,20 +238,25 @@ void ofApp::setup(){
         
         int frame_num = 0;
         
+        string line;
         vector<string> csv_line;
         
         while(!descriptors_file.eof() && frame_num < max_frames){
+            
+            cout << "frame num: " << frame_num << endl;
             
             // descriptors
             line.clear();
             getline(descriptors_file,line);
             csv_line.clear();
             csv_line = ofSplitString(line,",");
+//            cout << "\tdescriptors line size (strings): " << csv_line.size() << endl;
             vector<float> csv_line_fl(csv_line.size());
             for(int i = 0; i < csv_line.size(); i++){
                 csv_line_fl[i] = ofToFloat(csv_line[i]);
             }
-            
+//            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
+
             setValsFromCSV(width,height,csv_line_fl);
             
             // waveforms
@@ -256,6 +264,7 @@ void ofApp::setup(){
             getline(waveform0_file,line);
             csv_line.clear();
             csv_line = ofSplitString(line,",");
+//            cout << "\twaveform0 line size (strings): " << csv_line.size() << endl;
             for(int i = 0; i < csv_line.size(); i++){
                 waveforms[0][i] = ofToFloat(csv_line[i]);
             }
@@ -264,6 +273,7 @@ void ofApp::setup(){
             getline(waveform1_file,line);
             csv_line.clear();
             csv_line = ofSplitString(line,",");
+//            cout << "\twaveform1 line size (strings): " << csv_line.size() << endl;
             for(int i = 0; i < csv_line.size(); i++){
                 waveforms[1][i] = ofToFloat(csv_line[i]);
             }
@@ -273,14 +283,13 @@ void ofApp::setup(){
             getline(mags_file,line);
             csv_line.clear();
             csv_line = ofSplitString(line,",");
+//            cout << "\tmags line size (strings): " << csv_line.size() << endl;
             for(int i = 0; i < csv_line.size(); i++){
                 magnitudes[0][i] = ofToFloat(csv_line[i]);
             }
             
-            cout << "frame num: " << frame_num;
-            cout << endl;
-            
             for(int i = 0; i < nVisualContents; i++){
+//                cout << "\tupdating vc: " << i << endl;
                 visual_contents[i]->update(true);
             }
             
@@ -298,6 +307,33 @@ void ofApp::setup(){
         mags_file.close();
         
         ofExit();
+    }
+}
+
+void ofApp::processReaperMarker(string& cmd){
+    vector<string> tokens = ofSplitString(cmd," ");
+    int index = 0;
+    while(index < tokens.size()){
+        
+        cout << "index: " << index << " " << tokens[index] << endl;
+        
+        if(tokens[index] == "onset"){
+            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
+            
+        } else if(tokens[index] == "setActiveIndices"){
+            int ai[MAX_ACTIVE_MODULES];
+            
+            cout << "setActiveIndices: ";
+            
+            for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+                ai[i] = ofToInt(tokens[++index]);
+                cout << ai[i] << " ";
+            }
+            cout << endl;
+            setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+        }
+        
+        index++; // always increment at least one!
     }
 }
 
@@ -320,10 +356,15 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
     
     onset_occured = false;
     
-    if(csv_data[csv_data.size() - 1] > 0){
+//    cout << "csv_data.size(): " << csv_data.size() << endl;
+    
+    float onset_val = csv_data[csv_data.size() - 1];
+    if(onset_val > 0.5 && use_sc_onsets){
         onset_occured = true;
         onsetOccured(width,height); // onsets
     }
+    
+//    cout << "\tonset val: " << onset_val << " \tonset occured: " << onset_occured << endl;
     
     for (int i = 0; i < csv_data.size() - 1; i++){
         float val = csv_data[i];
@@ -336,18 +377,28 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
 
 void ofApp::incrementVecHistoryCounter(){
     // check if we just added the last index to the history and if so set true
-    if(vec_history_counter == vec_history_length - 1) vec_history_full = true;
+   vec_history_full = vec_history_counter == (vec_history_length - 1);
     
     // increment and modulous
     vec_history_counter = (vec_history_counter + 1) % vec_history_length;
 }
 
-void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height){
+void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex){
     HapMovie* vc = new HapMovie;
-    cout << "ofApp::newHapMovie loading " << path << endl;
-    vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff);
+    cout << "\t\tofApp::newHapMovie loading " << path << endl;
+    vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,config, videoIndex);
     vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full);
+    cout << "\t\tadding " << path << "\t at index " << index << endl;
     visual_contents[index] = vc;
+}
+
+void ofApp::setActiveIndices(int* ai,int width, int height){
+    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+        active_vc_i[i] = ai[i];
+        if(active_vc_i[i] >= 0 && visual_contents[active_vc_i[i]]->newParamsProb > ofRandom(1.f)){
+            visual_contents[active_vc_i[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -360,13 +411,21 @@ void ofApp::update(){
         osc_receiver.getNextMessage(oscMsg);
 
 //        cout << oscMsg << "\n";
-
+        
         string address = oscMsg.getAddress();
         
-        if(address == "/setActiveIndices"){
-            for(int i = 0; i < max_active_vc; i++){
-                active_vc_i[i] = oscMsg.getArgAsInt(i);
+        // from Reaper:
+        if(address == "/lastmarker/name"){
+            string cmd = oscMsg.getArgAsString(0);
+            processReaperMarker(cmd);
+            
+            // from SuperCollider:
+        } else if(address == "/setActiveIndices"){
+            int ai[MAX_ACTIVE_MODULES];
+            for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+                ai[i] = oscMsg.getArgAsInt(i);
             }
+            setActiveIndices(ai,main_fbo.getWidth(),main_fbo.getHeight());
         } else if (address == "/setOnsetSwitchProb"){
             onsetSwitchProb = oscMsg.getArgAsFloat(0);
         } else if (address == "/setNewParamsProb"){
@@ -424,12 +483,12 @@ void ofApp::update(){
             common_features["sensoryDissonance"] = vector_data[12];
             common_features["zeroCrossing"] = vector_data[13];
             
-            onset_occured = oscMsg.getArgAsFloat(106) > 0.5;
-            if(onset_occured){
-                onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
-            }
-            
+            onset_occured = use_sc_onsets && (oscMsg.getArgAsFloat(106) > 0.5);
         }
+    }
+    
+    if(onset_occured){
+        onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
     }
     
     for(int i = 0; i < nVisualContents; i++){
@@ -440,9 +499,10 @@ void ofApp::update(){
 void ofApp::onsetOccured(int width, int height){
 
     // new active vc i
-    if(onsetSwitchProb > ofRandom(1.f)){
+    if(ofRandom(1.f) < onsetSwitchProb){
         vector<int> chosen_i;
-        for(int i = 0; i < max_active_vc; i++){ // go through the max number that we'll display
+        int ai[MAX_ACTIVE_MODULES];
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
             bool found = false;
             while(!found){
                 // options array is the big pool of options (has duplicates based on probs)
@@ -451,14 +511,11 @@ void ofApp::onsetOccured(int width, int height){
                 if(!std::count(chosen_i.begin(), chosen_i.end(), result)){
                     found = true;
                     chosen_i.push_back(result);
-                    active_vc_i[i] = result; // the module's index
-                    
-                    if(result >= 0 && visual_contents[result]->newParamsProb > ofRandom(1.f)){
-                        visual_contents[result]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-                    }
+                    ai[i] = result;
                 }
             }
         }
+        setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
     }
     
     // blend mode
@@ -495,10 +552,10 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         
         ff.update(frameNum, &common_features);
         
-        for(int i = 0; i < max_active_vc; i++){
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             int index = active_vc_i[i];
             if(index >= 0){
-                for(int j = 0; j < max_active_vc; j++){
+                for(int j = 0; j < MAX_ACTIVE_MODULES; j++){
                     if(j != i && active_vc_i[j] >= 0){
                         visual_contents[index]->interact(visual_contents[active_vc_i[j]]);
                     }

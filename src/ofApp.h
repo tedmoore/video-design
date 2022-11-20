@@ -1,5 +1,6 @@
 #pragma once
 
+#include "defines.h"
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "VisualContent.hpp"
@@ -32,13 +33,14 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-    void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height);
+    void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex);
     void displayIncomingData(int width, int height);
     void onsetOccured(int width, int height);
     void drawScreen(int width, int height, int frameNum, bool isNRT);
     void setValsFromCSV(int width, int height, vector<float>& csv_data);
     void incrementVecHistoryCounter();
-    
+    void processReaperMarker(string& cmd);
+    void setActiveIndices(int* ai,int width, int height);
     void processConfigFile(string path){
         config.load(path);
         visual_contents[1]->processConfigFile(config);
@@ -53,16 +55,15 @@ public:
     }
     
     int nVisualContents;
-    VisualContent* visual_contents[9];
+    VisualContent* visual_contents[10];
     vector<int> vc_i_options;
     
-    int max_active_vc = 4;
     int* active_vc_i;
     FlowField ff;
     
     // waveform data
     int n_waveforms = 2;
-    int waveform_len;
+    int waveform_len = 1920;
     float** waveforms;
     
     // mags
@@ -115,4 +116,6 @@ public:
     int feedback_amt = 0;
     float feedback_prob = 0.f;
     int feedback_max = 255;
+    
+    bool use_sc_onsets = true;
 };

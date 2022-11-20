@@ -69,8 +69,8 @@ void Lines::display(int width, int height, int frame_num, std::unordered_map<std
     ofSetLineWidth(0);
     ofFill();
     
-    w = width / vec_len;
-    h = height / vec_len;
+    w = width / float(vec_len);
+    h = height / float(vec_len);
     
     for (int i = 0; i < vec_len; i++) {
         float alpha = 0;
@@ -81,7 +81,7 @@ void Lines::display(int width, int height, int frame_num, std::unordered_map<std
                 //cout << "borrowed color: " << borrowed_colors[i % N_CLUSTERS] << "\n";
                 ofSetColor(borrowed_colors[i % N_CLUSTERS], alpha);
             } else {
-                ofSetColor(255, 255,255,alpha);
+                ofSetColor(255,255,255,alpha);
             }
             drawLine(width,height,i);
         }
@@ -91,19 +91,20 @@ void Lines::display(int width, int height, int frame_num, std::unordered_map<std
 }
 
 void Lines::drawLine(int width, int height, int i) {
-    if (dir == HORZ) {
-        //cout << "horz\n";
-        if (inv) {
-            ofDrawRectangle(0, height - ((i+1) * h), width, h);
-        } else {
-            ofDrawRectangle(0, i * h, width, h);
-        }
-    } else if (dir == VERT) {
-        //cout << "vert\n";
-        if (inv) {
-            ofDrawRectangle(width - ((i+1) * w), 0, w, height);
-        } else {
-            ofDrawRectangle(i * w, 0, w, height);
-        }
+    switch(dir){
+        case HORZ:
+            if (inv) {
+                ofDrawRectangle(0, height - ((i+1) * h), width, h);
+            } else {
+                ofDrawRectangle(0, i * h, width, h);
+            }
+            break;
+        case VERT:
+            if (inv) {
+                ofDrawRectangle(width - ((i+1) * w), 0, w, height);
+            } else {
+                ofDrawRectangle(i * w, 0, w, height);
+            }
+            break;
     }
 }

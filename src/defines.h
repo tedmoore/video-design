@@ -8,6 +8,6 @@
 #ifndef defines_h
 #define defines_h
 
-#define TARGET_FRAME_RATE 30
+#define MAX_ACTIVE_MODULES 4
 
 #endif /* defines_h */

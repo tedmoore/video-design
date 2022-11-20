@@ -55,7 +55,7 @@ void HapMovie::setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, of
         total_frames = MIN(bitexact_tiffs.size(),tiffs.size());
     }
     
-    cluster_freq = TARGET_FRAME_RATE * ofRandom(15,25);
+    cluster_freq = config["target-framerate"].as<int>() * ofRandom(15,25);
     
     //cout << "cluster freq: " << cluster_freq << "\n";
     type = HAP;

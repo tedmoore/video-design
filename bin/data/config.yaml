@@ -1,13 +1,14 @@
 # if doing a non-real-time render
-nrt-render: true
+nrt-render: false
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221112_173249
-max-frames: 30
+max-frames: 99999
+use-sc-onsets: true
 initial-active-modules: [-1,-1,-1,-1] # only 4!
 initial-onset: true
-use-sc-onsets: false
-audio-sample-rate: 44100
 
+audio-sample-rate: 44100
 target-framerate: 30
+
 blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
 feedback-prob: 0.25
 feedback-max: 254
@@ -43,37 +44,37 @@ videos:
     prob: 1
     show-hap-prob: 0.2
     show-rects-prob: 0.4
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
   - # module index: 5
     name: "oil-water-1283-denoised-HQ1080" # mostly blue
     prob: 1
     show-hap-prob: 0.2
     show-rects-prob: 0.4
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
   - # module index: 6
     name: "oil-water-1286-HQ720" # crazy colors
     prob: 1
     show-hap-prob: 1.0
     show-rects-prob: 0.0
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
   - # module index: 7
     name: "eye4720"
     prob: 2 # int because it's how many times to put it in the pool of options
     show-hap-prob: 0.2
     show-rects-prob: 0.4
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
   - # module index: 8
     name: "eye4948"
     prob: 2
     show-hap-prob: 0.2
     show-rects-prob: 0.4
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
   - # module index: 9
     name: "slow-water"
-    prob: 2
+    prob: 1
     show-hap-prob: 0.2
     show-rects-prob: 0.4
-    use-ff-prob: 0.28
+    use-ff-prob: 0.18
 
 post-glitch:
   change-prob:       0.75

@@ -1,5 +1,6 @@
 #include "ofApp.h"
 #include <algorithm>
+#include "ReaperMarkersFileParser.hpp"
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -220,6 +221,9 @@ void ofApp::setup(){
         waveform1_file.open(csv_folder + "/waveform-1.csv");
         ifstream mags_file;
         mags_file.open(csv_folder + "/mags.csv");
+        
+        ReaperMarkersFileParser rmfp;
+        rmfp.setup(csv_folder + "/reaper-markers.txt",config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
 
         // stuff for rendering
         
@@ -258,6 +262,10 @@ void ofApp::setup(){
 //            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
 
             setValsFromCSV(width,height,csv_line_fl);
+            
+            string rm = rmfp.currentFrame(frame_num);
+            cout << "from rmfp: " << rm << endl;
+            processReaperMarker(rm);
             
             // waveforms
             line.clear();

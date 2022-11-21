@@ -1,10 +1,10 @@
 # if doing a non-real-time render
-nrt-render: false
+nrt-render: true
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221112_173249
-max-frames: 99999 # = 55.55 minutes
+max-frames: 30
 initial-active-modules: [-1,-1,-1,-1] # only 4!
 initial-onset: true
-use-sc-onsets: true
+use-sc-onsets: false
 audio-sample-rate: 44100
 
 target-framerate: 30

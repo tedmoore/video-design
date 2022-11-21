@@ -11,9 +11,9 @@ s.waitForBoot({
 	var start_sec = 0;
 
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = false;
+	var outfile, render_data = true;
 
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Desktop/sound collecting 210715/11 noisy proper --- series of gestures good fat sounds.wav");
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
 
 	if(render_data){
 		outpath.mkdir;
@@ -40,8 +40,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.5, allow_onsets = 1;
-		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,doneAction:2);
-		var sig = SoundIn.ar([2,3]);
+		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,doneAction:2);
+		// var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 		var fft = FFT(LocalBuf(2048),sig_mono);
 		var trig = Impulse.kr(frame_rate);

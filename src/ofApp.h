@@ -43,7 +43,44 @@ public:
     void setActiveIndices(int* ai,int width, int height);
     void processConfigFile(string path){
         config.load(path);
-        visual_contents[1]->processConfigFile(config);
+        
+        feedback_prob = config["feedback-prob"].as<float>();
+        feedback_max = config["feedback-max"].as<int>();
+        
+        ofSetFrameRate(config["target-framerate"].as<int>());
+        
+        postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
+        
+        use_sc_onsets = config["use-sc-onsets"].as<bool>();
+        
+        postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
+        postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
+        postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
+        postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].as<float>();
+        postGlitchProbs[4] = config["post-glitch"]["twist-prob"].as<float>();
+        postGlitchProbs[5] = config["post-glitch"]["outline-prob"].as<float>();
+        postGlitchProbs[6] = config["post-glitch"]["noise-prob"].as<float>();
+        postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].as<float>();
+        postGlitchProbs[8] = config["post-glitch"]["swell-prob"].as<float>();
+        postGlitchProbs[9] = config["post-glitch"]["invert-prob"].as<float>();
+        postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].as<float>();
+        postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].as<float>();
+        postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].as<float>();
+        postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].as<float>();
+        postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].as<float>();
+        postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].as<float>();
+        postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].as<float>();
+        
+        for(int i = 0; i < config["blend-mode-probs"].size(); i++){
+            int n = config["blend-mode-probs"][i].as<int>();
+            for(int j = 0; j < n; j++){
+                blendModePool.push_back(i);
+            }
+        }
+        
+        for(int i = 0; i < nVisualContents; i++){
+            visual_contents[i]->processConfigFile(config);
+        }
     }
     
     int addVCOptions(int counter, int num){

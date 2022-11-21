@@ -4,46 +4,13 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    
     config.load("config.yaml");
-    
+
     nrtRender = config["nrt-render"].as<bool>();
-    
-    ofSetFrameRate(config["target-framerate"].as<int>());
-    
-    postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
-    
-    use_sc_onsets = config["use-sc-onsets"].as<bool>();
-    
-    postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
-    postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
-    postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
-    postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].as<float>();
-    postGlitchProbs[4] = config["post-glitch"]["twist-prob"].as<float>();
-    postGlitchProbs[5] = config["post-glitch"]["outline-prob"].as<float>();
-    postGlitchProbs[6] = config["post-glitch"]["noise-prob"].as<float>();
-    postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].as<float>();
-    postGlitchProbs[8] = config["post-glitch"]["swell-prob"].as<float>();
-    postGlitchProbs[9] = config["post-glitch"]["invert-prob"].as<float>();
-    postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].as<float>();
-    postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].as<float>();
-    postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].as<float>();
-    postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].as<float>();
-    postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].as<float>();
-    postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].as<float>();
-    postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].as<float>();
-    
-    for(int i = 0; i < config["blend-mode-probs"].size(); i++){
-        int n = config["blend-mode-probs"][i].as<int>();
-        for(int j = 0; j < n; j++){
-            blendModePool.push_back(i);
-        }
-    }
         
     int width = 0;
     int height = 0;
-    
-    feedback_prob = config["feedback-prob"].as<float>();
-    feedback_max = config["feedback-max"].as<int>();
     
     if(nrtRender){
         width = 3840; // 4k
@@ -177,12 +144,6 @@ void ofApp::setup(){
         vc_i_options.push_back(-1);
     }
     
-//    cout << "vc_i_options: ";
-//    for(int i = 0; i < vc_i_options.size(); i++){
-//        cout << vc_i_options[i] << " (size=" << vc_i_options.size() << ") ";
-//    }
-//    cout << endl;
-    
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;
     vec_history = new float*[vec_history_length];
@@ -195,6 +156,8 @@ void ofApp::setup(){
     
     // ======================= OSC ================
     osc_receiver.setup(11000);
+    
+    processConfigFile("config.yaml");
     
     // =========================== INITIALIZATION =====================
     for(int i = 0; i < max_active_vc; i++){
@@ -321,6 +284,9 @@ void ofApp::setup(){
 void ofApp::processReaperMarker(string& cmd){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
+    
+    cout << "reaper marker: " << cmd << endl;
+    
     while(index < tokens.size()){
         
         cout << "index: " << index << " " << tokens[index] << endl;
@@ -418,7 +384,7 @@ void ofApp::update(){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
 
-//        cout << oscMsg << "\n";
+        cout << oscMsg << "\n";
         
         string address = oscMsg.getAddress();
         

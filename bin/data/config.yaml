@@ -1,8 +1,8 @@
 # if doing a non-real-time render
-nrt-render: false
-csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221112_173249
+nrt-render: true
+csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
 max-frames: 99999
-use-sc-onsets: true
+use-sc-onsets: false
 initial-active-modules: [-1,-1,-1,-1] # only 4!
 initial-onset: true
 

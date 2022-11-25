@@ -12,6 +12,7 @@ s.waitForBoot({
 
 	var outpath = folder+/+Date.localtime.stamp;
 	var outfile, render_data = true;
+	var freeables = List.new;
 
 	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
 
@@ -62,12 +63,23 @@ s.waitForBoot({
 		// Out.ar(0,sig * -20.dbamp);
 	}.play;
 	// s.sync;
-	WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil});
-	WaveformToOSC(s,analysis_bus,1,~oF,1,false,outfile:if(render_data){outpath+/+"waveform-1.csv"}{nil});
-	MagsToOSC(s,analysis_bus,2,~oF,0,outfile:if(render_data){outpath+/+"mags.csv"}{nil});
+	WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil},action:{
+		arg sy;
+		freeables.add(sy);
+	});
+	WaveformToOSC(s,analysis_bus,1,~oF,1,false,outfile:if(render_data){outpath+/+"waveform-1.csv"}{nil},action:{
+		arg sy;
+		freeables.add(sy);
+	});
+	MagsToOSC(s,analysis_bus,2,~oF,0,outfile:if(render_data){outpath+/+"mags.csv"}{nil},action:{
+		arg sy;
+		freeables.add(sy);
+	});
 
 	if(render_data){
 		audio_buf.duration.wait;
+		freeables.do(_.free);
+		outfile.close;
 		"done rendering data".postln;
 	};
 });

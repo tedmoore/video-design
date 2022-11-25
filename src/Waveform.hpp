@@ -23,7 +23,7 @@ public:
     void screenResize(int w, int h) override;
     void interact(VisualContent* other) override;
     void receiveOSC(int width, int height, std::string label, float val) override;
-    void displayWaveform(int wf_int, int x, int y, int z, float hmul2);
+    void displayWaveform(int wf_int, int x, int y, int z, float hmul2, int display_width, int display_height);
     
     enum waveformType { NORM , LISSAJOUS , IKEDA };
     

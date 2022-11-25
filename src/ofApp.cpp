@@ -285,11 +285,11 @@ void ofApp::processReaperMarker(string& cmd){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
-    cout << "reaper marker: " << cmd << endl;
+//    cout << "reaper marker: " << cmd << endl;
     
     while(index < tokens.size()){
         
-        cout << "index: " << index << " " << tokens[index] << endl;
+//        cout << "index: " << index << " " << tokens[index] << endl;
         
         if(tokens[index] == "onset"){
             onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
@@ -297,13 +297,13 @@ void ofApp::processReaperMarker(string& cmd){
         } else if(tokens[index] == "setActiveIndices"){
             int ai[MAX_ACTIVE_MODULES];
             
-            cout << "setActiveIndices: ";
+//            cout << "setActiveIndices: ";
             
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
                 ai[i] = ofToInt(tokens[++index]);
-                cout << ai[i] << " ";
+//                cout << ai[i] << " ";
             }
-            cout << endl;
+//            cout << endl;
             setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
         }
         
@@ -351,7 +351,7 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
 
 void ofApp::incrementVecHistoryCounter(){
     // check if we just added the last index to the history and if so set true
-   vec_history_full = vec_history_counter == (vec_history_length - 1);
+    if(vec_history_counter == (vec_history_length - 1)) vec_history_full = true;
     
     // increment and modulous
     vec_history_counter = (vec_history_counter + 1) % vec_history_length;

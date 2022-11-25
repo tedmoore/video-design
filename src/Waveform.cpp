@@ -59,7 +59,7 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
         {
             for (int i = 0; i < n_waveforms; i++) {
                 if (show[i]) {
-                    displayWaveform(i % maxNWaveforms, xoff[i], yoff[i], zoff[i], hmul[i]);
+                    displayWaveform(i % maxNWaveforms, xoff[i], yoff[i], zoff[i], hmul[i],width,height);
                 }
             }
         }
@@ -88,15 +88,16 @@ void Waveform::display(int width, int height, int frame_num, std::unordered_map<
     }
 }
 
-void Waveform::displayWaveform(int wf_int, int x, int y, int z, float hmul2){
+void Waveform::displayWaveform(int wf_int, int x, int y, int z, float hmul2, int display_width, int display_height){
     ofSetColor(255,255,255,255);
     ofNoFill();
     ofSetLineWidth(waveform_line_width);
     ofBeginShape();
+    float xhop = (float)display_width / (float)length;
     //cout << "wf int: " << wf_int << "\t" << x << "\t" << y << "\t" << z << "\t" << hmul2 << "\n";
     for (int i = 0; i < length; i++) {
       float y2 = y + (waveforms[wf_int][i] * h * hmul2);
-      float x2 = x + i;
+      float x2 = x + (i * xhop);
       ofVertex(x2, y2, -z);
     }
     ofEndShape();

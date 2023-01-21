@@ -23,8 +23,7 @@ void ofApp::setup(){
     main_fbo.allocate(width, height);
     postGlitch.setup(&main_fbo);
     
-    int max_active_vc = 2;
-    active_vc_i = new int[max_active_vc];
+    active_vc_i = new int[MAX_ACTIVE_MODULES];
     
     ofBackground(0);
     ofEnableAntiAliasing();
@@ -160,8 +159,9 @@ void ofApp::setup(){
     processConfigFile("config.yaml");
     
     // =========================== INITIALIZATION =====================
-    for(int i = 0; i < max_active_vc; i++){
+    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
         active_vc_i[i] = config["initial-active-modules"][i].as<int>();
+        cout << "initial active module " << i << ": " << active_vc_i[i] << endl;
     }
     
     if(config["initial-onset"].as<bool>()){
@@ -383,8 +383,6 @@ void ofApp::update(){
     while(osc_receiver.hasWaitingMessages()){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
-
-        cout << oscMsg << "\n";
         
         string address = oscMsg.getAddress();
         
@@ -530,7 +528,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
             int index = active_vc_i[i];
             if(index >= 0){
                 for(int j = 0; j < MAX_ACTIVE_MODULES; j++){
-                    if(j != i && active_vc_i[j] >= 0){
+                    if((j != i) && (active_vc_i[j] >= 0)){
                         visual_contents[index]->interact(visual_contents[active_vc_i[j]]);
                     }
                 }

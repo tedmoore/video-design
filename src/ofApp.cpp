@@ -159,6 +159,10 @@ void ofApp::setup(){
     processConfigFile("config.yaml");
     
     // =========================== INITIALIZATION =====================
+    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+        active_vc_i[i] = config["initial-active-modules"][i].as<int>();
+        cout << "initial active module " << i << ": " << active_vc_i[i] << endl;
+    }
     
     if(config["initial-onset"].as<bool>()){
         onsetOccured(width, height);
@@ -379,8 +383,6 @@ void ofApp::update(){
     while(osc_receiver.hasWaitingMessages()){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
-
-//        cout << oscMsg << "\n";
         
         string address = oscMsg.getAddress();
         
@@ -532,7 +534,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
             int index = active_vc_i[i];
             if(index >= 0){
                 for(int j = 0; j < MAX_ACTIVE_MODULES; j++){
-                    if(j != i && active_vc_i[j] >= 0){
+                    if((j != i) && (active_vc_i[j] >= 0)){
                         visual_contents[index]->interact(visual_contents[active_vc_i[j]]);
                     }
                 }

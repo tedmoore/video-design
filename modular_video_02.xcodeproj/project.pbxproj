@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		034A9E3E319B3657653BCC4D /* Waveform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67C0CA7280830DD9A5F1F312 /* Waveform.cpp */; };
 		0546D1A38E13BD319CC9755B /* OscReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF3AA0D4FAA89D0F8A0E545 /* OscReceivedElements.cpp */; };
 		07E1C2D35D2B2E13ABF3735A /* MoviePoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4400C8406DA6CE07BA691405 /* MoviePoint.cpp */; };
 		0A7A4F3905FAA0C77BF1FB67 /* HapMovie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00F6FE31DF6680670E90077C /* HapMovie.cpp */; };
@@ -314,7 +313,6 @@
 		6758E18DC19ABAA731D6EA30 /* gfluidkernel.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = gfluidkernel.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/gapi/fluid/gfluidkernel.hpp; sourceTree = SOURCE_ROOT; };
 		676F777537535D01BD0CF2E6 /* intrin_cpp.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = intrin_cpp.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/hal/intrin_cpp.hpp; sourceTree = SOURCE_ROOT; };
 		67AF0E794FA186DD25454CC9 /* calib3d.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = calib3d.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/calib3d/calib3d.hpp; sourceTree = SOURCE_ROOT; };
-		67C0CA7280830DD9A5F1F312 /* Waveform.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Waveform.cpp; path = src/Waveform.cpp; sourceTree = SOURCE_ROOT; };
 		67DBED026597C0EE427F0379 /* ofxPostGlitch.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxPostGlitch.h; path = ../../../addons/ofxPostGlitch/src/ofxPostGlitch.h; sourceTree = SOURCE_ROOT; };
 		69DF7DDD806D7FBA040E6EB7 /* opencl_clamdfft.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = opencl_clamdfft.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/opencl/runtime/opencl_clamdfft.hpp; sourceTree = SOURCE_ROOT; };
 		6AAFAE2870B07C8C000D3077 /* ostream_wrapper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ostream_wrapper.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/ostream_wrapper.h"; sourceTree = SOURCE_ROOT; };
@@ -2617,7 +2615,6 @@
 				F526AEA39BE6B4800769CE47 /* Turtle.hpp */,
 				87DFC3BB1BAAB0B50832D053 /* VisualContent.cpp */,
 				6E573FB8B52C369BDDE3874C /* VisualContent.hpp */,
-				67C0CA7280830DD9A5F1F312 /* Waveform.cpp */,
 				982E6E7FB6F1565B8BD352BC /* Waveform.hpp */,
 			);
 			path = src;
@@ -2877,7 +2874,6 @@
 				07E1C2D35D2B2E13ABF3735A /* MoviePoint.cpp in Sources */,
 				71C229A8120D1660E139D6CC /* FlowField.cpp in Sources */,
 				EFFDEF217AE48AA63914CCDF /* FlowFieldPoint.cpp in Sources */,
-				034A9E3E319B3657653BCC4D /* Waveform.cpp in Sources */,
 				0A7A4F3905FAA0C77BF1FB67 /* HapMovie.cpp in Sources */,
 				20560AF33F64E2BAEAFEC6FC /* LagUD.cpp in Sources */,
 				726452D2003E1ABC0A0E25C6 /* Lines.cpp in Sources */,

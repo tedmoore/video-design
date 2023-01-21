@@ -44,6 +44,12 @@ public:
     void processConfigFile(string path){
         config.load(path);
         
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            active_vc_i[i] = config["initial-active-modules"][i].as<int>();
+        }
+        
+        onsetSwitchProb = config["onset-switch-prob"].as<float>();
+        
         feedback_prob = config["feedback-prob"].as<float>();
         feedback_max = config["feedback-max"].as<int>();
         

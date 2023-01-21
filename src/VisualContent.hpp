@@ -34,6 +34,8 @@ public:
     
     virtual void processConfigFile(ofxYAML& config){}
     
+    virtual void printStatus(){}
+    
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;
     float newParamsProb = 1.f;

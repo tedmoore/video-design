@@ -23,8 +23,7 @@ void ofApp::setup(){
     main_fbo.allocate(width, height);
     postGlitch.setup(&main_fbo);
     
-    int max_active_vc = 2;
-    active_vc_i = new int[max_active_vc];
+    active_vc_i = new int[MAX_ACTIVE_MODULES];
     
     ofBackground(0);
     ofEnableAntiAliasing();
@@ -160,9 +159,6 @@ void ofApp::setup(){
     processConfigFile("config.yaml");
     
     // =========================== INITIALIZATION =====================
-    for(int i = 0; i < max_active_vc; i++){
-        active_vc_i[i] = config["initial-active-modules"][i].as<int>();
-    }
     
     if(config["initial-onset"].as<bool>()){
         onsetOccured(width, height);
@@ -384,7 +380,7 @@ void ofApp::update(){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
 
-        cout << oscMsg << "\n";
+//        cout << oscMsg << "\n";
         
         string address = oscMsg.getAddress();
         
@@ -411,7 +407,6 @@ void ofApp::update(){
             for(int i = 0; i < n_options; i++){
                 vc_i_options[i] = oscMsg.getArgAsInt(i+1);
             }
-            //onsetSwitchProb = oscMsg.getArgAsFloat(0);
         } else if (address == "/cmd"){
             int index = oscMsg.getArgAsInt(0);
             std::string str = oscMsg.getArgAsString(1);
@@ -473,10 +468,11 @@ void ofApp::update(){
 void ofApp::onsetOccured(int width, int height){
 
     // new active vc i
-    if(ofRandom(1.f) < onsetSwitchProb){
-        vector<int> chosen_i;
-        int ai[MAX_ACTIVE_MODULES];
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
+    
+    vector<int> chosen_i;
+    int ai[MAX_ACTIVE_MODULES];
+    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
+        if(ofRandom(1.f) < onsetSwitchProb){
             bool found = false;
             while(!found){
                 // options array is the big pool of options (has duplicates based on probs)
@@ -488,13 +484,19 @@ void ofApp::onsetOccured(int width, int height){
                     ai[i] = result;
                 }
             }
+        }else{
+            ai[i] = active_vc_i[i];
+            chosen_i.push_back(ai[i]);
         }
-        setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
     }
-    
+
+    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+
     // blend mode
-    int blendMode_i = int(ofRandom(blendModePool.size()));
-    blendMode = blendModes[blendModePool[blendMode_i]];
+    if(ofRandom(1.f) < onsetSwitchProb){
+        int blendMode_i = int(ofRandom(blendModePool.size()));
+        blendMode = blendModes[blendModePool[blendMode_i]];
+    }
     
     feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
     
@@ -708,6 +710,23 @@ void ofApp::keyPressed(int key){
     
     if (key == 'c') processConfigFile("config.yaml");
     
+    if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight());
+    if (key == 'p'){
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            if(active_vc_i[i] >= 0){
+                visual_contents[active_vc_i[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full);
+            }
+        }
+    }
+    
+    // print status
+    if (key == 'p'){
+        cout << "active modules:\n";
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            cout << "\t" << active_vc_i[i] << endl;
+            visual_contents[active_vc_i[i]]->printStatus();
+        }
+    }
 }
 
 //--------------------------------------------------------------

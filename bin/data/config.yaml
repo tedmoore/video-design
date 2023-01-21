@@ -1,17 +1,20 @@
+# config for mvt 4?
+
 # if doing a non-real-time render
-nrt-render: true
+nrt-render: false
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
 max-frames: 99999
 use-sc-onsets: false
-initial-active-modules: [-1,-1,-1,-1] # only 4!
-initial-onset: true
+initial-active-modules: [-1,-1,-1,0] # only 4!
+initial-onset: false
 
 audio-sample-rate: 44100
 target-framerate: 30
 
+onset-switch-prob: 0.9
 blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
 feedback-prob: 0.25
-feedback-max: 254
+feedback-max: 200
 flow-field-resolution: 12 # this was originally 20
 
 modules:
@@ -77,21 +80,21 @@ videos:
     use-ff-prob: 0.18
 
 post-glitch:
-  change-prob:       0.75
-  convergence-prob:  0.06
-  glow-prob:         0.2
-  shaker-prob:       0.01
-  cutslider-prob:    0.01
-  twist-prob:        0.008
-  outline-prob:      0.03
-  noise-prob:        0.05
-  slitscan-prob:     0.01
-  swell-prob:        0.01
-  invert-prob:       0.06
-  highcontrast-prob: 0.016
-  blueraise-prob:    0.008
-  redraise-prob:     0.008
-  greenraise-prob:   0.008
-  redinvert-prob:    0.008
-  blueinvert-prob:   0.008
-  greeninvert-prob:  0.008
+  change-prob:       0.5
+  convergence-prob:  0.0
+  glow-prob:         0.1
+  shaker-prob:       0.0
+  cutslider-prob:    0.0
+  twist-prob:        0.0
+  outline-prob:      0.0
+  noise-prob:        0.0
+  slitscan-prob:     0.0
+  swell-prob:        0.0
+  invert-prob:       0.1
+  highcontrast-prob: 0.1
+  blueraise-prob:    0.0
+  redraise-prob:     0.0
+  greenraise-prob:   0.0
+  redinvert-prob:    0.0
+  blueinvert-prob:   0.0
+  greeninvert-prob:  0.0

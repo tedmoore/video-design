@@ -11,10 +11,12 @@ s.waitForBoot({
 	var start_sec = 0;
 
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = true;
+	var outfile, render_data = false;
 	var freeables = List.new;
 
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
+	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
+
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Music/SuperCollider Recordings/improvPatch/improvPatch_230121_154652/improvPatch_out_0_230121_154652.wav");
 
 	if(render_data){
 		outpath.mkdir;
@@ -41,7 +43,7 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.5, allow_onsets = 1;
-		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,doneAction:2);
+		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:1);
 		// var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 		var fft = FFT(LocalBuf(2048),sig_mono);
@@ -60,7 +62,8 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		// Out.ar(0,sig * -20.dbamp);
+		Out.ar(0,sig * -20.dbamp);
+		nil;
 	}.play;
 	// s.sync;
 	WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil},action:{
@@ -86,6 +89,6 @@ s.waitForBoot({
 )
 
 ~synth.set(\t_force_onset,1);
-~synth.set(\onset_thresh,0.45);
+~synth.set(\onset_thresh,0.99999);
 ~synth.set(\allow_onsets,0);
 ~synth.set(\allow_onsets,1);

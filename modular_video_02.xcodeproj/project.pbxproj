@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		0546D1A38E13BD319CC9755B /* OscReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9BF3AA0D4FAA89D0F8A0E545 /* OscReceivedElements.cpp */; };
 		07E1C2D35D2B2E13ABF3735A /* MoviePoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4400C8406DA6CE07BA691405 /* MoviePoint.cpp */; };
-		0A7A4F3905FAA0C77BF1FB67 /* HapMovie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 00F6FE31DF6680670E90077C /* HapMovie.cpp */; };
 		10B69DE456AED1288FC9316B /* Tracker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A810DF70319A10353588F5DB /* Tracker.cpp */; };
 		11DF9AB1B4EAA63E3B190CA0 /* ofxSyphonServerDirectory.mm in Sources */ = {isa = PBXBuildFile; fileRef = E723BEF4C55D236E24639608 /* ofxSyphonServerDirectory.mm */; };
 		169D3C72FDE6C5590A1616F5 /* ofxCvFloatImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B6A03390302D5A2C9F0E4AB /* ofxCvFloatImage.cpp */; };
@@ -90,7 +89,6 @@
 		002DD489BECC92AE370E9D50 /* types.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = types.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/types.hpp; sourceTree = SOURCE_ROOT; };
 		00AD08BCC48245F20EC29129 /* core.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = core.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core.hpp; sourceTree = SOURCE_ROOT; };
 		00D6D32B84B099226431108C /* ofxOsc.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOsc.h; path = ../../../addons/ofxOsc/src/ofxOsc.h; sourceTree = SOURCE_ROOT; };
-		00F6FE31DF6680670E90077C /* HapMovie.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = HapMovie.cpp; path = src/HapMovie.cpp; sourceTree = SOURCE_ROOT; };
 		011E372AEA4DFBC1A32C2851 /* all_indices.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = all_indices.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/all_indices.h; sourceTree = SOURCE_ROOT; };
 		0173A3F435DECD5A4DDE0B8E /* logger.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = logger.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/logger.h; sourceTree = SOURCE_ROOT; };
 		01ACF32DD2BE3FB5BC5DFA8A /* AudioDecoder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioDecoder.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioDecoder.h; sourceTree = SOURCE_ROOT; };
@@ -2596,7 +2594,6 @@
 				EC2A356F4C065BDDF152386F /* FlowField.hpp */,
 				D698A99C85D3DD72B413F772 /* FlowFieldPoint.cpp */,
 				E2B7394B8BDFEF855CEAA637 /* FlowFieldPoint.hpp */,
-				00F6FE31DF6680670E90077C /* HapMovie.cpp */,
 				7927B6DF17D7A3588E995DA7 /* HapMovie.hpp */,
 				F31338EEE440D3F6627A9AA8 /* LagUD.cpp */,
 				6B28D788707CEAF5202F5634 /* LagUD.hpp */,
@@ -2874,7 +2871,6 @@
 				07E1C2D35D2B2E13ABF3735A /* MoviePoint.cpp in Sources */,
 				71C229A8120D1660E139D6CC /* FlowField.cpp in Sources */,
 				EFFDEF217AE48AA63914CCDF /* FlowFieldPoint.cpp in Sources */,
-				0A7A4F3905FAA0C77BF1FB67 /* HapMovie.cpp in Sources */,
 				20560AF33F64E2BAEAFEC6FC /* LagUD.cpp in Sources */,
 				726452D2003E1ABC0A0E25C6 /* Lines.cpp in Sources */,
 				19BAE58C3928EC9D8060BA95 /* VisualContent.cpp in Sources */,

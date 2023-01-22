@@ -13,7 +13,7 @@ blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtrac
 feedback-prob: 0.25
 feedback-max: 254
 flow-field-resolution: 12 # this was originally 20
-onset-switch-prob: 0.5
+onset-switch-prob: 0.9
 
 modules:
   waveform: # module index: 0

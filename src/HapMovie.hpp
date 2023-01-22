@@ -180,8 +180,8 @@ public:
             int h = height * tile_scale;
             int x_hop = w + x_off;
             int y_hop = h + y_off;
-            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
-            cout << "i_y: " << i_y << "\th: " << h << "\tinitial y: " << (i_y * h) << endl;
+//            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
+//            cout << "i_y: " << i_y << "\th: " << h << "\tinitial y: " << (i_y * h) << endl;
             for(int x = (i_x * w); x < width; x += x_hop){
                 for(int y = (i_y * h); y < height; y += y_hop){
                     texture.draw(x,y,w,h);

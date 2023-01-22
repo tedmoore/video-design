@@ -296,7 +296,7 @@ public:
         rect_w_mul = ofRandom(1.0,3.0);
         rect_h_mul = ofRandom(1.0,3.0);
         
-        bTile = ofRandom(1.f) < 1.f;
+        bTile = ofRandom(1.f) < 0.8;
         tile_scale = ofRandom(0.03,0.5);
         tile_offset_scale = ofRandom(0.03,0.4);
         i_x = ofRandom(-1.f,1.f);

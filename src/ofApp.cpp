@@ -503,6 +503,8 @@ void ofApp::onsetOccured(int width, int height){
     feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
     
     // ofx post glitch
+    postGlitch.newParams();
+    
     for(int i = 0; i < GLITCH_NUM; i++){
         if(ofRandom(1.f) < postGlitchChangeProb){
             if(ofRandom(1.f) < postGlitchProbs[i]){
@@ -547,7 +549,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     main_fbo.end();
     
-    postGlitch.generateFx();
+    postGlitch.generateFx(&common_features);
 }
 
 //--------------------------------------------------------------

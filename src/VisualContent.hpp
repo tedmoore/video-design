@@ -25,7 +25,9 @@ public:
     virtual void receiveOSC(int width, int height, std::string label, float val){
         std::cout << "VisualContent::receiveOSC\n";
     }
+    
     virtual void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){}
+    
     virtual void screenResize(int w, int h){}
     
     virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
@@ -36,9 +38,9 @@ public:
     
     virtual void printStatus(){}
     
-    virtual ofxYAML save(){}
+    virtual ofxYAML saveState(){}
     
-    virtual void load(ofxYAML &dict){}
+    virtual void loadState(ofxYAML::Node &dict){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

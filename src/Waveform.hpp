@@ -229,7 +229,7 @@ public:
         }
     }
     
-    ofxYAML save(){
+    ofxYAML saveSstate(){
         ofxYAML dict;
         dict["wfType"] = (int)wfType;
         dict["rectsDir"] = (int)rectsDir;
@@ -248,7 +248,7 @@ public:
         return dict;
     }
     
-    void load(ofxYAML &dict){
+    void loadState(ofxYAML::Node &dict){
         
         wfType = (waveformType)dict["wfType"].as<int>();
         rectsDir = (rectsDirection)dict["rectsDir"].as<int>();

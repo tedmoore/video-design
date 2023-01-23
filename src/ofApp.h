@@ -13,7 +13,6 @@
 #include "ofxOpenCv.h"
 #include "ofxPostGlitch.h"
 #include "ofxYAML.h"
-#include <format>
 
 class ofApp : public ofBaseApp{
     
@@ -168,7 +167,7 @@ public:
         ofxYAML dict;
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            dict["vc-save-" + ofToString(i)] = visual_contents[i]->save();
+            dict["vc-save-" + ofToString(i)] = visual_contents[i]->saveState();
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
@@ -189,7 +188,8 @@ public:
     void load(ofxYAML &dict){
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            visual_contents[i]->load(dict["vc-save-" + ofToString(i)].as<ofxYAMLNode>());
+            ofxYAML::Node child = dict["vc-save-" + ofToString(i)].as<Node>();
+            visual_contents[i]->loadState(child);
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){

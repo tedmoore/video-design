@@ -248,7 +248,7 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict){
+    void loadState(ofxYAML &dict){
         
         wfType = (waveformType)dict["wfType"].as<int>();
         rectsDir = (rectsDirection)dict["rectsDir"].as<int>();

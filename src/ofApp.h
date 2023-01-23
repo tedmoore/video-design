@@ -188,7 +188,7 @@ public:
     void load(ofxYAML &dict){
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            ofxYAML::Node child = dict["vc-save-" + ofToString(i)].as<Node>();
+            ofxYAML child = dict["vc-save-" + ofToString(i)];
             visual_contents[i]->loadState(child);
         }
         

@@ -40,7 +40,7 @@ public:
     
     virtual ofxYAML saveState(){}
     
-    virtual void loadState(ofxYAML::Node &dict){}
+    virtual void loadState(ofxYAML &dict){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

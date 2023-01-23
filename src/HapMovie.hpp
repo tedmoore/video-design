@@ -174,10 +174,10 @@ public:
         
         if(bTile){
             ofSetColor(255, tiles_alpha);
-            int x_off = width * tile_offset_scale;
-            int y_off = height * tile_offset_scale;
             int w = width * tile_scale;
             int h = height * tile_scale;
+            int x_off = width * tile_offset_scale;
+            int y_off = height * tile_offset_scale;
             int x_hop = w + x_off;
             int y_hop = h + y_off;
 //            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
@@ -298,7 +298,7 @@ public:
         
         bTile = ofRandom(1.f) < 0.8;
         tile_scale = ofRandom(0.03,0.5);
-        tile_offset_scale = ofRandom(0.03,0.4);
+        tile_offset_scale = ofRandom(0.0,0.4);
         i_x = ofRandom(-1.f,1.f);
         i_y = ofRandom(-1.f,1.f);
         tiles_alpha = ofRandom(1,255);

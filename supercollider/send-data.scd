@@ -14,11 +14,11 @@ s.waitForBoot({
 	var outfile, render_data = false;
 	var freeables = List.new;
 
-	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
 
 	// var audio_buf = Buffer.read(s,"/Volumes/Ted's 10TB My Book (June 2020)/SOUND DESIGNS/spacy space/_bounces/spacy space test with sax.wav");
 
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Music/SuperCollider Recordings/improvPatch/improvPatch_230121_154652/FIM-test.wav");
+	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Music/SuperCollider Recordings/improvPatch/improvPatch_230121_154652/FIM-test.wav");
 
 	if(render_data){
 		outpath.mkdir;

@@ -36,6 +36,10 @@ public:
     
     virtual void printStatus(){}
     
+    virtual ofxYAML save(){}
+    
+    virtual void load(ofxYAML &dict){}
+    
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;
     float newParamsProb = 1.f;

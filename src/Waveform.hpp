@@ -12,6 +12,7 @@
 #include "ofMain.h"
 #include <VisualContent.hpp>
 #include "ofxYAML.h"
+#include <format>
 
 class Waveform: public VisualContent {
 public:
@@ -213,22 +214,54 @@ public:
 
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
 
-        wfType = (waveformType)ofRandom(4.0);
-        rectsDir = (rectsDirection)ofRandom(4.0);
+        wfType = (waveformType)ofRandom(4);
+        rectsDir = (rectsDirection)ofRandom(4);
         
         for (int i = 0; i < n_waveforms; i++) {
             if (i > 0) {
                 xoff[i] = ofRandom(-width, width);
                 yoff[i] = ofRandom(0, height);
                 zoff[i] = ofRandom(0, height);
-                if (ofRandom(1.0) > 0.5) {
-                    show[i] = true;
-                } else {
-                    show[i] = false;
-                }
+                show[i] = ofRandom(1.0) > 0.5;
             }
             
             hmul[i] = ofRandom(0.3, 1.0);
+        }
+    }
+    
+    ofxYAML save(){
+        ofxYAML dict;
+        dict["wfType"] = (int)wfType;
+        dict["rectsDir"] = (int)rectsDir;
+        
+        for (int i = 0; i < n_waveforms; i++) {
+            if (i > 0) {
+                dict["xoff-" + ofToString(i)] = xoff[i];
+                dict["yoff-" + ofToString(i)] = yoff[i];
+                dict["zoff-" + ofToString(i)] = zoff[i];
+                dict["show-" + ofToString(i)] = show[i];
+            }
+            
+            dict["hmul-" + ofToString(i)] = hmul[i];
+        }
+        
+        return dict;
+    }
+    
+    void load(ofxYAML &dict){
+        
+        wfType = (waveformType)dict["wfType"].as<int>();
+        rectsDir = (rectsDirection)dict["rectsDir"].as<int>();
+        
+        for (int i = 0; i < n_waveforms; i++) {
+            if (i > 0) {
+                xoff[i] = dict["xoff-" + ofToString(i)].as<int>();
+                yoff[i] = dict["yoff-" + ofToString(i)].as<int>();
+                zoff[i] = dict["zoff-" + ofToString(i)].as<int>();
+                show[i] = dict["show-" + ofToString(i)].as<bool>();
+            }
+            
+            hmul[i] = dict["hmul-" + ofToString(i)].as<float>();
         }
     }
 

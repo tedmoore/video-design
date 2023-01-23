@@ -132,9 +132,7 @@ void ofApp::setup(){
         cout << "\t\tvc_counter = " << vc_counter << "\n\n";
     }
     
-    nVisualContents = vc_counter;
-    
-    for(int i = 0; i < nVisualContents; i++){
+    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         cout << "vc index: " << i << visual_contents[i]->type << endl;
     }
     
@@ -259,7 +257,7 @@ void ofApp::setup(){
                 magnitudes[0][i] = ofToFloat(csv_line[i]);
             }
             
-            for(int i = 0; i < nVisualContents; i++){
+            for(int i = 0; i < N_VISUAL_CONTENTS; i++){
 //                cout << "\tupdating vc: " << i << endl;
                 visual_contents[i]->update(true);
             }
@@ -462,7 +460,7 @@ void ofApp::update(){
         onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
     }
     
-    for(int i = 0; i < nVisualContents; i++){
+    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         visual_contents[i]->update(false);
     }
 }
@@ -693,24 +691,24 @@ void ofApp::keyPressed(int key){
     }
     
     // post glitch manual controls
-    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , true);
-    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , true);
-    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , true);
-    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , true);
-    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , true);
-    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , true);
-    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , true);
-    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , true);
-    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , true);
-    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , true);
-
-    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, true);
-    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , true);
-    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , true);
-    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , true);
-    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
-    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
-    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
+//    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , true);
+//    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , true);
+//    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , true);
+//    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , true);
+//    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , true);
+//    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , true);
+//    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , true);
+//    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , true);
+//    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , true);
+//    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , true);
+//
+//    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, true);
+//    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , true);
+//    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , true);
+//    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , true);
+//    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
+//    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
+//    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
     
     if (key == 'c') processConfigFile("config.yaml");
     
@@ -723,38 +721,33 @@ void ofApp::keyPressed(int key){
         }
     }
     
-    // print status
-    if (key == 'p'){
-        cout << "active modules:\n";
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            cout << "\t" << active_vc_i[i] << endl;
-            visual_contents[active_vc_i[i]]->printStatus();
-        }
-    }
+    if(key == '1') saves[1] = save();
+    if(key == '!') load(saves[1]);
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
     // post glitch manual controls
-    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , false);
-    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , false);
-    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , false);
-    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , false);
-    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , false);
-    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , false);
-    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , false);
-    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , false);
-    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , false);
-    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , false);
-
-    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, false);
-    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , false);
-    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , false);
-    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , false);
-    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , false);
-    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , false);
-    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , false);
+//    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , false);
+//    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , false);
+//    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , false);
+//    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , false);
+//    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , false);
+//    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , false);
+//    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , false);
+//    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , false);
+//    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , false);
+//    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , false);
+//
+//    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, false);
+//    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , false);
+//    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , false);
+//    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , false);
+//    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , false);
+//    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , false);
+//    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , false);
 }
 
 //--------------------------------------------------------------
@@ -791,7 +784,7 @@ void ofApp::mouseExited(int x, int y){
 void ofApp::windowResized(int w, int h){
     main_fbo.allocate(w, h);
     postGlitch.setup(&main_fbo);
-    for(int i = 0; i < nVisualContents; i++){
+    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         visual_contents[i]->screenResize(w, h);
     }
 }

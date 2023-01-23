@@ -13,6 +13,7 @@
 #include "ofxOpenCv.h"
 #include "ofxPostGlitch.h"
 #include "ofxYAML.h"
+#include <format>
 
 class ofApp : public ofBaseApp{
     
@@ -84,7 +85,7 @@ public:
             }
         }
         
-        for(int i = 0; i < nVisualContents; i++){
+        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
             visual_contents[i]->processConfigFile(config);
         }
     }
@@ -97,8 +98,7 @@ public:
         return counter + 1;
     }
     
-    int nVisualContents;
-    VisualContent* visual_contents[10];
+    VisualContent* visual_contents[N_VISUAL_CONTENTS];
     vector<int> vc_i_options;
     
     int* active_vc_i;
@@ -161,4 +161,47 @@ public:
     int feedback_max = 255;
     
     bool use_sc_onsets = true;
+    
+    ofxYAML saves[10];
+    
+    ofxYAML save(){
+        ofxYAML dict;
+        
+        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+            dict["vc-save-" + ofToString(i)] = visual_contents[i]->save();
+        }
+        
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            dict["active_vc" + ofToString(i)] = active_vc_i[i];
+        }
+        
+        for(int i = 0; i < GLITCH_NUM; i++){
+            dict["postGlitch" + ofToString(i)] = postGlitch.getFx(i);
+        }
+
+        dict["feedback_amt"] = feedback_amt;
+        dict["blendMode"] = (int)blendMode;
+        dict["debug"] = debug;
+        
+        return dict;
+    }
+    
+    void load(ofxYAML &dict){
+        
+        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+            visual_contents[i]->load(dict["vc-save-" + ofToString(i)].as<ofxYAMLNode>());
+        }
+        
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            active_vc_i[i] = dict["active_vc" + ofToString(i)].as<int>();
+        }
+        
+        for(int i = 0; i < GLITCH_NUM; i++){
+            postGlitch.setFx(i,dict["postGlitch" + ofToString(i)].as<bool>());
+        }
+
+        feedback_amt = dict["feedback_amt"].as<int>();
+        blendMode = (ofBlendMode)dict["blendMode"].as<int>();
+        debug = dict["debug"].as<bool>();
+    }
 };

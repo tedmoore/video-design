@@ -38,9 +38,12 @@ public:
     
     virtual void printStatus(){}
     
-    virtual ofxYAML saveState(){}
+    virtual ofxYAML::Node saveState(){
+        ofxYAML::Node dict;
+        return dict;
+    }
     
-    virtual void loadState(ofxYAML &dict){}
+    virtual void loadState(ofxYAML::Node &dict){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

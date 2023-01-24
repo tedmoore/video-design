@@ -36,7 +36,6 @@ public:
     float waveform_line_width = 1.f;
     float ikeda_avg = 0.2;
     
-//    bool lissajous = false;
     int maxNWaveforms = 2;
     
     int rect_side = 0;
@@ -229,8 +228,9 @@ public:
         }
     }
     
-    ofxYAML saveSstate(){
-        ofxYAML dict;
+    ofxYAML::Node saveState(){
+        ofxYAML::Node dict;
+        
         dict["wfType"] = (int)wfType;
         dict["rectsDir"] = (int)rectsDir;
         
@@ -248,8 +248,8 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML &dict){
-        
+    void loadState(ofxYAML::Node &dict){
+
         wfType = (waveformType)dict["wfType"].as<int>();
         rectsDir = (rectsDirection)dict["rectsDir"].as<int>();
         

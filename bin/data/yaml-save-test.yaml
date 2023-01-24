@@ -1,0 +1,42 @@
+vc-save-0:
+  wfType: 0
+  rectsDir: 0
+  hmul-0: 0.6847969
+  xoff-1: 1825
+  yoff-1: 625
+  zoff-1: 839
+  show-1: true
+  hmul-1: 0.4648244
+vc-save-1: ~
+vc-save-2: ~
+vc-save-3: ~
+vc-save-4: ~
+vc-save-5: ~
+vc-save-6: ~
+vc-save-7: ~
+vc-save-8: ~
+vc-save-9: ~
+active_vc0: 7
+active_vc1: 6
+active_vc2: 9
+active_vc3: 8
+postGlitch0: false
+postGlitch1: true
+postGlitch2: false
+postGlitch3: false
+postGlitch4: false
+postGlitch5: false
+postGlitch6: false
+postGlitch7: false
+postGlitch8: false
+postGlitch9: false
+postGlitch10: false
+postGlitch11: false
+postGlitch12: false
+postGlitch13: false
+postGlitch14: false
+postGlitch15: false
+postGlitch16: false
+feedback_amt: 0
+blendMode: 1
+debug: false

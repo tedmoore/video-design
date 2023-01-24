@@ -188,7 +188,16 @@ public:
     void load(ofxYAML &dict){
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            ofxYAML child = dict["vc-save-" + ofToString(i)];
+            
+            // ====================================================
+            // this line actually is important because i think
+            // it is casting YAML::Node that is in the dict into an
+            // ofxYAML::Node, which is the type expected by loadState()
+            // below. just passing dict["vc-save-" + ofToString(i)]
+            // directly into load state doesn't work.
+            ofxYAML::Node child = dict["vc-save-" + ofToString(i)];
+            // ====================================================
+            
             visual_contents[i]->loadState(child);
         }
         

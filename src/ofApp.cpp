@@ -721,8 +721,24 @@ void ofApp::keyPressed(int key){
         }
     }
     
-    if(key == '1') saves[1] = save();
+    char saveKeys[10] = {'0','1','2','3','4','5','6','7','8','9'};
+    
+    for(int i = 0; i < 10; i++){
+        if(key == saveKeys[i]) saves[i] = save();
+        std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".yaml"));
+        fout << saves[i];
+    }
+
+    if(key == ')') load(saves[0]);
     if(key == '!') load(saves[1]);
+    if(key == '@') load(saves[2]);
+    if(key == '#') load(saves[3]);
+    if(key == '$') load(saves[4]);
+    if(key == '%') load(saves[5]);
+    if(key == '^') load(saves[6]);
+    if(key == '&') load(saves[7]);
+    if(key == '*') load(saves[8]);
+    if(key == '(') load(saves[9]);
     
 }
 

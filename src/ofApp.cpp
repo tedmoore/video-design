@@ -729,16 +729,16 @@ void ofApp::keyPressed(int key){
         fout << saves[i];
     }
 
-    if(key == ')') load(saves[0]);
-    if(key == '!') load(saves[1]);
-    if(key == '@') load(saves[2]);
-    if(key == '#') load(saves[3]);
-    if(key == '$') load(saves[4]);
-    if(key == '%') load(saves[5]);
-    if(key == '^') load(saves[6]);
-    if(key == '&') load(saves[7]);
-    if(key == '*') load(saves[8]);
-    if(key == '(') load(saves[9]);
+    if(key == ')') load(saves[0],ofGetWidth(),ofGetHeight());
+    if(key == '!') load(saves[1],ofGetWidth(),ofGetHeight());
+    if(key == '@') load(saves[2],ofGetWidth(),ofGetHeight());
+    if(key == '#') load(saves[3],ofGetWidth(),ofGetHeight());
+    if(key == '$') load(saves[4],ofGetWidth(),ofGetHeight());
+    if(key == '%') load(saves[5],ofGetWidth(),ofGetHeight());
+    if(key == '^') load(saves[6],ofGetWidth(),ofGetHeight());
+    if(key == '&') load(saves[7],ofGetWidth(),ofGetHeight());
+    if(key == '*') load(saves[8],ofGetWidth(),ofGetHeight());
+    if(key == '(') load(saves[9],ofGetWidth(),ofGetHeight());
     
 }
 

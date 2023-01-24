@@ -286,11 +286,62 @@ public:
         if(showRects){
             displayRects(width, height, frame_num, common_features, isNRT);
         }
+        
+    }
+    
+    ofxYAML::Node saveState(){
+        ofxYAML::Node dict;
+        
+        dict["speed"] = speed;
+        dict["showHap"] = showHap;
+        dict["showRects"] = showRects;
+        dict["rect_w_mul"] = rect_w_mul;
+        dict["rect_h_mul"] = rect_h_mul;
+        dict["bTile"] = bTile;
+        dict["tile_scale"] = tile_scale;
+        dict["tile_offset_scale"] = tile_offset_scale;
+        dict["i_x"] = i_x;
+        dict["i_y"] = i_y;
+        dict["tiles_alpha"] = tiles_alpha;
+        dict["useFF"] = useFF;
+        
+        for(int i = 0; i < N_CLUSTERS; i++){
+            dict["center_color_indices" + ofToString(i)] = center_color_indices[i];
+        }
+        
+        return dict;
+    }
+    
+    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        setSpeed(dict["speed"].as<float>());
+        
+        showHap = dict["showHap"].as<bool>();
+        showRects = dict["showRects"].as<bool>();
+        rect_w_mul = dict["rect_w_mul"].as<float>();
+        rect_h_mul = dict["rect_h_mul"].as<float>();
+        
+        bTile = dict["bTile"].as<bool>();
+        tile_scale = dict["tile_scale"].as<float>();
+        tile_offset_scale = dict["tile_offset_scale"].as<float>();
+        i_x = dict["i_x"].as<float>();
+        i_y = dict["i_y"].as<float>();
+        tiles_alpha = dict["tiles_alpha"].as<int>();
+        
+        useFF = dict["useFF"].as<bool>();
+        
+        for(int i = 0; i < N_CLUSTERS; i++){
+            center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
+        }
+        
+        for(int i = 0; i < nMoviePoints; i ++){
+            moviePoints[i].resetPos();
+        }
     }
 
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
-        speed = ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))];
-        player.setSpeed(speed);
+        
+        setSpeed(ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))]);
+        
         showHap = ofRandom(1.f) < show_hap_prob; // 0.2
         showRects = ofRandom(1.f) < show_rects_prob; // 0.4
         rect_w_mul = ofRandom(1.0,3.0);
@@ -305,22 +356,26 @@ public:
         
         useFF = ofRandom(1.f) < use_ff_prob; // 0.28
         
-        for(int i = 0; i < nMoviePoints; i ++){
-            moviePoints[i].resetPos();
-        }
-        
         for(int i = 0; i < N_CLUSTERS; i++){
             center_color_indices[i] = ofRandom(mag_len);
         }
-        
+       
+        for(int i = 0; i < nMoviePoints; i ++){
+            moviePoints[i].resetPos();
+        }
     }
 
     void interact(VisualContent* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
         if(label == "speed"){
-            player.setSpeed(val);
+            setSpeed(val);
         }
+    }
+    
+    void setSpeed(float val){
+        speed = val;
+        player.setSpeed(speed);
     }
 
     void screenResize(int w, int h){

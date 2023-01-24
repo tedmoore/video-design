@@ -43,7 +43,7 @@ public:
         return dict;
     }
     
-    virtual void loadState(ofxYAML::Node &dict){}
+    virtual void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

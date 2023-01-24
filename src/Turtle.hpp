@@ -36,21 +36,11 @@ public:
         newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
     }
     
-//    void interact(VisualContent* other){
-//
-//    }
-//
-//    void receiveOSC(int width, int height, std::string label, float val){
-//
-//    }
-    
     bool onScreen(ofVec3f pt, int width, int height){
         bool a = pt.x >= 0;
         bool b = pt.x < width;
         bool c = pt.y >= 0;
         bool d = pt.y < height;
-        
-//        cout << "is onscreen: " << (a && b && c && d) << endl;
         
         return a && b && c && d;
     }
@@ -97,18 +87,30 @@ public:
     
     
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
-        frame_counter = 0;
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
+        restartPath(width,height);
+    }
+    
+    void restartPath(int width, int height){
+        frame_counter = 0;
         angle = 360 / divisors[divisor_i];
         path.clear();
         path.push_back(ofVec3f(ofRandom(width),ofRandom(height),0));
     }
     
-//    void update(bool isNRT){
-//
-//    }
+    ofxYAML::Node saveState(){
+        ofxYAML::Node dict;
+        dict["divisor_i"] = divisor_i;
+        dict["stepSize"] = stepSize;
+        return dict;
+    }
     
+    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        divisor_i = dict["divisor_i"].as<int>();
+        stepSize = dict["stepSize"].as<float>();
+        restartPath(width,height);
+    }
 };
 
 #endif /* Turtle_hpp */

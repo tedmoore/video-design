@@ -174,10 +174,7 @@ public:
             dict["active_vc" + ofToString(i)] = active_vc_i[i];
         }
         
-        for(int i = 0; i < GLITCH_NUM; i++){
-            dict["postGlitch" + ofToString(i)] = postGlitch.getFx(i);
-        }
-
+        dict["postGlitch"] = postGlitch.saveState();
         dict["feedback_amt"] = feedback_amt;
         dict["blendMode"] = (int)blendMode;
         dict["debug"] = debug;
@@ -185,7 +182,7 @@ public:
         return dict;
     }
     
-    void load(ofxYAML &dict){
+    void load(ofxYAML &dict, int width, int height){
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
             
@@ -198,16 +195,15 @@ public:
             ofxYAML::Node child = dict["vc-save-" + ofToString(i)];
             // ====================================================
             
-            visual_contents[i]->loadState(child);
+            visual_contents[i]->loadState(child,width,height,vec_history,vector_len,vec_history_length,vec_history_full);
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             active_vc_i[i] = dict["active_vc" + ofToString(i)].as<int>();
         }
         
-        for(int i = 0; i < GLITCH_NUM; i++){
-            postGlitch.setFx(i,dict["postGlitch" + ofToString(i)].as<bool>());
-        }
+        ofxYAML::Node child = dict["postGlitch"];
+        postGlitch.loadState(child);
 
         feedback_amt = dict["feedback_amt"].as<int>();
         blendMode = (ofBlendMode)dict["blendMode"].as<int>();

@@ -39,7 +39,7 @@ public:
     void drawScreen(int width, int height, int frameNum, bool isNRT);
     void setValsFromCSV(int width, int height, vector<float>& csv_data);
     void incrementVecHistoryCounter();
-    void processReaperMarker(string& cmd);
+    void processReaperMarker(string& cmd,int width, int height);
     void setActiveIndices(int* ai,int width, int height);
     void processConfigFile(string path){
         config.load(path);
@@ -86,6 +86,18 @@ public:
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
             visual_contents[i]->processConfigFile(config);
+        }
+        
+        for(int i = 0; i < N_STATE_SAVES; i++){
+            if(config["state-save-" + ofToString(i)]){
+                ofxYAML state;
+                state.load(config["state-save-" + ofToString(i)].as<string>());
+                saves[i] = state;
+            }
+        }
+        
+        for(int i = 0; i < N_STATE_SAVES; i++){
+            cout << saves[i];
         }
     }
     

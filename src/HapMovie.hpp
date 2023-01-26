@@ -41,6 +41,7 @@ public:
     
     int alpha = 255;
     float speed = 1.f;
+    bool reactive_speed = true;
     float dir_options[2] = {-1.f,1.f};
     
     bool showHap, showRects;
@@ -151,7 +152,9 @@ public:
         }
     }
 
-    void update(bool isNRT){
+    void update(bool isNRT, std::unordered_map<std::string, float>* common_features){
+        setSpeed((speed * (1-reactive_speed)) + (reactive_speed * ofMap(common_features->at("loudness"),0.f,1.f,0.8,3)));
+        
         if(!isNRT){
             //cout << "mini vid updated\n";
             mini_vid.update();
@@ -163,6 +166,7 @@ public:
     }
     
     void displayHap(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+                        
         if(isNRT){
             img.load(tiffs[int(nrt_playhead)].getAbsolutePath());
             texture = img.getTexture();
@@ -182,8 +186,8 @@ public:
             int y_hop = h + y_off;
 //            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
 //            cout << "i_y: " << i_y << "\th: " << h << "\tinitial y: " << (i_y * h) << endl;
-            for(int x = (i_x * w); x < width; x += x_hop){
-                for(int y = (i_y * h); y < height; y += y_hop){
+            for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
                     texture.draw(x,y,w,h);
                 }
             }
@@ -293,6 +297,7 @@ public:
         ofxYAML::Node dict;
         
         dict["speed"] = speed;
+        dict["reactive_speed"] = reactive_speed;
         dict["showHap"] = showHap;
         dict["showRects"] = showRects;
         dict["rect_w_mul"] = rect_w_mul;
@@ -314,6 +319,7 @@ public:
     
     void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         setSpeed(dict["speed"].as<float>());
+        reactive_speed = dict["reactive_speed"].as<bool>();
         
         showHap = dict["showHap"].as<bool>();
         showRects = dict["showRects"].as<bool>();
@@ -341,6 +347,7 @@ public:
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
         setSpeed(ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))]);
+        reactive_speed = ofRandom(2);
         
         showHap = ofRandom(1.f) < show_hap_prob; // 0.2
         showRects = ofRandom(1.f) < show_rects_prob; // 0.4
@@ -350,8 +357,8 @@ public:
         bTile = ofRandom(1.f) < 0.8;
         tile_scale = ofRandom(0.03,0.5);
         tile_offset_scale = ofRandom(0.0,0.4);
-        i_x = ofRandom(-1.f,1.f);
-        i_y = ofRandom(-1.f,1.f);
+        i_x = ofRandom(1.f);
+        i_y = ofRandom(1.f);
         tiles_alpha = ofRandom(1,255);
         
         useFF = ofRandom(1.f) < use_ff_prob; // 0.28

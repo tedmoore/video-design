@@ -27,7 +27,7 @@ void ofApp::setup(){
     
     ofBackground(0);
     ofEnableAntiAliasing();
-//    ofEnableDepthTest(); this should be off!
+    // ofEnableDepthTest(); this should be off!
     ofEnableAlphaBlending();
 
     // ================ DATA STRUCTURES ========================
@@ -54,7 +54,7 @@ void ofApp::setup(){
     }
     // mags
     magnitudes = new float*[n_magnitudes];
-//    magnitudes = (float**) malloc(sizeof(float*) * n_magnitudes);
+    // magnitudes = (float**) malloc(sizeof(float*) * n_magnitudes);
     for(int i = 0; i < n_magnitudes; i++){
         //magnitudes[i] = (float*) malloc(sizeof(float) * magnitude_len);
         magnitudes[i] = new float[magnitude_len];
@@ -226,7 +226,7 @@ void ofApp::setup(){
             
             string rm = rmfp.currentFrame(frame_num);
             cout << "from rmfp: " << rm << endl;
-            processReaperMarker(rm);
+            processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight());
             
             // waveforms
             line.clear();
@@ -259,7 +259,7 @@ void ofApp::setup(){
             
             for(int i = 0; i < N_VISUAL_CONTENTS; i++){
 //                cout << "\tupdating vc: " << i << endl;
-                visual_contents[i]->update(true);
+                visual_contents[i]->update(true,&common_features);
             }
             
             drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
@@ -279,7 +279,7 @@ void ofApp::setup(){
     }
 }
 
-void ofApp::processReaperMarker(string& cmd){
+void ofApp::processReaperMarker(string& cmd, int width, int height){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
@@ -303,6 +303,8 @@ void ofApp::processReaperMarker(string& cmd){
             }
 //            cout << endl;
             setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+        } else if(tokens[index] == "loadState"){
+            load(saves[ofToInt(tokens[++index])],width,height);
         }
         
         index++; // always increment at least one!
@@ -387,7 +389,7 @@ void ofApp::update(){
         // from Reaper:
         if(address == "/lastmarker/name"){
             string cmd = oscMsg.getArgAsString(0);
-            processReaperMarker(cmd);
+            processReaperMarker(cmd,ofGetWidth(),ofGetHeight());
             
             // from SuperCollider:
         } else if(address == "/setActiveIndices"){
@@ -461,7 +463,7 @@ void ofApp::update(){
     }
     
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        visual_contents[i]->update(false);
+        visual_contents[i]->update(false,&common_features);
     }
 }
 
@@ -724,9 +726,12 @@ void ofApp::keyPressed(int key){
     char saveKeys[10] = {'0','1','2','3','4','5','6','7','8','9'};
     
     for(int i = 0; i < 10; i++){
-        if(key == saveKeys[i]) saves[i] = save();
-        std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".yaml"));
-        fout << saves[i];
+        if(key == saveKeys[i]){
+            saves[i] = save();
+            std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".yaml"));
+            fout << saves[i];
+            break;
+        }
     }
 
     if(key == ')') load(saves[0],ofGetWidth(),ofGetHeight());

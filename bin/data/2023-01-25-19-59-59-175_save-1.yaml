@@ -1,0 +1,154 @@
+vc-save-0:
+  wfType: 2
+  rectsDir: 2
+  hmul-0: 0.68463
+  xoff-1: 1799
+  yoff-1: 902
+  zoff-1: 322
+  show-1: false
+  hmul-1: 0.3397333
+vc-save-1:
+  useFF: true
+  waveformEffectDim: 0
+vc-save-2:
+  dir: 0
+  inv: true
+  is_borrow_colors: true
+vc-save-3:
+  divisor_i: 0
+  stepSize: 58.71902
+vc-save-4:
+  speed: -3.969328
+  showHap: false
+  showRects: true
+  rect_w_mul: 1.37705
+  rect_h_mul: 2.0841
+  bTile: true
+  tile_scale: 0.1711175
+  tile_offset_scale: 0.1206092
+  i_x: 0.3922171
+  i_y: -0.006365418
+  tiles_alpha: 3
+  useFF: false
+  center_color_indices0: 33
+  center_color_indices1: 369
+  center_color_indices2: 217
+  center_color_indices3: 345
+vc-save-5:
+  speed: -0.9000987
+  showHap: false
+  showRects: false
+  rect_w_mul: 1.528447
+  rect_h_mul: 2.616768
+  bTile: true
+  tile_scale: 0.3307357
+  tile_offset_scale: 0.07233874
+  i_x: -0.01309168
+  i_y: -0.03189933
+  tiles_alpha: 111
+  useFF: true
+  center_color_indices0: 216
+  center_color_indices1: 440
+  center_color_indices2: 399
+  center_color_indices3: 390
+vc-save-6:
+  speed: 6.645159
+  showHap: true
+  showRects: false
+  rect_w_mul: 1.018475
+  rect_h_mul: 1.509666
+  bTile: false
+  tile_scale: 0.2789695
+  tile_offset_scale: 0.0177274
+  i_x: 0.7219493
+  i_y: -0.1984335
+  tiles_alpha: 245
+  useFF: false
+  center_color_indices0: 451
+  center_color_indices1: 371
+  center_color_indices2: 450
+  center_color_indices3: 193
+vc-save-7:
+  speed: 9.429123
+  showHap: false
+  showRects: true
+  rect_w_mul: 2.091469
+  rect_h_mul: 1.316441
+  bTile: true
+  tile_scale: 0.2221887
+  tile_offset_scale: 0.2345764
+  i_x: -0.3724205
+  i_y: 0.7275025
+  tiles_alpha: 18
+  useFF: true
+  center_color_indices0: 202
+  center_color_indices1: 431
+  center_color_indices2: 177
+  center_color_indices3: 157
+vc-save-8:
+  speed: 3.714685
+  showHap: false
+  showRects: true
+  rect_w_mul: 1.477582
+  rect_h_mul: 1.715296
+  bTile: false
+  tile_scale: 0.4966852
+  tile_offset_scale: 0.1871475
+  i_x: -0.05793672
+  i_y: 0.2571068
+  tiles_alpha: 25
+  useFF: false
+  center_color_indices0: 327
+  center_color_indices1: 336
+  center_color_indices2: 225
+  center_color_indices3: 211
+vc-save-9:
+  speed: 2.081087
+  showHap: false
+  showRects: true
+  rect_w_mul: 2.663946
+  rect_h_mul: 2.947117
+  bTile: true
+  tile_scale: 0.2168637
+  tile_offset_scale: 0.06675105
+  i_x: 0.4249135
+  i_y: -0.479147
+  tiles_alpha: 251
+  useFF: false
+  center_color_indices0: 258
+  center_color_indices1: 148
+  center_color_indices2: 453
+  center_color_indices3: 324
+active_vc0: 2
+active_vc1: 3
+active_vc2: 0
+active_vc3: 9
+postGlitch:
+  features_map0: 2
+  invert_param0: true
+  features_map1: 2
+  invert_param1: true
+  features_map2: 3
+  invert_param2: true
+  features_map3: 2
+  invert_param3: true
+  bShading0: false
+  bShading1: false
+  bShading2: false
+  bShading3: true
+  bShading4: false
+  bShading5: false
+  bShading6: false
+  bShading7: false
+  bShading8: false
+  bShading9: false
+  bShading10: false
+  bShading11: false
+  bShading12: false
+  bShading13: false
+  bShading14: false
+  bShading15: false
+  bShading16: false
+feedback_amt: 246
+blendMode: 2
+debug: false

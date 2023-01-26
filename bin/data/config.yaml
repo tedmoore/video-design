@@ -2,7 +2,7 @@
 nrt-render: false
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
 max-frames: 99999
-use-sc-onsets: false
+use-sc-onsets: true
 initial-active-modules: [-1,-1,-1,-1] # only 4!
 initial-onset: true
 
@@ -96,3 +96,14 @@ post-glitch:
   redinvert-prob:    0.008
   blueinvert-prob:   0.008
   greeninvert-prob:  0.008
+
+# state-save-0: ~
+# state-save-1: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/bin/data/2023-01-25-16-11-57-661_save-1.yaml
+# state-save-2: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/bin/data/2023-01-25-16-13-36-896_save-2.yaml
+# state-save-3: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/bin/data/2023-01-25-16-13-54-130_save-3.yaml
+# state-save-4: ~
+# state-save-5: ~
+# state-save-6: ~
+# state-save-7: ~
+# state-save-8: ~
+# state-save-9: ~

@@ -15,7 +15,7 @@ feedback-max: 254
 flow-field-resolution: 12 # this was originally 20
 onset-switch-prob: 0.9
 
-show-flow-prob: 0.15
+show-flow-prob: 0.16
 
 modules:
   waveform: # module index: 0

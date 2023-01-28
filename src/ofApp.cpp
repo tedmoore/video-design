@@ -437,7 +437,7 @@ void ofApp::onsetOccured(int width, int height){
     
     // ofx post glitch
     postGlitch.newParams();
-    flow_then_postGlitch = ofRandom(1.f) < 0.5;
+    flow_then_postGlitch = ofRandom(1.f) < 0.95;
     
     for(int i = 0; i < GLITCH_NUM; i++){
         if(ofRandom(1.f) < postGlitchChangeProb){
@@ -609,7 +609,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
 //    cout << "flow_then_postGlitch: " << flow_then_postGlitch << endl;
     
     if(flow_then_postGlitch){
-//        cout << "flow then pg" << endl;
+        cout << "flow then pg" << endl;
         
         if(show_flow_tools){
             //    combinedBridgeFlow.drawInput(0, 0, width, height);
@@ -633,10 +633,11 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         
         postGlitch.generateFx(&common_features);
     } else {
-//        cout << "pg then flow" << endl;
+        cout << "pg then flow" << endl;
         main_fbo.end();
         postGlitch.generateFx(&common_features);
-        
+        if(show_flow_tools){
+            main_fbo.begin();
         //    combinedBridgeFlow.drawInput(0, 0, width, height);
         //    opticalFlow.drawInput(0, 0, width, height);
 //            opticalFlow.draw(0, 0, width, height);
@@ -651,8 +652,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         //    fluidFlow.drawTemperature(0, 0, width, height);
         //    fluidFlow.drawPressure(0, 0, width, height);
         //    fluidFlow.drawVelocity(0, 0, width, height);
-        if(show_flow_tools){
-            main_fbo.begin();
+
             fluidFlow.draw(0, 0, width, height);
             main_fbo.end();
         }
@@ -798,6 +798,10 @@ void ofApp::keyPressed(int key){
     if(key == 'd'){
         debug = !debug;
     }
+    
+//    if(key == 'g'){
+//        flow_then_postGlitch = !flow_then_postGlitch;
+//    }
     
     // post glitch manual controls
 //    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , true);

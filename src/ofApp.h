@@ -237,7 +237,7 @@ public:
 //    ftTemperatureBridgeFlow temperatureBridgeFlow;
     flowTools::ftCombinedBridgeFlow     combinedBridgeFlow;
     flowTools::ftFluidFlow                fluidFlow;
-    bool flow_then_postGlitch = false;
+    bool flow_then_postGlitch = true;
     bool show_flow_tools = false;
     float show_flow_prob = 0.1;
 };

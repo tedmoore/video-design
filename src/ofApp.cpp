@@ -433,6 +433,7 @@ void ofApp::onsetOccured(int width, int height){
     }
     
     feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
+    show_flow_tools = ofRandom(1.f) < show_flow_prob;
     
     // ofx post glitch
     postGlitch.newParams();
@@ -609,22 +610,25 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     if(flow_then_postGlitch){
 //        cout << "flow then pg" << endl;
-        //    combinedBridgeFlow.drawInput(0, 0, width, height);
-        //    opticalFlow.drawInput(0, 0, width, height);
-//            opticalFlow.draw(0, 0, width, height);
-        //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
-        //    combinedBridgeFlow.drawDensity(0, 0, width, height);
-        //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
-        //    fluidFlow.drawObstacle(0, 0, width, height);
-        //    fluidFlow.drawObstacleOffset(0, 0, width, height);
-        //    fluidFlow.drawBuoyancy(0, 0, width, height);
-        //    fluidFlow.drawVorticity(0, 0, width, height);
-        //    fluidFlow.drawDivergence(0, 0, width, height);
-        //    fluidFlow.drawTemperature(0, 0, width, height);
-        //    fluidFlow.drawPressure(0, 0, width, height);
-        //    fluidFlow.drawVelocity(0, 0, width, height);
         
-        fluidFlow.draw(0, 0, width, height);
+        if(show_flow_tools){
+            //    combinedBridgeFlow.drawInput(0, 0, width, height);
+            //    opticalFlow.drawInput(0, 0, width, height);
+            //            opticalFlow.draw(0, 0, width, height);
+            //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
+            //    combinedBridgeFlow.drawDensity(0, 0, width, height);
+            //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
+            //    fluidFlow.drawObstacle(0, 0, width, height);
+            //    fluidFlow.drawObstacleOffset(0, 0, width, height);
+            //    fluidFlow.drawBuoyancy(0, 0, width, height);
+            //    fluidFlow.drawVorticity(0, 0, width, height);
+            //    fluidFlow.drawDivergence(0, 0, width, height);
+            //    fluidFlow.drawTemperature(0, 0, width, height);
+            //    fluidFlow.drawPressure(0, 0, width, height);
+            //    fluidFlow.drawVelocity(0, 0, width, height);
+            
+            fluidFlow.draw(0, 0, width, height);
+        }
         main_fbo.end();
         
         postGlitch.generateFx(&common_features);
@@ -647,9 +651,11 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         //    fluidFlow.drawTemperature(0, 0, width, height);
         //    fluidFlow.drawPressure(0, 0, width, height);
         //    fluidFlow.drawVelocity(0, 0, width, height);
-        main_fbo.begin();
-        fluidFlow.draw(0, 0, width, height);
-        main_fbo.end();
+        if(show_flow_tools){
+            main_fbo.begin();
+            fluidFlow.draw(0, 0, width, height);
+            main_fbo.end();
+        }
     }
 }
 

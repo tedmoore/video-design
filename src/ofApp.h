@@ -58,6 +58,8 @@ public:
         
         use_sc_onsets = config["use-sc-onsets"].as<bool>();
         
+        show_flow_prob = config["show-flow-prob"].as<float>();
+        
         postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
         postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
         postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
@@ -190,6 +192,9 @@ public:
         dict["blendMode"] = (int)blendMode;
         dict["debug"] = debug;
         
+        dict["flow_then_postGlitch"] = flow_then_postGlitch;
+        dict["show_flow_tools"] = show_flow_tools;
+        
         return dict;
     }
     
@@ -219,6 +224,9 @@ public:
         feedback_amt = dict["feedback_amt"].as<int>();
         blendMode = (ofBlendMode)dict["blendMode"].as<int>();
         debug = dict["debug"].as<bool>();
+        
+        flow_then_postGlitch = dict["flow_then_postGlitch"].as<bool>();
+        show_flow_tools = dict["show_flow_tools"].as<bool>();
     }
     
     // === ofxFlowTools ===
@@ -230,4 +238,6 @@ public:
     flowTools::ftCombinedBridgeFlow     combinedBridgeFlow;
     flowTools::ftFluidFlow                fluidFlow;
     bool flow_then_postGlitch = false;
+    bool show_flow_tools = false;
+    float show_flow_prob = 0.1;
 };

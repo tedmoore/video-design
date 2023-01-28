@@ -15,6 +15,8 @@ feedback-max: 254
 flow-field-resolution: 12 # this was originally 20
 onset-switch-prob: 0.9
 
+show-flow-prob: 0.15
+
 modules:
   waveform: # module index: 0
     prob: 3 # int because it's how many times to put it in the pool of options

@@ -12,7 +12,6 @@
 #include "ofMain.h"
 #include <VisualContent.hpp>
 #include "ofxHapPlayer.h"
-#include "ofxCv.h"
 #include "MoviePoint.hpp"
 #include "FlowField.hpp"
 
@@ -347,7 +346,7 @@ public:
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
         setSpeed(ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))]);
-        reactive_speed = ofRandom(2);
+        reactive_speed = ofRandom(1.f) < 0.5;
         
         showHap = ofRandom(1.f) < show_hap_prob; // 0.2
         showRects = ofRandom(1.f) < show_rects_prob; // 0.4

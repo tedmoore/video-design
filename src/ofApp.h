@@ -9,10 +9,9 @@
 #include "Mesh.hpp"
 #include "Turtle.hpp"
 #include "Lines.hpp"
-#include "ofxCv.h"
-#include "ofxOpenCv.h"
 #include "ofxPostGlitch.h"
 #include "ofxYAML.h"
+#include "ofxFlowTools.h"
 
 class ofApp : public ofBaseApp{
     
@@ -221,4 +220,14 @@ public:
         blendMode = (ofBlendMode)dict["blendMode"].as<int>();
         debug = dict["debug"].as<bool>();
     }
+    
+    // === ofxFlowTools ===
+    vector<flowTools::ftFlow*> flows;
+    flowTools::ftOpticalFlow            opticalFlow;
+//    ftVelocityBridgeFlow    velocityBridgeFlow;
+//    ftDensityBridgeFlow        densityBridgeFlow;
+//    ftTemperatureBridgeFlow temperatureBridgeFlow;
+    flowTools::ftCombinedBridgeFlow     combinedBridgeFlow;
+    flowTools::ftFluidFlow                fluidFlow;
+    bool flow_then_postGlitch = false;
 };

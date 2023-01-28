@@ -166,6 +166,30 @@ void ofApp::setup(){
         onsetOccured(width, height);
     }
     
+    // ofxFlowTools
+    
+    int densityWidth = 1280;
+    int densityHeight = 720;
+    int simulationWidth = densityWidth / 2;
+    int simulationHeight = densityHeight / 2;
+    
+    opticalFlow.setup(simulationWidth, simulationHeight);
+//    velocityBridgeFlow.setup(simulationWidth, simulationHeight);
+//    densityBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
+//    temperatureBridgeFlow.setup(simulationWidth, simulationHeight);
+    combinedBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
+    fluidFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
+    
+    flows.push_back(&opticalFlow);
+//    flows.push_back(&velocityBridgeFlow);
+//    flows.push_back(&densityBridgeFlow);
+//    flows.push_back(&temperatureBridgeFlow);
+    flows.push_back(&combinedBridgeFlow);
+    flows.push_back(&fluidFlow);
+    
+    //flowToolsLogo.load("flowtools.png");
+    //fluidFlow.addObstacle(flowToolsLogo.getTexture());
+    
     // =========== NRT RENDERING
     if(nrtRender){
         
@@ -375,6 +399,56 @@ void ofApp::setActiveIndices(int* ai,int width, int height){
     }
 }
 
+void ofApp::onsetOccured(int width, int height){
+
+    // new active vc i
+    
+    vector<int> chosen_i;
+    int ai[MAX_ACTIVE_MODULES];
+    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
+        if(ofRandom(1.f) < onsetSwitchProb){
+            bool found = false;
+            while(!found){
+                // options array is the big pool of options (has duplicates based on probs)
+                int rand_int = ofRandom(1.f) * vc_i_options.size(); // random int the size of the options array
+                int result = vc_i_options[rand_int]; // the int in the from the options array (which is the index for the modules array)
+                if(!std::count(chosen_i.begin(), chosen_i.end(), result)){
+                    found = true;
+                    chosen_i.push_back(result);
+                    ai[i] = result;
+                }
+            }
+        }else{
+            ai[i] = active_vc_i[i];
+            chosen_i.push_back(ai[i]);
+        }
+    }
+
+    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+
+    // blend mode
+    if(ofRandom(1.f) < onsetSwitchProb){
+        int blendMode_i = int(ofRandom(blendModePool.size()));
+        blendMode = blendModes[blendModePool[blendMode_i]];
+    }
+    
+    feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
+    
+    // ofx post glitch
+    postGlitch.newParams();
+    flow_then_postGlitch = ofRandom(1.f) < 0.5;
+    
+    for(int i = 0; i < GLITCH_NUM; i++){
+        if(ofRandom(1.f) < postGlitchChangeProb){
+            if(ofRandom(1.f) < postGlitchProbs[i]){
+                postGlitch.setFx((ofxPostGlitchType)i,true);
+            } else {
+                postGlitch.setFx((ofxPostGlitchType)i,false);
+            }
+        }
+    }
+}
+
 //--------------------------------------------------------------
 void ofApp::update(){
     onset_occured = false;
@@ -465,67 +539,48 @@ void ofApp::update(){
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         visual_contents[i]->update(false,&common_features);
     }
-}
-
-void ofApp::onsetOccured(int width, int height){
-
-    // new active vc i
     
-    vector<int> chosen_i;
-    int ai[MAX_ACTIVE_MODULES];
-    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
-        if(ofRandom(1.f) < onsetSwitchProb){
-            bool found = false;
-            while(!found){
-                // options array is the big pool of options (has duplicates based on probs)
-                int rand_int = ofRandom(1.f) * vc_i_options.size(); // random int the size of the options array
-                int result = vc_i_options[rand_int]; // the int in the from the options array (which is the index for the modules array)
-                if(!std::count(chosen_i.begin(), chosen_i.end(), result)){
-                    found = true;
-                    chosen_i.push_back(result);
-                    ai[i] = result;
-                }
-            }
-        }else{
-            ai[i] = active_vc_i[i];
-            chosen_i.push_back(ai[i]);
-        }
-    }
-
-    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
-
-    // blend mode
-    if(ofRandom(1.f) < onsetSwitchProb){
-        int blendMode_i = int(ofRandom(blendModePool.size()));
-        blendMode = blendModes[blendModePool[blendMode_i]];
-    }
+    // ofxFlowTools
+            
+    opticalFlow.setInput(main_fbo.getTexture());
     
-    feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
+    opticalFlow.update();
     
-    // ofx post glitch
-    postGlitch.newParams();
+    combinedBridgeFlow.setVelocity(opticalFlow.getVelocity());
+    combinedBridgeFlow.setDensity(main_fbo.getTexture());
+    float dt = 1.0 / max(ofGetFrameRate(), 1.f); // more smooth as 'real' deltaTime.
+    combinedBridgeFlow.update(dt);
     
-    for(int i = 0; i < GLITCH_NUM; i++){
-        if(ofRandom(1.f) < postGlitchChangeProb){
-            if(ofRandom(1.f) < postGlitchProbs[i]){
-                postGlitch.setFx((ofxPostGlitchType)i,true);
-            } else {
-                postGlitch.setFx((ofxPostGlitchType)i,false);
-            }
-        }
-    }
+//    velocityBridgeFlow.setVelocity(opticalFlow.getVelocity());
+//    velocityBridgeFlow.update(dt);
+//    densityBridgeFlow.setDensity(cameraFbo.getTexture());
+//    densityBridgeFlow.setVelocity(opticalFlow.getVelocity());
+//    densityBridgeFlow.update(dt);
+//    temperatureBridgeFlow.setDensity(cameraFbo.getTexture());
+//    temperatureBridgeFlow.setVelocity(opticalFlow.getVelocity());
+//    temperatureBridgeFlow.update(dt);
+    
+    fluidFlow.addVelocity(combinedBridgeFlow.getVelocity());
+    fluidFlow.addDensity(combinedBridgeFlow.getDensity());
+    fluidFlow.addTemperature(combinedBridgeFlow.getTemperature());
+    fluidFlow.update(dt);
 }
 
 void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     main_fbo.begin();
     
-//    main_fbo.draw(0,0);
+//    ofEnableBlendMode(blendMode);
+//    if(blendMode == OF_BLENDMODE_ADD){
+//        cout << "blend mode is add" << endl;
+//    }
+    
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    
     ofSetColor(0,255 - feedback_amt); // alpha of 255 = no feedback, alpha of 0 = full feedback
     ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
-
-//    ofClear(0,0,0,0);
     
+//    cout << "variable blend mode: " << blendMode << endl;
     ofEnableBlendMode(blendMode);
     
     if(!debug){
@@ -547,9 +602,55 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         displayIncomingData(width,height);
     }
     
-    main_fbo.end();
+//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     
-    postGlitch.generateFx(&common_features);
+//    cout << "flow_then_postGlitch: " << flow_then_postGlitch << endl;
+    
+    if(flow_then_postGlitch){
+//        cout << "flow then pg" << endl;
+        //    combinedBridgeFlow.drawInput(0, 0, width, height);
+        //    opticalFlow.drawInput(0, 0, width, height);
+//            opticalFlow.draw(0, 0, width, height);
+        //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
+        //    combinedBridgeFlow.drawDensity(0, 0, width, height);
+        //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
+        //    fluidFlow.drawObstacle(0, 0, width, height);
+        //    fluidFlow.drawObstacleOffset(0, 0, width, height);
+        //    fluidFlow.drawBuoyancy(0, 0, width, height);
+        //    fluidFlow.drawVorticity(0, 0, width, height);
+        //    fluidFlow.drawDivergence(0, 0, width, height);
+        //    fluidFlow.drawTemperature(0, 0, width, height);
+        //    fluidFlow.drawPressure(0, 0, width, height);
+        //    fluidFlow.drawVelocity(0, 0, width, height);
+        
+        fluidFlow.draw(0, 0, width, height);
+        main_fbo.end();
+        
+        postGlitch.generateFx(&common_features);
+    } else {
+//        cout << "pg then flow" << endl;
+        main_fbo.end();
+        postGlitch.generateFx(&common_features);
+        
+        //    combinedBridgeFlow.drawInput(0, 0, width, height);
+        //    opticalFlow.drawInput(0, 0, width, height);
+//            opticalFlow.draw(0, 0, width, height);
+        //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
+        //    combinedBridgeFlow.drawDensity(0, 0, width, height);
+        //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
+        //    fluidFlow.drawObstacle(0, 0, width, height);
+        //    fluidFlow.drawObstacleOffset(0, 0, width, height);
+        //    fluidFlow.drawBuoyancy(0, 0, width, height);
+        //    fluidFlow.drawVorticity(0, 0, width, height);
+        //    fluidFlow.drawDivergence(0, 0, width, height);
+        //    fluidFlow.drawTemperature(0, 0, width, height);
+        //    fluidFlow.drawPressure(0, 0, width, height);
+        //    fluidFlow.drawVelocity(0, 0, width, height);
+        main_fbo.begin();
+        fluidFlow.draw(0, 0, width, height);
+        main_fbo.end();
+    }
 }
 
 //--------------------------------------------------------------

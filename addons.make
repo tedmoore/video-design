@@ -1,7 +1,5 @@
-ofxOpenCv
-ofxCv
+ofxFlowTools
 ofxHapPlayer
 ofxOsc
 ofxPostGlitch
-ofxSyphon
 ofxYAML

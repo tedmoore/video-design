@@ -46,7 +46,7 @@ public:
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         chooseDir();
         chooseInv();
-        is_borrow_colors = ofRandom(2);
+        is_borrow_colors = ofRandom(1.f) < 0.5;
     }
     
     ofxYAML::Node saveState(){

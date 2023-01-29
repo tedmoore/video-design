@@ -19,6 +19,8 @@
 
 #define N_CLUSTERS 4
 
+enum UnfoldTilesOrder { LRTB = 0 , LRBT, RLTB , RLBT , TBLR , TBRL , BTLR , BTRL };
+
 class HapMovie: public VisualContent {
 public:
     
@@ -81,7 +83,11 @@ public:
     float i_x = 0;
     float i_y = 0;
     int tiles_alpha = 255;
-    
+    int n_new_tiles_per_frame = 1;
+    int counting_tiles_start_frame = 0;
+    UnfoldTilesOrder unfold_tiles_order = LRBT;
+    bool dontUnfoldTiles = false;
+
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
         
         show_hap_prob = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
@@ -152,7 +158,7 @@ public:
     }
 
     void update(bool isNRT, std::unordered_map<std::string, float>* common_features){
-        setSpeed((speed * (1-reactive_speed)) + (reactive_speed * ofMap(common_features->at("loudness"),0.f,1.f,0.8,3)));
+        setSpeed((speed * (1-reactive_speed)) + (reactive_speed * ofMap(common_features->at("specFlatness"),0.f,1.f,0.8,3)));
         
         if(!isNRT){
             //cout << "mini vid updated\n";
@@ -185,10 +191,67 @@ public:
             int y_hop = h + y_off;
 //            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
 //            cout << "i_y: " << i_y << "\th: " << h << "\tinitial y: " << (i_y * h) << endl;
-            for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
-                for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
-                    texture.draw(x,y,w,h);
-                }
+            int tileCounter = 0;
+            
+            int make_n_tiles = (frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
+            
+            switch(unfold_tiles_order){
+                case LRTB: // 0
+                    for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                        for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case LRBT: // 1
+                    for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                        for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case RLTB: // 2
+                    for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                        for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case RLBT: // 3
+                    for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                        for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case TBLR: // 4
+                    for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                        for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case BTLR:
+                    for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                        for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case TBRL:
+                    for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                        for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
+                case BTRL:
+                    for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                        for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                            if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
+                        }
+                    }
+                    break;
             }
         } else {
             ofSetColor(255, alpha);
@@ -308,6 +371,9 @@ public:
         dict["i_y"] = i_y;
         dict["tiles_alpha"] = tiles_alpha;
         dict["useFF"] = useFF;
+        dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
+        dict["dontUnfoldTiles"] = dontUnfoldTiles;
+        dict["unfold_tiles_order"] = (int)unfold_tiles_order;
         
         for(int i = 0; i < N_CLUSTERS; i++){
             dict["center_color_indices" + ofToString(i)] = center_color_indices[i];
@@ -331,6 +397,10 @@ public:
         i_x = dict["i_x"].as<float>();
         i_y = dict["i_y"].as<float>();
         tiles_alpha = dict["tiles_alpha"].as<int>();
+        
+        n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].as<int>();
+        dontUnfoldTiles = dict["dontUnfoldTiles"].as<bool>();
+        unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].as<int>();
         
         useFF = dict["useFF"].as<bool>();
         
@@ -359,6 +429,7 @@ public:
         i_x = ofRandom(1.f);
         i_y = ofRandom(1.f);
         tiles_alpha = ofRandom(1,255);
+        unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
         
         useFF = ofRandom(1.f) < use_ff_prob; // 0.28
         
@@ -369,6 +440,10 @@ public:
         for(int i = 0; i < nMoviePoints; i ++){
             moviePoints[i].resetPos();
         }
+        
+        dontUnfoldTiles = ofRandom(1.f) < 0.5;
+        n_new_tiles_per_frame = ofRandom(1,4) + (999 * dontUnfoldTiles);
+        counting_tiles_start_frame = frame_num;
     }
 
     void interact(VisualContent* other){}

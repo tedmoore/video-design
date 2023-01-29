@@ -168,7 +168,7 @@ void ofApp::setup(){
     
     // ofxFlowTools
     
-    int densityWidth = 1280;
+    int densityWidth = 720;
     int densityHeight = 720;
     int simulationWidth = densityWidth / 2;
     int simulationHeight = densityHeight / 2;
@@ -441,6 +441,7 @@ void ofApp::onsetOccured(int width, int height,int frame_num){
     // ofx post glitch
     postGlitch.newParams();
     flow_then_postGlitch = ofRandom(1.f) < 0.95;
+    fluid_flow_orientation = (FluidFlowOrientation)ofRandom(4);
     
     for(int i = 0; i < GLITCH_NUM; i++){
         if(ofRandom(1.f) < postGlitchChangeProb){
@@ -616,7 +617,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
 //    cout << "flow_then_postGlitch: " << flow_then_postGlitch << endl;
     
     if(flow_then_postGlitch){
-        cout << "flow then pg" << endl;
+//        cout << "flow then pg" << endl;
         
         if(show_flow_tools){
             //    combinedBridgeFlow.drawInput(0, 0, width, height);
@@ -634,13 +635,13 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
             //    fluidFlow.drawPressure(0, 0, width, height);
             //    fluidFlow.drawVelocity(0, 0, width, height);
             
-            fluidFlow.draw(0, 0, width, height);
+            drawFluidFlow(width,height);
         }
         main_fbo.end();
         
         postGlitch.generateFx(&common_features);
     } else {
-        cout << "pg then flow" << endl;
+//        cout << "pg then flow" << endl;
         main_fbo.end();
         postGlitch.generateFx(&common_features);
         if(show_flow_tools){
@@ -660,10 +661,38 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         //    fluidFlow.drawPressure(0, 0, width, height);
         //    fluidFlow.drawVelocity(0, 0, width, height);
 
-            fluidFlow.draw(0, 0, width, height);
+            drawFluidFlow(width,height);
             main_fbo.end();
         }
     }
+}
+
+void ofApp::drawFluidFlow(int width, int height){
+    switch(fluid_flow_orientation){
+        case TOP:
+            fluidFlow.draw(0, 0, width, height);
+            break;
+        case RIGHT:
+            ofPushMatrix();
+//            ofRotateDeg(90, width/2, height/2, 0);
+            ofTranslate(width/2,height/2);
+            ofRotateZDeg(90);
+            fluidFlow.draw(height * -0.5, width * -0.5, height, width);
+            ofPopMatrix();
+            break;
+        case BOTTOM:
+            fluidFlow.draw(width, height, -width, -height);
+            break;
+        case LEFT:
+            ofPushMatrix();
+            //ofRotateDeg(-90, width/2, height/2, 0);
+            ofTranslate(width/2,height/2);
+            ofRotateZDeg(-90);
+            fluidFlow.draw(height * -0.5, width * -0.5, height, width);
+            ofPopMatrix();
+            break;
+    }
+    
 }
 
 //--------------------------------------------------------------

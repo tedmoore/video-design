@@ -13,6 +13,8 @@
 #include "ofxYAML.h"
 #include "ofxFlowTools.h"
 
+enum FluidFlowOrientation { TOP = 0, RIGHT, BOTTOM, LEFT };
+
 class ofApp : public ofBaseApp{
     
 public:
@@ -41,6 +43,7 @@ public:
     void processReaperMarker(string& cmd,int width, int height, int frame_num);
     void setActiveIndices(int* ai,int width, int height, int frame_num);
     void prUpdate(bool isNRT);
+    void drawFluidFlow(int width, int height);
     void runNrtRender(int width,int height);
     void processConfigFile(string path){
         config.load(path);
@@ -196,6 +199,7 @@ public:
         
         dict["flow_then_postGlitch"] = flow_then_postGlitch;
         dict["show_flow_tools"] = show_flow_tools;
+        dict["fluid_flow_orientation"] = (int)fluid_flow_orientation;
         
         return dict;
     }
@@ -229,6 +233,7 @@ public:
         
         flow_then_postGlitch = dict["flow_then_postGlitch"].as<bool>();
         show_flow_tools = dict["show_flow_tools"].as<bool>();
+        fluid_flow_orientation = (FluidFlowOrientation)dict["fluid_flow_orientation"].as<int>();
     }
     
     // === ofxFlowTools ===
@@ -242,4 +247,5 @@ public:
     bool flow_then_postGlitch = true;
     bool show_flow_tools = false;
     float show_flow_prob = 0.1;
+    FluidFlowOrientation fluid_flow_orientation = TOP;
 };

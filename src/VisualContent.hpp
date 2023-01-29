@@ -30,7 +30,7 @@ public:
     
     virtual void screenResize(int w, int h){}
     
-    virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
+    virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){}
     
     virtual void update(bool isNRT, std::unordered_map<std::string, float>* common_features){}
     

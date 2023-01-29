@@ -163,7 +163,7 @@ void ofApp::setup(){
     }
     
     if(config["initial-onset"].as<bool>()){
-        onsetOccured(width, height);
+        onsetOccured(width, height, 0);
     }
     
     // ofxFlowTools
@@ -192,118 +192,121 @@ void ofApp::setup(){
     
     // =========== NRT RENDERING
     if(nrtRender){
-        
-        string csv_folder = config["csv-folder"].as<string>();
-        
-        //int max_frames = 600; // 600 frames = 20 seconds
-        int max_frames = config["max-frames"].as<int>();
-        
-        ifstream descriptors_file;
-        descriptors_file.open(csv_folder + "/descriptors.csv");
-        ifstream waveform0_file;
-        waveform0_file.open(csv_folder + "/waveform-0.csv");
-        ifstream waveform1_file;
-        waveform1_file.open(csv_folder + "/waveform-1.csv");
-        ifstream mags_file;
-        mags_file.open(csv_folder + "/mags.csv");
-        
-        ReaperMarkersFileParser rmfp;
-        rmfp.setup(csv_folder + "/reaper-markers.txt",config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
-
-        // stuff for rendering
-        
-        string new_dir_path;
-        ofFileDialogResult result = ofSystemSaveDialog("", "Choose location to save frames");
-        if(result.bSuccess) {
-          new_dir_path = result.getPath();
-        } else {
-            ofExit();
-        }
-        
-        ofDirectory new_dir(new_dir_path);
-        new_dir.create();
-        
-        ofPixels pix;
-        
-        int frame_num = 0;
-        
-        string line;
-        vector<string> csv_line;
-        
-        while(!descriptors_file.eof() && frame_num < max_frames){
-            
-            cout << "frame num: " << frame_num << endl;
-            
-            // descriptors
-            line.clear();
-            getline(descriptors_file,line);
-            csv_line.clear();
-            csv_line = ofSplitString(line,",");
-//            cout << "\tdescriptors line size (strings): " << csv_line.size() << endl;
-            vector<float> csv_line_fl(csv_line.size());
-            for(int i = 0; i < csv_line.size(); i++){
-                csv_line_fl[i] = ofToFloat(csv_line[i]);
-            }
-//            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
-
-            setValsFromCSV(width,height,csv_line_fl);
-            
-            string rm = rmfp.currentFrame(frame_num);
-            cout << "from rmfp: " << rm << endl;
-            processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight());
-            
-            // waveforms
-            line.clear();
-            getline(waveform0_file,line);
-            csv_line.clear();
-            csv_line = ofSplitString(line,",");
-//            cout << "\twaveform0 line size (strings): " << csv_line.size() << endl;
-            for(int i = 0; i < csv_line.size(); i++){
-                waveforms[0][i] = ofToFloat(csv_line[i]);
-            }
-            
-            line.clear();
-            getline(waveform1_file,line);
-            csv_line.clear();
-            csv_line = ofSplitString(line,",");
-//            cout << "\twaveform1 line size (strings): " << csv_line.size() << endl;
-            for(int i = 0; i < csv_line.size(); i++){
-                waveforms[1][i] = ofToFloat(csv_line[i]);
-            }
-                        
-            // mags
-            line.clear();
-            getline(mags_file,line);
-            csv_line.clear();
-            csv_line = ofSplitString(line,",");
-//            cout << "\tmags line size (strings): " << csv_line.size() << endl;
-            for(int i = 0; i < csv_line.size(); i++){
-                magnitudes[0][i] = ofToFloat(csv_line[i]);
-            }
-            
-            for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-//                cout << "\tupdating vc: " << i << endl;
-                visual_contents[i]->update(true,&common_features);
-            }
-            
-            drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
-
-            main_fbo.readToPixels(pix);
-            ofSaveImage(pix, new_dir_path+"/"+ofToString(frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
-            
-            frame_num++;
-        }
-        
-        descriptors_file.close();
-        waveform0_file.close();
-        waveform1_file.close();
-        mags_file.close();
-        
-        ofExit();
+        runNrtRender(width,height);
     }
 }
 
-void ofApp::processReaperMarker(string& cmd, int width, int height){
+void ofApp::runNrtRender(int width, int height){
+    string csv_folder = config["csv-folder"].as<string>();
+    
+    //int max_frames = 600; // 600 frames = 20 seconds
+    int max_frames = config["max-frames"].as<int>();
+    
+    ifstream descriptors_file;
+    descriptors_file.open(csv_folder + "/descriptors.csv");
+    ifstream waveform0_file;
+    waveform0_file.open(csv_folder + "/waveform-0.csv");
+    ifstream waveform1_file;
+    waveform1_file.open(csv_folder + "/waveform-1.csv");
+    ifstream mags_file;
+    mags_file.open(csv_folder + "/mags.csv");
+    
+    ReaperMarkersFileParser rmfp;
+    rmfp.setup(csv_folder + "/reaper-markers.txt",config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
+
+    // stuff for rendering
+    
+    string new_dir_path;
+    ofFileDialogResult result = ofSystemSaveDialog("", "Choose location to save frames");
+    if(result.bSuccess) {
+      new_dir_path = result.getPath();
+    } else {
+        ofExit();
+    }
+    
+    ofDirectory new_dir(new_dir_path);
+    new_dir.create();
+    
+    ofPixels pix;
+    
+    int frame_num = 0;
+    
+    string line;
+    vector<string> csv_line;
+    
+    while(!descriptors_file.eof() && frame_num < max_frames){
+        
+        cout << "frame num: " << frame_num << endl;
+        
+        // descriptors
+        line.clear();
+        getline(descriptors_file,line);
+        csv_line.clear();
+        csv_line = ofSplitString(line,",");
+//            cout << "\tdescriptors line size (strings): " << csv_line.size() << endl;
+        vector<float> csv_line_fl(csv_line.size());
+        for(int i = 0; i < csv_line.size(); i++){
+            csv_line_fl[i] = ofToFloat(csv_line[i]);
+        }
+//            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
+
+        setValsFromCSV(width,height,csv_line_fl,frame_num);
+        
+        string rm = rmfp.currentFrame(frame_num);
+        cout << "from rmfp: " << rm << endl;
+        processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
+        
+        // waveforms
+        line.clear();
+        getline(waveform0_file,line);
+        csv_line.clear();
+        csv_line = ofSplitString(line,",");
+//            cout << "\twaveform0 line size (strings): " << csv_line.size() << endl;
+        for(int i = 0; i < csv_line.size(); i++){
+            waveforms[0][i] = ofToFloat(csv_line[i]);
+        }
+        
+        line.clear();
+        getline(waveform1_file,line);
+        csv_line.clear();
+        csv_line = ofSplitString(line,",");
+//            cout << "\twaveform1 line size (strings): " << csv_line.size() << endl;
+        for(int i = 0; i < csv_line.size(); i++){
+            waveforms[1][i] = ofToFloat(csv_line[i]);
+        }
+                    
+        // mags
+        line.clear();
+        getline(mags_file,line);
+        csv_line.clear();
+        csv_line = ofSplitString(line,",");
+//            cout << "\tmags line size (strings): " << csv_line.size() << endl;
+        for(int i = 0; i < csv_line.size(); i++){
+            magnitudes[0][i] = ofToFloat(csv_line[i]);
+        }
+        
+        // ============ UPDATE ================
+        prUpdate(true);
+        
+        // ============ DRAW ====================
+        drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
+
+        // save to disk
+        main_fbo.readToPixels(pix);
+        ofSaveImage(pix, new_dir_path+"/"+ofToString(frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
+        
+        frame_num++;
+    }
+    
+    descriptors_file.close();
+    waveform0_file.close();
+    waveform1_file.close();
+    mags_file.close();
+    
+    ofExit();
+}
+
+void ofApp::processReaperMarker(string& cmd, int width, int height, int frame_num){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
@@ -314,7 +317,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height){
 //        cout << "index: " << index << " " << tokens[index] << endl;
         
         if(tokens[index] == "onset"){
-            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
+            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
             
         } else if(tokens[index] == "setActiveIndices"){
             int ai[MAX_ACTIVE_MODULES];
@@ -326,7 +329,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height){
 //                cout << ai[i] << " ";
             }
 //            cout << endl;
-            setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+            setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
         } else if(tokens[index] == "loadState"){
             load(saves[ofToInt(tokens[++index])],width,height);
         }
@@ -335,7 +338,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height){
     }
 }
 
-void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
+void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, int frame_num){
     
     common_features["specCentroid"] = vector_data[0];
     common_features["specSpread"] = vector_data[1];
@@ -359,7 +362,7 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data){
     float onset_val = csv_data[csv_data.size() - 1];
     if(onset_val > 0.5 && use_sc_onsets){
         onset_occured = true;
-        onsetOccured(width,height); // onsets
+        onsetOccured(width,height,frame_num); // onsets
     }
     
 //    cout << "\tonset val: " << onset_val << " \tonset occured: " << onset_occured << endl;
@@ -385,21 +388,21 @@ void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width
     HapMovie* vc = new HapMovie;
     cout << "\t\tofApp::newHapMovie loading " << path << endl;
     vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,config, videoIndex);
-    vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full);
+    vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
     cout << "\t\tadding " << path << "\t at index " << index << endl;
     visual_contents[index] = vc;
 }
 
-void ofApp::setActiveIndices(int* ai,int width, int height){
+void ofApp::setActiveIndices(int* ai,int width, int height, int frame_num){
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
         active_vc_i[i] = ai[i];
         if(active_vc_i[i] >= 0 && visual_contents[active_vc_i[i]]->newParamsProb > ofRandom(1.f)){
-            visual_contents[active_vc_i[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+            visual_contents[active_vc_i[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full,frame_num);
         }
     }
 }
 
-void ofApp::onsetOccured(int width, int height){
+void ofApp::onsetOccured(int width, int height,int frame_num){
 
     // new active vc i
     
@@ -424,7 +427,7 @@ void ofApp::onsetOccured(int width, int height){
         }
     }
 
-    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight());
+    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
 
     // blend mode
     if(ofRandom(1.f) < onsetSwitchProb){
@@ -464,7 +467,7 @@ void ofApp::update(){
         // from Reaper:
         if(address == "/lastmarker/name"){
             string cmd = oscMsg.getArgAsString(0);
-            processReaperMarker(cmd,ofGetWidth(),ofGetHeight());
+            processReaperMarker(cmd,ofGetWidth(),ofGetHeight(),ofGetFrameNum());
             
             // from SuperCollider:
         } else if(address == "/setActiveIndices"){
@@ -472,7 +475,7 @@ void ofApp::update(){
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
                 ai[i] = oscMsg.getArgAsInt(i);
             }
-            setActiveIndices(ai,main_fbo.getWidth(),main_fbo.getHeight());
+            setActiveIndices(ai,main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
         } else if (address == "/setOnsetSwitchProb"){
             onsetSwitchProb = oscMsg.getArgAsFloat(0);
         } else if (address == "/setNewParamsProb"){
@@ -534,11 +537,15 @@ void ofApp::update(){
     }
     
     if(onset_occured){
-        onsetOccured(main_fbo.getWidth(),main_fbo.getHeight());
+        onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
     }
     
+    prUpdate(false);
+}
+
+void ofApp::prUpdate(bool isNRT){
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        visual_contents[i]->update(false,&common_features);
+        visual_contents[i]->update(isNRT,&common_features);
     }
     
     // ofxFlowTools
@@ -825,11 +832,11 @@ void ofApp::keyPressed(int key){
     
     if (key == 'c') processConfigFile("config.yaml");
     
-    if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight());
+    if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
     if (key == 'p'){
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             if(active_vc_i[i] >= 0){
-                visual_contents[active_vc_i[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full);
+                visual_contents[active_vc_i[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full,ofGetFrameNum());
             }
         }
     }

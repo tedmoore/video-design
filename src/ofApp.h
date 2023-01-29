@@ -34,12 +34,14 @@ public:
     void gotMessage(ofMessage msg);
     void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex);
     void displayIncomingData(int width, int height);
-    void onsetOccured(int width, int height);
+    void onsetOccured(int width, int height, int frame_num);
     void drawScreen(int width, int height, int frameNum, bool isNRT);
-    void setValsFromCSV(int width, int height, vector<float>& csv_data);
+    void setValsFromCSV(int width, int height, vector<float>& csv_data, int frame_num);
     void incrementVecHistoryCounter();
-    void processReaperMarker(string& cmd,int width, int height);
-    void setActiveIndices(int* ai,int width, int height);
+    void processReaperMarker(string& cmd,int width, int height, int frame_num);
+    void setActiveIndices(int* ai,int width, int height, int frame_num);
+    void prUpdate(bool isNRT);
+    void runNrtRender(int width,int height);
     void processConfigFile(string path){
         config.load(path);
         

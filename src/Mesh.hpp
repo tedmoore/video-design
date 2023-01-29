@@ -110,7 +110,7 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num) {
         newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
         
         if (ofRandom(1.0) < 0.8) {

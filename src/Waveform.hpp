@@ -62,7 +62,7 @@ public:
         hmul[0] = 1;
         
         screenResize(width,height);
-        newParams(width, height, vecHistory,vector_length, history_length, vecHistoryFull);
+        newParams(width, height, vecHistory,vector_length, history_length, vecHistoryFull,0);
     }
 
     //void Waveform::update(){}
@@ -211,7 +211,7 @@ public:
         ofEndShape();
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
 
         wfType = (waveformType)ofRandom(4);
         rectsDir = (rectsDirection)ofRandom(4);

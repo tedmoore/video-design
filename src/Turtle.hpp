@@ -33,7 +33,7 @@ public:
         
         max_frames = config["modules"]["turtle"]["max-frames"].as<int>();
         
-        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
+        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull,0);
     }
     
     bool onScreen(ofVec3f pt, int width, int height){
@@ -86,7 +86,7 @@ public:
     }
     
     
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
         restartPath(width,height);

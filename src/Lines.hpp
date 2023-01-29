@@ -33,7 +33,7 @@ public:
         vec = vec_;
         vec_len = float(vec_len_);
         
-        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull);
+        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull,0);
         
         type = LINES;
         
@@ -43,7 +43,7 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
         chooseDir();
         chooseInv();
         is_borrow_colors = ofRandom(1.f) < 0.5;

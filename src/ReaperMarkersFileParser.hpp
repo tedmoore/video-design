@@ -41,12 +41,12 @@ public:
   
     std::string currentFrame(int cf){
         double current_sample = cf * samples_per_frame;
-        std::string out = "";
+        std::string outstring = "";
         while(index < markers.size() && markers[index].sample < current_sample){
-            out += markers[index].cmd + " ";
+            outstring += markers[index].cmd + " ";
             index++;
         }
-        return out;
+        return outstring;
     }
 };
 

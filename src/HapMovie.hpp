@@ -343,7 +343,7 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
         
         setSpeed(ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))]);
         reactive_speed = ofRandom(1.f) < 0.5;

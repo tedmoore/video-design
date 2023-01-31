@@ -87,12 +87,19 @@ public:
     int counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
     bool dontUnfoldTiles = false;
+    
+    ofLight light;
+    ofVec3f lightPosition = {0,0,0};
+    bool bBoxes = false;
+    float boxes_prob = 0.2;
+    bool zShiftBoxes = true;
 
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
         
         show_hap_prob = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
         show_rects_prob = config["videos"][videoIndex]["show-rects-prob"].as<float>(); // 0.4
         use_ff_prob = config["videos"][videoIndex]["use-ff-prob"].as<float>(); // 0.28
+        boxes_prob = config["videos"][videoIndex]["boxes-prob"].as<float>(); // 0.28
         
         n_mag = n_mag_;
         mag_len = mag_len_;
@@ -155,6 +162,9 @@ public:
                 moviePoints[(j * mini_width) + i] = *mp;
             }
         }
+        
+        light.setPointLight();
+        light.setAmbientColor(0);
     }
 
     void update(bool isNRT, std::unordered_map<std::string, float>* common_features){
@@ -276,6 +286,11 @@ public:
         float rec_h = (height / mini_height) * rect_h_mul;
         int i = 0;
         int x_pos_scaled = 0;
+        
+//        ofEnableDepthTest();
+        ofEnableLighting();
+        light.enable();
+        
         while(i < mini_width && x_pos_scaled < width){
             int j = 0;
             int y_pos_scaled = 0;
@@ -298,7 +313,7 @@ public:
                     
                     int x = x_pos_scaled;
                     int y = y_pos_scaled;
-                    int z = ofMap(local_mag,0,1,height * 0.5,0);
+                    int z = ofMap(local_mag,0,1,height * 0.5,0) * zShiftBoxes;
                 
                     // get the point at this i, j and apply the force from the ff
                     MoviePoint &mp = moviePoints[(j * mini_width) + i];
@@ -314,24 +329,29 @@ public:
                         z = mp.pos.z * rect_h_mul * height * zDir;
                     }
                     
+                    // move to the point on the screen that we want to put the rectangle
                     ofPushMatrix();
                     ofTranslate(x, y, z);
-                    
-                    // move to the point on the screen that we want to put the rectangle
                     
                     if(ofRandom(1.f) < 0.9999) ofFill();
                     ofFill();
                     ofSetColor(col,local_alpha);
-//                    ofDrawRectangle(0, 0, rec_w, rec_h);
                     
                     float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
-                    ofDrawBox(rec_w,rec_h,box_depth);
+                    if(bBoxes){
+                        ofDrawBox(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth);
+                    } else {
+                        ofDrawRectangle(0, 0, rec_w, rec_h);
+                    }
                     
                     if(local_mag > avg_mag){
                         if(ofRandom(1.f) < 0.9999) ofNoFill();
                         ofSetColor(255,mp.rect_outline_alpha.update(255));
-//                        ofDrawRectangle(0, 0, rec_w, rec_h);
-                        ofDrawBox(rec_w,rec_h,box_depth);
+                        if(bBoxes){
+                            ofDrawBox(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth);
+                        } else {
+                            ofDrawRectangle(0, 0, rec_w, rec_h);
+                        }
                     }
                     
                     ofPopMatrix();
@@ -343,6 +363,9 @@ public:
             i++;
             x_pos_scaled += rec_w;
         }
+        
+        light.disable();
+        ofDisableLighting();
         
         avg_mag = summingmag / i_counter;
     }
@@ -378,6 +401,9 @@ public:
         dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
         dict["dontUnfoldTiles"] = dontUnfoldTiles;
         dict["unfold_tiles_order"] = (int)unfold_tiles_order;
+        dict["bBoxes"] = bBoxes;
+        dict["lightPosition"] = lightPosition;
+        dict["zShiftBoxes"] = zShiftBoxes;
         
         for(int i = 0; i < N_CLUSTERS; i++){
             dict["center_color_indices" + ofToString(i)] = center_color_indices[i];
@@ -387,26 +413,26 @@ public:
     }
     
     void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        
         setSpeed(dict["speed"].as<float>());
         reactive_speed = dict["reactive_speed"].as<bool>();
-        
         showHap = dict["showHap"].as<bool>();
         showRects = dict["showRects"].as<bool>();
         rect_w_mul = dict["rect_w_mul"].as<float>();
         rect_h_mul = dict["rect_h_mul"].as<float>();
-        
         bTile = dict["bTile"].as<bool>();
         tile_scale = dict["tile_scale"].as<float>();
         tile_offset_scale = dict["tile_offset_scale"].as<float>();
         i_x = dict["i_x"].as<float>();
         i_y = dict["i_y"].as<float>();
         tiles_alpha = dict["tiles_alpha"].as<int>();
-        
         n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].as<int>();
         dontUnfoldTiles = dict["dontUnfoldTiles"].as<bool>();
         unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].as<int>();
-        
         useFF = dict["useFF"].as<bool>();
+        bBoxes = dict["bBoxes"].as<bool>();
+        zShiftBoxes = dict["zShiftBoxes"].as<bool>();
+        lightPosition = dict["lightPosition"].as<ofVec3f>();
         
         for(int i = 0; i < N_CLUSTERS; i++){
             center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
@@ -434,6 +460,7 @@ public:
         i_y = ofRandom(1.f);
         tiles_alpha = ofRandom(1,255);
         unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
+        bBoxes = ofRandom(1.f) < boxes_prob;
         
         useFF = ofRandom(1.f) < use_ff_prob; // 0.28
         
@@ -446,8 +473,15 @@ public:
         }
         
         dontUnfoldTiles = ofRandom(1.f) < 0.5;
+        zShiftBoxes = ofRandom(1.f) < 0.35;
         n_new_tiles_per_frame = ofRandom(1,4) + (999 * dontUnfoldTiles);
         counting_tiles_start_frame = frame_num;
+        
+        lightPosition.x = ofRandom(width);
+        lightPosition.y = ofRandom(height);
+        lightPosition.z = ofRandom(height);
+
+        light.setPosition(lightPosition);
     }
 
     void interact(VisualContent* other){}

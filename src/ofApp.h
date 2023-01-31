@@ -45,6 +45,7 @@ public:
     void prUpdate(bool isNRT);
     void drawFluidFlow(int width, int height);
     void runNrtRender(int width,int height);
+    void drawBounds();
     void processConfigFile(string path){
         config.load(path);
         

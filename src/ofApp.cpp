@@ -27,7 +27,6 @@ void ofApp::setup(){
     
     ofBackground(0);
     ofEnableAntiAliasing();
-    // ofEnableDepthTest(); this should be off!
     ofEnableAlphaBlending();
 
     // ================ DATA STRUCTURES ========================
@@ -579,21 +578,14 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     main_fbo.begin();
     
-//    ofEnableBlendMode(blendMode);
-//    if(blendMode == OF_BLENDMODE_ADD){
-//        cout << "blend mode is add" << endl;
-//    }
-    
     ofEnableBlendMode(OF_BLENDMODE_ALPHA);
     
     ofSetColor(0,255 - feedback_amt); // alpha of 255 = no feedback, alpha of 0 = full feedback
     ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
     
-//    cout << "variable blend mode: " << blendMode << endl;
     ofEnableBlendMode(blendMode);
     
     if(!debug){
-        
         ff.update(frameNum, &common_features);
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
@@ -611,18 +603,13 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
         displayIncomingData(width,height);
     }
     
-//    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+    // ============ ofxPostGlitch & ofxFlowTools ===============
     ofEnableBlendMode(OF_BLENDMODE_ADD);
-    
-//    cout << "flow_then_postGlitch: " << flow_then_postGlitch << endl;
-    
     if(flow_then_postGlitch){
-//        cout << "flow then pg" << endl;
-        
         if(show_flow_tools){
             //    combinedBridgeFlow.drawInput(0, 0, width, height);
             //    opticalFlow.drawInput(0, 0, width, height);
-            //            opticalFlow.draw(0, 0, width, height);
+            //    opticalFlow.draw(0, 0, width, height);
             //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
             //    combinedBridgeFlow.drawDensity(0, 0, width, height);
             //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
@@ -634,33 +621,29 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
             //    fluidFlow.drawTemperature(0, 0, width, height);
             //    fluidFlow.drawPressure(0, 0, width, height);
             //    fluidFlow.drawVelocity(0, 0, width, height);
-            
             drawFluidFlow(width,height);
         }
         main_fbo.end();
-        
         postGlitch.generateFx(&common_features);
     } else {
-//        cout << "pg then flow" << endl;
         main_fbo.end();
         postGlitch.generateFx(&common_features);
         if(show_flow_tools){
             main_fbo.begin();
-        //    combinedBridgeFlow.drawInput(0, 0, width, height);
-        //    opticalFlow.drawInput(0, 0, width, height);
-//            opticalFlow.draw(0, 0, width, height);
-        //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
-        //    combinedBridgeFlow.drawDensity(0, 0, width, height);
-        //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
-        //    fluidFlow.drawObstacle(0, 0, width, height);
-        //    fluidFlow.drawObstacleOffset(0, 0, width, height);
-        //    fluidFlow.drawBuoyancy(0, 0, width, height);
-        //    fluidFlow.drawVorticity(0, 0, width, height);
-        //    fluidFlow.drawDivergence(0, 0, width, height);
-        //    fluidFlow.drawTemperature(0, 0, width, height);
-        //    fluidFlow.drawPressure(0, 0, width, height);
-        //    fluidFlow.drawVelocity(0, 0, width, height);
-
+            //    combinedBridgeFlow.drawInput(0, 0, width, height);
+            //    opticalFlow.drawInput(0, 0, width, height);
+            //    opticalFlow.draw(0, 0, width, height);
+            //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
+            //    combinedBridgeFlow.drawDensity(0, 0, width, height);
+            //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
+            //    fluidFlow.drawObstacle(0, 0, width, height);
+            //    fluidFlow.drawObstacleOffset(0, 0, width, height);
+            //    fluidFlow.drawBuoyancy(0, 0, width, height);
+            //    fluidFlow.drawVorticity(0, 0, width, height);
+            //    fluidFlow.drawDivergence(0, 0, width, height);
+            //    fluidFlow.drawTemperature(0, 0, width, height);
+            //    fluidFlow.drawPressure(0, 0, width, height);
+            //    fluidFlow.drawVelocity(0, 0, width, height);
             drawFluidFlow(width,height);
             main_fbo.end();
         }
@@ -701,55 +684,40 @@ void ofApp::draw(){
     drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     main_fbo.draw(0,0,ofGetWidth(),ofGetHeight());
     
-    //ofSetColor(255,0,0);
-    //ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 10);
-
-//    ofSetColor(0, 255, 0);
-//    ofDrawSphere(0, 0, 0, 10);
-//    ofDrawSphere(xsize, 0, 0, 10);
-//    ofDrawSphere(xsize, ysize, 0, 10);
-//    ofDrawSphere(0, ysize, 0, 10);
-//
-//    ofDrawSphere(0, 0, -zmax, 10);
-//    ofDrawSphere(xsize, 0, -zmax, 10);
-//    ofDrawSphere(xsize, ysize, -zmax, 10);
-//    ofDrawSphere(0, ysize, -zmax, 10);
-//
-//    ofSetColor(255, 0, 0);
-//    ofDrawSphere(xmin, ymin, 0 - 10, 10);
-//    ofDrawSphere(xmax, ymin, 0 - 10, 10);
-//    ofDrawSphere(xmax, ymax, 0 - 10, 10);
-//    ofDrawSphere(xmin, ymax, 0, 10);
-//
-//    ofDrawSphere(xmin, ymin, -zmax + 10, 10);
-//    ofDrawSphere(xmax, ymin, -zmax + 10, 10);
-//    ofDrawSphere(xmax, ymax, -zmax + 10, 10);
-//    ofDrawSphere(xmin, ymax, -zmax, 10);
-//
-//    ofFill();
-//    ofSetColor(255,255,0,100);
-//    ofBeginShape();
-//    ofVertex(xmin, ymin, zmin);
-//    ofVertex(xmin, ymin, -zmax);
-//    ofVertex(xmin, ymax, zmax);
-//    ofVertex(xmin, ymax, zmin);
-//    ofEndShape();
-
-//    ofSetColor(0, 255, 0);
-//    ofDrawSphere(0, 0, 0, 10);
-//    ofDrawSphere(xsize, 0, 0, 10);
-//    ofDrawSphere(xsize, ysize, 0, 10);
-//    ofDrawSphere(0, ysize, 0, 10);
-//
-//    ofDrawSphere(0, 0, zmax, 10);
-//    ofDrawSphere(xsize, 0, zmax, 10);
-//    ofDrawSphere(xsize, ysize, zmax, 10);
-//    ofDrawSphere(0, ysize, zmax, 10);
-    
-//    cout << "active ints: " << active_vc_i[0] << active_vc_i[1] << active_vc_i[2] << "\n";
-//    cout << "frame rate:  " << ofGetFrameRate() << "\n\n";
+//    ofEnableDepthTest(); //this should be off!
+//    drawBounds();
+//    ofDisableDepthTest();
 }
 
+void ofApp::drawBounds(){
+    
+    ofNoFill();
+    ofSetColor(200,100);
+    ofDrawBox(ofGetWidth()*0.5, ofGetHeight()*0.5, ofGetHeight() * -0.5, ofGetWidth(), ofGetHeight(), ofGetHeight());
+    
+    ofFill();
+    int offset = 20;
+    for(int x = 0; x < 2; x++){
+        for(int y = 0; y < 2; y++){
+            for(int z = 0; z < 2; z++){
+                int x_ = (x * ofGetWidth()) + ((x==0)*offset) + ((x==1) * -offset);
+                int y_ = (y * ofGetHeight()) + ((y==0)*offset) + ((y==1) * -offset);
+                int z_ = (-z * ofGetHeight()) + ((z==0) * -offset) + ((z==1) * offset);
+                cout << "\tcolor: " << x*255 << "\t" << y*255 << "\t" << z*255 << "\tx_: " << x_ << "\ty_: " << y_ << "\tz_: " << z_ << endl;
+                ofSetColor(x * 255, y * 255, z * 255);
+                ofDrawSphere(x_,y_,z_,100);
+            }
+        }
+    }
+    
+    int len = 1000;
+    ofSetLineWidth(15);
+    for(int dir = 0; dir < 3; dir++){
+        ofSetColor((dir == 0) * 255, (dir == 1) * 255, (dir == 2) * 255);
+        ofDrawLine(0, 0, 0, (dir == 0) * len, (dir == 1) * len, (dir == 2) * -len);
+    }
+}
+    
 void ofApp::displayIncomingData(int width, int height){
 
     // mags

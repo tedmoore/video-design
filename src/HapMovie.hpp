@@ -298,7 +298,7 @@ public:
                     
                     int x = x_pos_scaled;
                     int y = y_pos_scaled;
-                    int z = 0;
+                    int z = ofMap(local_mag,0,1,height * 0.5,0);
                 
                     // get the point at this i, j and apply the force from the ff
                     MoviePoint &mp = moviePoints[(j * mini_width) + i];
@@ -322,12 +322,16 @@ public:
                     if(ofRandom(1.f) < 0.9999) ofFill();
                     ofFill();
                     ofSetColor(col,local_alpha);
-                    ofDrawRectangle(0, 0, rec_w, rec_h);
+//                    ofDrawRectangle(0, 0, rec_w, rec_h);
+                    
+                    float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
+                    ofDrawBox(rec_w,rec_h,box_depth);
                     
                     if(local_mag > avg_mag){
                         if(ofRandom(1.f) < 0.9999) ofNoFill();
                         ofSetColor(255,mp.rect_outline_alpha.update(255));
-                        ofDrawRectangle(0, 0,rec_w, rec_h);
+//                        ofDrawRectangle(0, 0, rec_w, rec_h);
+                        ofDrawBox(rec_w,rec_h,box_depth);
                     }
                     
                     ofPopMatrix();

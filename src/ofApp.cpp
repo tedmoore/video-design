@@ -137,9 +137,9 @@ void ofApp::setup(){
     }
     
     // add null options to vc options
-    for(int i = 0; i < 1; i++){
-        vc_i_options.push_back(-1);
-    }
+//    for(int i = 0; i < 1; i++){
+//        vc_i_options.push_back(-1);
+//    }
     
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;

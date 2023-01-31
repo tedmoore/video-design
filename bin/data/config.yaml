@@ -1,10 +1,10 @@
 # if doing a non-real-time render
-nrt-render: false
+nrt-render: true
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
 max-frames: 99999
-use-sc-onsets: true
+use-sc-onsets: false
 initial-active-modules: [-1,-1,-1,-1] # only 4!
-initial-onset: false
+initial-onset: true
 
 audio-sample-rate: 44100
 target-framerate: 30
@@ -12,7 +12,7 @@ target-framerate: 30
 blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtract
 feedback-prob: 0.25
 feedback-max: 254
-flow-field-resolution: 12 # this was originally 20
+flow-field-resolution: 20 # this was originally 20
 onset-switch-prob: 0.9
 
 show-flow-prob: 0.16

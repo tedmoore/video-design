@@ -16,11 +16,13 @@
 
 class Waveform: public VisualContent {
 public:
-    enum waveformType { NORM , LISSAJOUS , IKEDA, RECTS };
-    enum rectsDirection { HEIGHT_WIDTH , WIDTH_HEIGHT , ANGLE_L , ANGLE_R };
+    enum waveformType { NORM = 0, LISSAJOUS , IKEDA, RECTS };
+    enum rectsDirection { HEIGHT_WIDTH = 0, WIDTH_HEIGHT , ANGLE_L , ANGLE_R };
+    enum rectsShape { SQUARE = 0, CIRCLE , TWO_TRIANGLES };
     
-    waveformType wfType = NORM;
-    rectsDirection rectsDir = HEIGHT_WIDTH;
+    waveformType wfType = RECTS;
+    rectsDirection rectsDir = ANGLE_L;
+    rectsShape rects_shape = SQUARE;
     
     int n_waveforms;
     int length;
@@ -39,6 +41,9 @@ public:
     int maxNWaveforms = 2;
     
     int rect_side = 0;
+    int triangle_side = 0;
+    bool trianglesDir = true;
+    bool scale_size = true;
     
     void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
         lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
@@ -118,83 +123,147 @@ public:
                 
                 switch(rectsDir){
                     case WIDTH_HEIGHT:
-                    {
-                        int counter = 0;
-                        for(int x = 0; x < width; x+= rect_side){
-                            for(int y = 0; y < height; y += rect_side){
-                                int alpha = abs(waveforms[int(counter / length)][counter % length]) * 255;
-                                drawRect(x,y,rect_side,alpha);
-                                counter++;
-                            }
-                        }
-                    }
+                        traverseWidthHeight(width,height,rects_shape);
                         break;
                     case HEIGHT_WIDTH:
-                    {
-                        int counter = 0;
-                        for(int y = 0; y < height; y += rect_side){
-                            for(int x = 0; x < width; x += rect_side){
-                                int alpha = abs(waveforms[int(counter / length)][counter % length]) * 255;
-                                drawRect(x,y,rect_side,alpha);
-                                counter++;
-                            }
-                        }
-                    }
+                        traverseHeightWidth(width,height,rects_shape);
                         break;
                     case ANGLE_L:
-                    {
-                        int i = (width / rect_side) + 1;
-                        int j = (height / rect_side) + 1;
-                        int counter = 0;
-                        
-                        for(int x = 0; x < i; x++){
-                            counter = getNextRect(x,0,i,j,counter,-1);
-                        }
-                        
-                        for(int y = 1; y < j; y++){
-                            counter = getNextRect(i-1,y,i,j,counter,-1);
-                        }
-                    }
+                        traverseAngleL(width,height,rects_shape);
                         break;
                     case ANGLE_R:
-                    {
-                        int i = (width / rect_side) + 1;
-                        int j = (height / rect_side) + 1;
-                        int counter = 0;
-                        
-                        for(int x = (i-1); x >= 0; x--){
-                            counter = getNextRect(x,0,i,j,counter,1);
-                        }
-                        
-                        for(int y = 1; y < j; y++){
-                            counter = getNextRect(0,y,i,j,counter,1);
-                        }
-                    }
+                        traverseAngleR(width,height,rects_shape);
                         break;
-                        
                 }
             }
                 break;
         }
     }
     
-    int getNextRect(int x, int y, int i, int j, int counter, int xplus){
-        int alpha = abs(waveforms[int(counter / length)][counter % length]) * 255;
-        drawRect(x * rect_side, y * rect_side, rect_side, alpha);
+    void traverseWidthHeight(int width, int height, rectsShape rs){
+        int counter = 0;
+        int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
+        
+        for(int x = 0; x < width; x+= side){
+            for(int y = 0; y < height; y += side){
+                drawShape(x,y,side,rs,counter);
+                counter++;
+            }
+        }
+    }
+    
+    void traverseHeightWidth(int width, int height, rectsShape rs){
+        int counter = 0;
+        int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
+        
+        for(int y = 0; y < height; y += side){
+            for(int x = 0; x < width; x += side){
+                drawShape(x,y,side,rs,counter);
+                counter++;
+            }
+        }
+    }
+    
+    void traverseAngleL(int width, int height, rectsShape rs){
+        int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
+        
+        int i = (width / side) + 1;
+        int j = (height / side) + 1;
+        int counter = 0;
+        
+        for(int x = 0; x < i; x++){
+            counter = getNextRect(x,0,i,j,counter,-1,side,rs);
+        }
+        
+        for(int y = 1; y < j; y++){
+            counter = getNextRect(i-1,y,i,j,counter,-1,side,rs);
+        }
+    }
+    
+    void traverseAngleR(int width, int height, rectsShape rs){
+        int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
+        
+        int i = (width / side) + 1;
+        int j = (height / side) + 1;
+        int counter = 0;
+        
+        for(int x = (i-1); x >= 0; x--){
+            counter = getNextRect(x,0,i,j,counter,1,side,rs);
+        }
+        
+        for(int y = 1; y < j; y++){
+            counter = getNextRect(0,y,i,j,counter,1,side,rs);
+        }
+    }
+    
+    int getNextRect(int x, int y, int i, int j, int counter, int xplus, int side, rectsShape rs){
+
+        drawShape(x,y,side,rs,counter);
         
         x += xplus;
         y += 1;
         
         if((x >=0) && (y < j) && (x < i)){
-            return getNextRect(x,y,i,j,counter + 1,xplus);
+            return getNextRect(x,y,i,j,counter + 1,xplus,side,rs);
         }
         
         return counter++;
     }
     
-    void drawRect(int x, int y, int side, int alpha){
-        ofSetColor(255,alpha);
-        ofDrawRectangle(x, y, side, side);
+    void drawShape(int x, int y, int side, rectsShape rs, int counter){
+        switch(rs){
+            case SQUARE:
+                ofSetRectMode(OF_RECTMODE_CENTER);
+                drawSquare(x*side,y*side,side,abs(waveforms[int(counter / length)][counter % length]));
+                break;
+                
+            case CIRCLE:
+                drawCircle(x*side,y*side,side,abs(waveforms[int(counter / length)][counter % length]));
+                break;
+                
+            case TWO_TRIANGLES:
+                drawTwoTriangles(x*side,y*side,side,counter);
+                break;
+                
+        }
+    }
+    
+    void drawSquare(int x, int y, int side, float amp){
+        ofSetColor(255,amp * 255);
+        int half_side = side / 2;
+        int side_scaled = (side * amp * scale_size) + ((1-scale_size) * side);
+        ofDrawRectangle(x+half_side, y+half_side, side_scaled, side_scaled);
+    }
+    
+    void drawTwoTriangles(int x, int y, int side, int counter){
+        ofPushMatrix();
+        int half_side = side / 2;
+        ofTranslate(x+half_side,y+half_side);
+        
+        ofRotateZDeg(90.f * trianglesDir);
+        
+        ofSetColor(255,abs(waveforms[0][counter % length]) * 255);
+        ofBeginShape();
+        ofVertex(-half_side,-half_side);
+        ofVertex(half_side,-half_side);
+        ofVertex(half_side,half_side);
+        ofEndShape();
+        
+        ofSetColor(255,abs(waveforms[1][counter % length]) * 255);
+        ofBeginShape();
+        ofVertex(-half_side,-half_side);
+        ofVertex(-half_side,half_side);
+        ofVertex(half_side,half_side);
+        ofEndShape();
+        
+        ofPopMatrix();
+    }
+    
+    void drawCircle(int x, int y, int side, float amp){
+        ofSetColor(255,amp * 255);
+        int half_side = side / 2;
+        int r = (half_side * amp * scale_size) + ((1-scale_size) * half_side);
+        ofDrawCircle(x+half_side,y+half_side,r);
     }
 
     void displayWaveform(int wf_int, int x, int y, int z, float hmul2, int display_width, int display_height){
@@ -214,7 +283,10 @@ public:
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
 
         wfType = (waveformType)ofRandom(4);
-        rectsDir = (rectsDirection)ofRandom(4);
+        rectsDir = (rectsDirection)ofRandom(5);
+        rects_shape = (rectsShape)ofRandom(3);
+        trianglesDir = ofRandom(1.f) < 0.5;
+        scale_size = ofRandom(1.f) < 0.4;
         
         for (int i = 0; i < n_waveforms; i++) {
             if (i > 0) {
@@ -233,6 +305,9 @@ public:
         
         dict["wfType"] = (int)wfType;
         dict["rectsDir"] = (int)rectsDir;
+        dict["rects_shape"] = (int)rects_shape;
+        dict["trianglesDir"] = trianglesDir;
+        dict["scale_size"] = scale_size;
         
         for (int i = 0; i < n_waveforms; i++) {
             if (i > 0) {
@@ -252,6 +327,9 @@ public:
 
         wfType = (waveformType)dict["wfType"].as<int>();
         rectsDir = (rectsDirection)dict["rectsDir"].as<int>();
+        rects_shape = (rectsShape)dict["rects_shape"].as<int>();
+        trianglesDir = dict["trianglesDir"].as<bool>();
+        scale_size = dict["scale_size"].as<bool>();
         
         for (int i = 0; i < n_waveforms; i++) {
             if (i > 0) {
@@ -280,8 +358,13 @@ public:
 
     void screenResize(int w, int h) {
         yoff[0] = h / 2;
-        float littleA = (w * h) / float(length * n_waveforms);
+        int bigA = w * h;
+        float littleA = bigA / length;
+        triangle_side = ceil(sqrt(littleA));
+        
+        littleA /= n_waveforms;
         rect_side = ceil(sqrt(littleA));
+    
     }
 };
 

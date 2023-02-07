@@ -331,6 +331,10 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, int frame_nu
             setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
         } else if(tokens[index] == "loadState"){
             load(saves[ofToInt(tokens[++index])],width,height);
+        } else if(tokens[index] == "loadStateFromDisk"){
+            ofxYAML dict;
+            dict.load(ofToDataPath(tokens[++index]));
+            load(dict,width,height);
         }
         
         index++; // always increment at least one!
@@ -544,6 +548,7 @@ void ofApp::update(){
 }
 
 void ofApp::prUpdate(bool isNRT){
+        
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         visual_contents[i]->update(isNRT,&common_features);
     }
@@ -703,7 +708,6 @@ void ofApp::drawBounds(){
                 int x_ = (x * ofGetWidth()) + ((x==0)*offset) + ((x==1) * -offset);
                 int y_ = (y * ofGetHeight()) + ((y==0)*offset) + ((y==1) * -offset);
                 int z_ = (-z * ofGetHeight()) + ((z==0) * -offset) + ((z==1) * offset);
-                cout << "\tcolor: " << x*255 << "\t" << y*255 << "\t" << z*255 << "\tx_: " << x_ << "\ty_: " << y_ << "\tz_: " << z_ << endl;
                 ofSetColor(x * 255, y * 255, z * 255);
                 ofDrawSphere(x_,y_,z_,100);
             }

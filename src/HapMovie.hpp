@@ -16,10 +16,12 @@
 #include "FlowField.hpp"
 
 #include "defines.h"
+#include "Param.hpp"
 
 #define N_CLUSTERS 4
 
 enum UnfoldTilesOrder { LRTB = 0 , LRBT, RLTB , RLBT , TBLR , TBRL , BTLR , BTRL };
+enum RectTypes { RECT = 0 , BOX , SPHERE };
 
 class HapMovie: public VisualContent {
 public:
@@ -41,19 +43,11 @@ public:
     int mag_len;
     
     int alpha = 255;
-    float speed = 1.f;
-    bool reactive_speed = true;
-    float dir_options[2] = {-1.f,1.f};
-    
-    bool showHap, showRects;
-    
+        
     float avg_mag = 0.5;
     
     int mini_width = 32;
     int mini_height = 32;
-    
-    float rect_w_mul = 1.f;
-    float rect_h_mul = 1.f;
     
     vector<ofFile> tiffs;
     vector<ofFile> bitexact_tiffs;
@@ -65,41 +59,129 @@ public:
     int nMoviePoints;
     FlowField *ff;
     
-    bool useFF = false;
-    bool useFFMaster = true;
+    bool bUseFFMaster = true;
     
     int zDir = -1;
     
     float nrt_playhead = 0;
     int total_frames = 0;
     
-    float show_hap_prob = 0.2; // 0.2
-    float show_rects_prob = 0.4; // 0.4
-    float use_ff_prob = 0.28; // 0.28
+    vector<Param*> params;
     
-    bool bTile = true;
-    float tile_scale = 0.5;
-    float tile_offset_scale = 0.5;
-    float i_x = 0;
-    float i_y = 0;
-    int tiles_alpha = 255;
+    ParamFloat speed;
+    ParamIntList speedDir;
+    ParamBool bShowHap;
+    ParamBool bShowRects;
+    ParamBool bUseFF;
+    ParamBool bReactiveSpeed;
+    ParamBool bTile;
+    ParamBool bDontUnfoldTiles;
+    ParamFloat rect_w_mul;
+    ParamFloat rect_h_mul;
+    ParamFloat tile_scale;
+    ParamFloat tile_offset_scale;
+    ParamFloat i_x;
+    ParamFloat i_y;
+    ParamInt tiles_alpha;
+    ParamBool bZShiftBoxes;
+    
     int n_new_tiles_per_frame = 1;
     int counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
-    bool dontUnfoldTiles = false;
+    ParamEnumWeighted rectType;
     
     ofLight light;
     ofVec3f lightPosition = {0,0,0};
-    bool bBoxes = false;
-    float boxes_prob = 0.2;
-    bool zShiftBoxes = true;
+    
+    int vi;
 
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
         
-        show_hap_prob = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
-        show_rects_prob = config["videos"][videoIndex]["show-rects-prob"].as<float>(); // 0.4
-        use_ff_prob = config["videos"][videoIndex]["use-ff-prob"].as<float>(); // 0.28
-        boxes_prob = config["videos"][videoIndex]["boxes-prob"].as<float>(); // 0.28
+        vi = videoIndex;
+        
+        // speed
+        speed.name = "speed";
+        speed.min = config["videos"][videoIndex]["speed-min"].as<float>();
+        speed.max = config["videos"][videoIndex]["speed-max"].as<float>();
+        speed.power = config["videos"][videoIndex]["speed-pow"].as<float>();
+        speed.newRandom();
+        params.push_back(&speed);
+        
+        // speed_dir
+        speedDir.name = "speedDir";
+        speedDir.setup({-1,1},1);
+        params.push_back(&speedDir);
+        
+        // showHap
+        bShowHap.name = "showHap";
+        bShowHap.trueProb = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
+        params.push_back(&bShowHap);
+        
+        // show_rects
+        bShowRects.name = "showRects";
+        bShowRects.trueProb = config["videos"][videoIndex]["show-rects-prob"].as<float>(); // 0.4
+        params.push_back(&bShowRects);
+        
+        // use_ff
+        bUseFF.name = "bUseFF";
+        bUseFF.trueProb = config["videos"][videoIndex]["use-ff-prob"].as<float>(); // 0.28
+        params.push_back(&bUseFF);
+        
+        // reactive_speed;
+        bReactiveSpeed.name = "reactiveSpeed";
+        params.push_back(&bReactiveSpeed);
+        
+        // bTile;
+        bTile.name = "bTile";
+        params.push_back(&bTile);
+        
+        // bDontUnfoldTiles
+        bDontUnfoldTiles.name = "bDontUnfoldTiles";
+        params.push_back(&bDontUnfoldTiles);
+        
+        //rect_w_mul
+        rect_w_mul.name = "rect_w_mul";
+        rect_w_mul.setup(1.f,3.f,1.f,1.f);
+        params.push_back(&rect_w_mul);
+        
+        // rect_h_mul
+        rect_h_mul.name = "rect_h_mul";
+        rect_h_mul.setup(1.f,3.f,1.f,1.f);
+        params.push_back(&rect_h_mul);
+        
+        // tile_scale
+        tile_scale.name = "tile_scale";
+        tile_scale.setup(0.03,0.5,1.f,0.5);
+        params.push_back(&tile_scale);
+        
+        // tile_offset_scale
+        tile_offset_scale.name = "tile_offset_scale";
+        tile_offset_scale.setup(0.0,0.4,1.f,0.0);
+        params.push_back(&tile_offset_scale);
+        
+        // i_x
+        i_x.name = "i_x";
+        i_x.setup(0.f,1.f,1.f,0.f);
+        params.push_back(&i_x);
+        
+        // i_y
+        i_y.name = "i_y";
+        i_y.setup(0.f,1.f,1.f,0.f);
+        params.push_back(&i_y);
+        
+        // tiles_alpha
+        tiles_alpha.name = "tiles_alpha";
+        tiles_alpha.setup(1,255,1);
+        params.push_back(&tiles_alpha);
+        
+        // bZShiftBoxes
+        bZShiftBoxes.name = "bZShiftBoxes";
+        params.push_back(&bZShiftBoxes);
+        
+        // rectType
+        rectType.name = "rectType";
+        rectType.setup({0,0,0,0,1,1,1,1,2},0);
+        params.push_back(&rectType);
         
         n_mag = n_mag_;
         mag_len = mag_len_;
@@ -113,18 +195,7 @@ public:
         
         ofDirectory dir(path);
         
-        if(!isNRT){ // is real-time
-            player.load(dir.getAbsolutePath() + "/hap.mov");
-            player.setLoopState(OF_LOOP_NORMAL);
-            player.play();
-            player.setVolume(0);
-
-            mini_vid.load(dir.getAbsolutePath() + "/mini.mp4");
-            mini_vid.setVolume(0);
-            mini_vid.setLoopState(OF_LOOP_NORMAL);
-            mini_vid.play();
-            mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),mini_vid.getPixelFormat());
-        } else { // is non-real-time
+        if(isNRT){ // is non-real-time
             ofDirectory tiffs_dir(dir.getAbsolutePath() + "/frames");
             cout << "\t\t" << tiffs_dir.getAbsolutePath() << "\n";
             tiffs_dir.listDir();
@@ -141,11 +212,21 @@ public:
             mini_pix.allocate(mini_width, mini_height, OF_PIXELS_RGBA);
             
             total_frames = MIN(bitexact_tiffs.size(),tiffs.size());
+        } else { // is real-time
+            player.load(dir.getAbsolutePath() + "/hap.mov");
+            player.setLoopState(OF_LOOP_NORMAL);
+            player.play();
+            player.setVolume(0);
+
+            mini_vid.load(dir.getAbsolutePath() + "/mini.mp4");
+            mini_vid.setVolume(0);
+            mini_vid.setLoopState(OF_LOOP_NORMAL);
+            mini_vid.play();
+            mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),mini_vid.getPixelFormat());
         }
         
         cluster_freq = config["target-framerate"].as<int>() * ofRandom(15,25);
         
-        //cout << "cluster freq: " << cluster_freq << "\n";
         type = HAP;
         
         for(int i = 0; i < N_CLUSTERS; i++){
@@ -168,15 +249,19 @@ public:
     }
 
     void update(bool isNRT, std::unordered_map<std::string, float>* common_features){
-        setSpeed((speed * (1-reactive_speed)) + (reactive_speed * ofMap(common_features->at("specFlatness"),0.f,1.f,0.8,3)));
         
-        if(!isNRT){
-            //cout << "mini vid updated\n";
-            mini_vid.update();
-        } else {
-            nrt_playhead += speed;
+        if(bReactiveSpeed.value){
+            speed.value = ofMap(pow(common_features->at("specFlatness"),3.f),0.f,1.f,0.8,10);
+        }
+        
+        player.setSpeed(getSpeed());
+        
+        if(isNRT){
+            nrt_playhead += getSpeed();
             while(nrt_playhead < 0) nrt_playhead += total_frames;
             while(nrt_playhead >= total_frames) nrt_playhead -= total_frames;
+        } else {
+            mini_vid.update();
         }
     }
     
@@ -188,76 +273,72 @@ public:
         } else {
             texture = *player.getTexture();
         }
-        //cout << "texture w h: " << texture.getWidth() << " " << texture.getHeight() << "\n";
         
-        
-        if(bTile){
-            ofSetColor(255, tiles_alpha);
-            int w = width * tile_scale;
-            int h = height * tile_scale;
-            int x_off = width * tile_offset_scale;
-            int y_off = height * tile_offset_scale;
+        if(bTile.value){
+            ofSetColor(255, tiles_alpha.value);
+            int w = width * tile_scale.value;
+            int h = height * tile_scale.value;
+            int x_off = width * tile_offset_scale.value;
+            int y_off = height * tile_offset_scale.value;
             int x_hop = w + x_off;
             int y_hop = h + y_off;
-//            cout << "i_x: " << i_x << "\tw: " << w << "\tinitial x: " << (i_x * w) << endl;
-//            cout << "i_y: " << i_y << "\th: " << h << "\tinitial y: " << (i_y * h) << endl;
             int tileCounter = 0;
             
             int make_n_tiles = (frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
             
             switch(unfold_tiles_order){
                 case LRTB: // 0
-                    for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
-                        for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                    for(int y = ofMap(i_y.value,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                        for(int x = ofMap(i_x.value,0.f,1.f,-w,x_off); x < width; x += x_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case LRBT: // 1
-                    for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
-                        for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                    for(int y = ofMap(i_y.value,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                        for(int x = ofMap(i_x.value,0.f,1.f,-w,x_off); x < width; x += x_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case RLTB: // 2
-                    for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
-                        for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                    for(int y = ofMap(i_y.value,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                        for(int x = ofMap(i_x.value,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case RLBT: // 3
-                    for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
-                        for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                    for(int y = ofMap(i_y.value,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                        for(int x = ofMap(i_x.value,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case TBLR: // 4
-                    for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
-                        for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                    for(int x = ofMap(i_x.value,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                        for(int y = ofMap(i_y.value,0.f,1.f,-h,y_off); y < height; y += y_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case BTLR:
-                    for(int x = ofMap(i_x,0.f,1.f,-w,x_off); x < width; x += x_hop){
-                        for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                    for(int x = ofMap(i_x.value,0.f,1.f,-w,x_off); x < width; x += x_hop){
+                        for(int y = ofMap(i_y.value,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case TBRL:
-                    for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
-                        for(int y = ofMap(i_y,0.f,1.f,-h,y_off); y < height; y += y_hop){
+                    for(int x = ofMap(i_x.value,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                        for(int y = ofMap(i_y.value,0.f,1.f,-h,y_off); y < height; y += y_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
                     break;
                 case BTRL:
-                    for(int x = ofMap(i_x,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
-                        for(int y = ofMap(i_y,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
+                    for(int x = ofMap(i_x.value,0.f,1.f,width,width - x_hop); x > -w; x -= x_hop){
+                        for(int y = ofMap(i_y.value,0.f,1.f,height,height - y_hop); y > -h; y -= y_hop){
                             if(tileCounter++ < make_n_tiles) texture.draw(x,y,w,h);
                         }
                     }
@@ -282,8 +363,8 @@ public:
         ofSetLineWidth(1);
         int i_counter = 0;
         float summingmag = 0;
-        float rec_w = (width / mini_width) * rect_w_mul;
-        float rec_h = (height / mini_height) * rect_h_mul;
+        float rec_w = (width / mini_width) * rect_w_mul.value;
+        float rec_h = (height / mini_height) * rect_h_mul.value;
         int i = 0;
         int x_pos_scaled = 0;
         
@@ -303,7 +384,7 @@ public:
                         break;
                     }
                 }
-                if(showRects){
+                if(bShowRects.value){
                     // showing the rectangles
                     
                     // figure out the alpha
@@ -313,45 +394,37 @@ public:
                     
                     int x = x_pos_scaled;
                     int y = y_pos_scaled;
-                    int z = ofMap(local_mag,0,1,height * 0.5,0) * zShiftBoxes;
+                    int z = ofMap(local_mag,0.f,1.f,height * 0.5,0) * bZShiftBoxes.value * ((RectTypes)rectType.value != SPHERE);
                 
                     // get the point at this i, j and apply the force from the ff
                     MoviePoint &mp = moviePoints[(j * mini_width) + i];
-                    if(useFF && useFFMaster){
+                    if(bUseFF.value && bUseFFMaster){
                         ofVec3f force = ff->getOrientationFromPos(mp.pos);
                         force.normalize();
                         force.operator*=(common_features->at("specCentroid") * 0.002);
                         force.z = 0.0005 * common_features->at("specFlatness");
                         mp.applyForce(&force);
                         mp.move(common_features->at("loudness") * 0.05);
-                        x = mp.pos.x * rect_w_mul * width;
-                        y = mp.pos.y * rect_h_mul * height;
-                        z = mp.pos.z * rect_h_mul * height * zDir;
+                        x = mp.pos.x * rect_w_mul.value * width;
+                        y = mp.pos.y * rect_h_mul.value * height;
+                        z = mp.pos.z * rect_h_mul.value * height * zDir;
                     }
                     
                     // move to the point on the screen that we want to put the rectangle
                     ofPushMatrix();
                     ofTranslate(x, y, z);
                     
-                    if(ofRandom(1.f) < 0.9999) ofFill();
                     ofFill();
                     ofSetColor(col,local_alpha);
                     
+                    ofSetRectMode(OF_RECTMODE_CENTER);
                     float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
-                    if(bBoxes){
-                        ofDrawBox(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth);
-                    } else {
-                        ofDrawRectangle(0, 0, rec_w, rec_h);
-                    }
+                    drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag);
                     
-                    if(local_mag > avg_mag){
+                    if((local_mag > avg_mag) && ((RectTypes)rectType.value != SPHERE)){
                         if(ofRandom(1.f) < 0.9999) ofNoFill();
                         ofSetColor(255,mp.rect_outline_alpha.update(255));
-                        if(bBoxes){
-                            ofDrawBox(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth);
-                        } else {
-                            ofDrawRectangle(0, 0, rec_w, rec_h);
-                        }
+                        drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag);
                     }
                     
                     ofPopMatrix();
@@ -369,14 +442,28 @@ public:
         
         avg_mag = summingmag / i_counter;
     }
+    
+    void drawRect(float x, float y, float z, float w, float h, float depth, float local_mag){
+        switch((RectTypes)rectType.value){
+            case RECT:
+                ofDrawRectangle(x, y, w, h);
+                break;
+            case BOX:
+                ofDrawBox(x,y,z,w,h,depth);
+                break;
+            case SPHERE:
+                ofDrawSphere(x,y,z,local_mag * w);
+                break;
+        }
+    }
 
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         
-        if(showHap){
+        if(bShowHap.value){
             displayHap(width, height, frame_num, common_features, isNRT);
         }
         
-        if(showRects){
+        if(bShowRects.value){
             displayRects(width, height, frame_num, common_features, isNRT);
         }
         
@@ -385,25 +472,15 @@ public:
     ofxYAML::Node saveState(){
         ofxYAML::Node dict;
         
-        dict["speed"] = speed;
-        dict["reactive_speed"] = reactive_speed;
-        dict["showHap"] = showHap;
-        dict["showRects"] = showRects;
-        dict["rect_w_mul"] = rect_w_mul;
-        dict["rect_h_mul"] = rect_h_mul;
-        dict["bTile"] = bTile;
-        dict["tile_scale"] = tile_scale;
-        dict["tile_offset_scale"] = tile_offset_scale;
-        dict["i_x"] = i_x;
-        dict["i_y"] = i_y;
-        dict["tiles_alpha"] = tiles_alpha;
-        dict["useFF"] = useFF;
+        for(Param* p : params){
+            if(p->name != ""){
+                dict[p->name] = p->save();
+            }
+        }
+
         dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
-        dict["dontUnfoldTiles"] = dontUnfoldTiles;
         dict["unfold_tiles_order"] = (int)unfold_tiles_order;
-        dict["bBoxes"] = bBoxes;
         dict["lightPosition"] = lightPosition;
-        dict["zShiftBoxes"] = zShiftBoxes;
         
         for(int i = 0; i < N_CLUSTERS; i++){
             dict["center_color_indices" + ofToString(i)] = center_color_indices[i];
@@ -413,25 +490,16 @@ public:
     }
     
     void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+
+        for(Param* p : params){
+            if(dict[p->name]){
+                ofxYAML::Node child = dict[p->name];
+                p->load(child);
+            }
+        }
         
-        setSpeed(dict["speed"].as<float>());
-        reactive_speed = dict["reactive_speed"].as<bool>();
-        showHap = dict["showHap"].as<bool>();
-        showRects = dict["showRects"].as<bool>();
-        rect_w_mul = dict["rect_w_mul"].as<float>();
-        rect_h_mul = dict["rect_h_mul"].as<float>();
-        bTile = dict["bTile"].as<bool>();
-        tile_scale = dict["tile_scale"].as<float>();
-        tile_offset_scale = dict["tile_offset_scale"].as<float>();
-        i_x = dict["i_x"].as<float>();
-        i_y = dict["i_y"].as<float>();
-        tiles_alpha = dict["tiles_alpha"].as<int>();
         n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].as<int>();
-        dontUnfoldTiles = dict["dontUnfoldTiles"].as<bool>();
         unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].as<int>();
-        useFF = dict["useFF"].as<bool>();
-        bBoxes = dict["bBoxes"].as<bool>();
-        zShiftBoxes = dict["zShiftBoxes"].as<bool>();
         lightPosition = dict["lightPosition"].as<ofVec3f>();
         
         for(int i = 0; i < N_CLUSTERS; i++){
@@ -442,28 +510,18 @@ public:
             moviePoints[i].resetPos();
         }
     }
-
+    
+    float getSpeed(){
+        return speed.value * speedDir.value;
+    }
+    
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
         
-        // ===== speed =====
-        setSpeed(ofMap(pow(ofRandom(1.f),4.f),0.f,1.f,0.9 ,10) * dir_options[int(ofRandom(2.f))]);
-        reactive_speed = ofRandom(1.f) < 0.5;
-        
-        showHap = ofRandom(1.f) < show_hap_prob; // 0.2
-        showRects = ofRandom(1.f) < show_rects_prob; // 0.4
-        rect_w_mul = ofRandom(1.0,3.0);
-        rect_h_mul = ofRandom(1.0,3.0);
-        
-        bTile = ofRandom(1.f) < 0.8;
-        tile_scale = ofRandom(0.03,0.5);
-        tile_offset_scale = ofRandom(0.0,0.4);
-        i_x = ofRandom(1.f);
-        i_y = ofRandom(1.f);
-        tiles_alpha = ofRandom(1,255);
+        for(Param* p : params){
+            p->newRandom();
+        }
+    
         unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
-        bBoxes = ofRandom(1.f) < boxes_prob;
-        
-        useFF = ofRandom(1.f) < use_ff_prob; // 0.28
         
         for(int i = 0; i < N_CLUSTERS; i++){
             center_color_indices[i] = ofRandom(mag_len);
@@ -473,9 +531,8 @@ public:
             moviePoints[i].resetPos();
         }
         
-        dontUnfoldTiles = ofRandom(1.f) < 0.5;
-        zShiftBoxes = ofRandom(1.f) < 0.35;
-        n_new_tiles_per_frame = ofRandom(1,4) + (999 * dontUnfoldTiles);
+        n_new_tiles_per_frame = ofRandom(1,4) + (999 * bDontUnfoldTiles.value);
+        
         counting_tiles_start_frame = frame_num;
         
         lightPosition.x = ofRandom(width);
@@ -488,14 +545,6 @@ public:
     void interact(VisualContent* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
-        if(label == "speed"){
-            setSpeed(val);
-        }
-    }
-    
-    void setSpeed(float val){
-        speed = val;
-        player.setSpeed(speed);
     }
 
     void screenResize(int w, int h){

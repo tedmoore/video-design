@@ -91,6 +91,6 @@ s.waitForBoot({
 )
 
 ~synth.set(\t_force_onset,1);
-~synth.set(\onset_thresh,0.3);
+~synth.set(\onset_thresh,0.2);
 ~synth.set(\allow_onsets,0);
 ~synth.set(\allow_onsets,1);

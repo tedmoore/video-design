@@ -1,0 +1,329 @@
+vc-save-0:
+  wfType: 3
+  rectsDir: 2
+  rects_shape: 0
+  trianglesDir: true
+  scale_size: false
+  hmul-0: 0.4918419
+  xoff-1: -1259
+  yoff-1: 312
+  zoff-1: 661
+  show-1: true
+  hmul-1: 0.7331195
+vc-save-1:
+  useFF: false
+  waveformEffectDim: 0
+vc-save-2:
+  dir: 0
+  inv: false
+  is_borrow_colors: false
+vc-save-3:
+  divisor_i: 1
+  stepSize: 56.87708
+vc-save-4:
+  speed:
+    value: 3.721067
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  showRects:
+    value: true
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: false
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: false
+  rect_w_mul:
+    value: 1.393972
+  rect_h_mul:
+    value: 2.490993
+  tile_scale:
+    value: 0.294476
+  tile_offset_scale:
+    value: 0.2197558
+  i_x:
+    value: 0.5887936
+  i_y:
+    value: 0.8549315
+  tiles_alpha:
+    value: 213
+  bZShiftBoxes:
+    value: false
+  rectType:
+    value: 1
+  n_new_tiles_per_frame: 3
+  unfold_tiles_order: 5
+  lightPosition:
+    - 649.4536
+    - 241.8716
+    - 367.9612
+  center_color_indices0: 349
+  center_color_indices1: 369
+  center_color_indices2: 245
+  center_color_indices3: 354
+vc-save-5:
+  speed:
+    value: 8.968425
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  showRects:
+    value: false
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: true
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: false
+  rect_w_mul:
+    value: 2.137119
+  rect_h_mul:
+    value: 2.565754
+  tile_scale:
+    value: 0.4138032
+  tile_offset_scale:
+    value: 0.2557664
+  i_x:
+    value: 0.6666245
+  i_y:
+    value: 0.9584532
+  tiles_alpha:
+    value: 185
+  bZShiftBoxes:
+    value: true
+  rectType:
+    value: 1
+  n_new_tiles_per_frame: 3
+  unfold_tiles_order: 1
+  lightPosition:
+    - 1077.451
+    - 996.5485
+    - 390.6778
+  center_color_indices0: 292
+  center_color_indices1: 462
+  center_color_indices2: 211
+  center_color_indices3: 178
+vc-save-6:
+  speed:
+    value: 8.968425
+  speedDir:
+    value: 1
+  showHap:
+    value: true
+  showRects:
+    value: false
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: true
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: true
+  rect_w_mul:
+    value: 1.467529
+  rect_h_mul:
+    value: 2.753438
+  tile_scale:
+    value: 0.03933807
+  tile_offset_scale:
+    value: 0.3701866
+  i_x:
+    value: 0.3184348
+  i_y:
+    value: 0.9345785
+  tiles_alpha:
+    value: 118
+  bZShiftBoxes:
+    value: false
+  rectType:
+    value: 0
+  n_new_tiles_per_frame: 1000
+  unfold_tiles_order: 1
+  lightPosition:
+    - 1003.72
+    - 385.6631
+    - 344.8411
+  center_color_indices0: 204
+  center_color_indices1: 76
+  center_color_indices2: 207
+  center_color_indices3: 432
+vc-save-7:
+  speed:
+    value: 0.9025059
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  showRects:
+    value: true
+  bUseFF:
+    value: true
+  reactiveSpeed:
+    value: false
+  bTile:
+    value: true
+  bDontUnfoldTiles:
+    value: false
+  rect_w_mul:
+    value: 1.071451
+  rect_h_mul:
+    value: 1.874311
+  tile_scale:
+    value: 0.1588735
+  tile_offset_scale:
+    value: 0.184926
+  i_x:
+    value: 0.1278351
+  i_y:
+    value: 0.5245901
+  tiles_alpha:
+    value: 200
+  bZShiftBoxes:
+    value: false
+  rectType:
+    value: 1
+  n_new_tiles_per_frame: 3
+  unfold_tiles_order: 6
+  lightPosition:
+    - 1180.872
+    - 643.2911
+    - 327.2703
+  center_color_indices0: 400
+  center_color_indices1: 296
+  center_color_indices2: 187
+  center_color_indices3: 133
+vc-save-8:
+  speed:
+    value: 4.755252
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  showRects:
+    value: false
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: false
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: false
+  rect_w_mul:
+    value: 2.122041
+  rect_h_mul:
+    value: 1.139058
+  tile_scale:
+    value: 0.300803
+  tile_offset_scale:
+    value: 0.3201864
+  i_x:
+    value: 0.4348091
+  i_y:
+    value: 0.8384938
+  tiles_alpha:
+    value: 145
+  bZShiftBoxes:
+    value: true
+  rectType:
+    value: 1
+  n_new_tiles_per_frame: 2
+  unfold_tiles_order: 7
+  lightPosition:
+    - 857.9483
+    - 58.96418
+    - 990.1121
+  center_color_indices0: 281
+  center_color_indices1: 104
+  center_color_indices2: 184
+  center_color_indices3: 35
+vc-save-9:
+  speed:
+    value: 0.9319171
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  showRects:
+    value: true
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: false
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: true
+  rect_w_mul:
+    value: 2.813743
+  rect_h_mul:
+    value: 2.57888
+  tile_scale:
+    value: 0.08520594
+  tile_offset_scale:
+    value: 0.05649358
+  i_x:
+    value: 0.718927
+  i_y:
+    value: 0.006215107
+  tiles_alpha:
+    value: 117
+  bZShiftBoxes:
+    value: true
+  rectType:
+    value: 1
+  n_new_tiles_per_frame: 1001
+  unfold_tiles_order: 2
+  lightPosition:
+    - 563.367
+    - 18.37569
+    - 767.3116
+  center_color_indices0: 345
+  center_color_indices1: 453
+  center_color_indices2: 54
+  center_color_indices3: 407
+active_vc0: 9
+active_vc1: 5
+active_vc2: 2
+active_vc3: 7
+postGlitch:
+  features_map0: 1
+  invert_param0: false
+  features_map1: 2
+  invert_param1: true
+  features_map2: 1
+  invert_param2: true
+  features_map3: 2
+  invert_param3: false
+  bShading0: false
+  bShading1: true
+  bShading2: false
+  bShading3: false
+  bShading4: false
+  bShading5: false
+  bShading6: false
+  bShading7: false
+  bShading8: false
+  bShading9: false
+  bShading10: false
+  bShading11: false
+  bShading12: false
+  bShading13: false
+  bShading14: false
+  bShading15: false
+  bShading16: false
+  bShading17: false
+feedback_amt: 0
+blendMode: 0
+debug: false
+flow_then_postGlitch: true
+show_flow_tools: false
+fluid_flow_orientation: 3

@@ -63,7 +63,6 @@ public:
     
     int zDir = -1;
     
-    float nrt_playhead = 0;
     int total_frames = 0;
     
     vector<Param*> params;
@@ -84,6 +83,7 @@ public:
     ParamFloat i_y;
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
+    ParamFloat nrtPlayHead;
     
     int n_new_tiles_per_frame = 1;
     int counting_tiles_start_frame = 0;
@@ -92,12 +92,8 @@ public:
     
     ofLight light;
     ofVec3f lightPosition = {0,0,0};
-    
-    int vi;
 
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
-        
-        vi = videoIndex;
         
         // speed
         speed.name = "speed";
@@ -183,6 +179,10 @@ public:
         rectType.setup({0,0,0,0,1,1,1,1,2},0);
         params.push_back(&rectType);
         
+        nrtPlayHead.name = "nrtPlayHead";
+        nrtPlayHead.setup(0.f,total_frames,1.f,0.f);
+        params.push_back(&nrtPlayHead);
+        
         n_mag = n_mag_;
         mag_len = mag_len_;
         mags = mags_;
@@ -257,9 +257,9 @@ public:
         player.setSpeed(getSpeed());
         
         if(isNRT){
-            nrt_playhead += getSpeed();
-            while(nrt_playhead < 0) nrt_playhead += total_frames;
-            while(nrt_playhead >= total_frames) nrt_playhead -= total_frames;
+            nrtPlayHead.value += getSpeed();
+            while(nrtPlayHead.value < 0) nrtPlayHead.value += total_frames;
+            while(nrtPlayHead.value >= total_frames) nrtPlayHead.value -= total_frames;
         } else {
             mini_vid.update();
         }
@@ -268,7 +268,7 @@ public:
     void displayHap(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
                         
         if(isNRT){
-            img.load(tiffs[int(nrt_playhead)].getAbsolutePath());
+            img.load(tiffs[int(nrtPlayHead.value)].getAbsolutePath());
             texture = img.getTexture();
         } else {
             texture = *player.getTexture();
@@ -353,7 +353,7 @@ public:
     void displayRects(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         // just getting the pixels
         if(isNRT){
-            string path = bitexact_tiffs[int(nrt_playhead)].getAbsolutePath();
+            string path = bitexact_tiffs[int(nrtPlayHead.value)].getAbsolutePath();
             mini_img.load(path);
             mini_pix = mini_img.getPixels();
         } else {
@@ -419,12 +419,12 @@ public:
                     
                     ofSetRectMode(OF_RECTMODE_CENTER);
                     float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
-                    drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag);
+                    drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag, j);
                     
                     if((local_mag > avg_mag) && ((RectTypes)rectType.value != SPHERE)){
                         if(ofRandom(1.f) < 0.9999) ofNoFill();
                         ofSetColor(255,mp.rect_outline_alpha.update(255));
-                        drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag);
+                        drawRect(rec_w * 0.5,rec_h * 0.5,box_depth * -0.5,rec_w,rec_h,box_depth,local_mag,j);
                     }
                     
                     ofPopMatrix();
@@ -443,7 +443,7 @@ public:
         avg_mag = summingmag / i_counter;
     }
     
-    void drawRect(float x, float y, float z, float w, float h, float depth, float local_mag){
+    void drawRect(float x, float y, float z, float w, float h, float depth, float local_mag, int row){
         switch((RectTypes)rectType.value){
             case RECT:
                 ofDrawRectangle(x, y, w, h);
@@ -452,7 +452,7 @@ public:
                 ofDrawBox(x,y,z,w,h,depth);
                 break;
             case SPHERE:
-                ofDrawSphere(x,y,z,local_mag * w);
+                ofDrawSphere(x + ((row%2) * w * 0.5),y,z,local_mag * w);
                 break;
         }
     }
@@ -545,6 +545,18 @@ public:
     void interact(VisualContent* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
+        if(label == "speed"){
+            speed.value = abs(val);
+            speedDir.value = (val > 0) + ((val < 0) * -1);
+            bReactiveSpeed.value = false;
+        } else if(label == "position"){
+//            nrt_playHead
+            nrtPlayHead.value = val * (total_frames-1);
+//            mini_video
+            mini_vid.setPosition(val);
+//            player
+            player.setPosition(val);
+        }
     }
 
     void screenResize(int w, int h){

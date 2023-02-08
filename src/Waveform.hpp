@@ -303,6 +303,8 @@ public:
     ofxYAML::Node saveState(){
         ofxYAML::Node dict;
         
+        
+        
         dict["wfType"] = (int)wfType;
         dict["rectsDir"] = (int)rectsDir;
         dict["rects_shape"] = (int)rects_shape;

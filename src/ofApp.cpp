@@ -600,6 +600,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     ofSetColor(0,255 - feedback_amt); // alpha of 255 = no feedback, alpha of 0 = full feedback
     ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
     
+    // TODO: investigate if it makes sense to just have this _always_ be OF_BLENDMODE_ADD
     ofEnableBlendMode(blendMode);
     
     if(!debug){

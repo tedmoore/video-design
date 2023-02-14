@@ -42,6 +42,8 @@ public:
     float jitter_mul = 0.006;
     float dist_thresh_mul = 0.15;
     
+    ofLight light;
+    
     void processConfigFile(ofxYAML& config){
         line_width = config["modules"]["mesh"]["line-width"].as<float>();
         point_size = config["modules"]["mesh"]["point-size"].as<float>();
@@ -80,6 +82,9 @@ public:
         
         velLimit.setup(1, 0.14, 0);
         jitterMag.setup(1,0.14,0);
+        
+        light.setPointLight();
+        light.setPosition(0,0,0);
     }
 
     void newPointLocs(float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
@@ -140,11 +145,16 @@ public:
     }
 
     void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) {
-        //println("displaying mesh",frameCount);
-        //ofEnableDepthTest();
+
+//        ofEnableDepthTest();
+        ofEnableLighting();
+        light.enable();
+        
+        
         ofFill();
-        ofSetLineWidth(0);
-        ofSetColor(255,255,255,255);
+        
+        
+        
         float amp = common_features->at("loudness");
         float sensDis = common_features->at("sensoryDissonance");
         jitterMag.update(amp * jitter_mul);//amp * 0.01;//MIN(0.01, amp);
@@ -157,12 +167,16 @@ public:
         
         float scale_factor = height / 1080.f; // 1080 is the native so we'll scale based on that
         
+        
+        ofFill();
+        ofSetColor(255,255);
+        
         for (int i = 0; i < nPoints; i++) {
             
             if (useFF && useFFmaster) {
                 ofVec3f ori = ff->getOrientationFromPos(points[i].pos);
                 ori.normalize();
-                ori.operator*=(speed * flow_field_influence); // this float multiplier changes the amount that the flow field affects the point's direction
+                ori *= speed * flow_field_influence; // this float multiplier changes the amount that the flow field affects the point's direction
                 points[i].applyForce(&ori);
             }
             if (!waveformTracking) {
@@ -184,7 +198,6 @@ public:
                         float dist = points[i].distanceTo(&points[j]);
                         if(dist < distThresh) {
                             float alpha = ofMap(dist,0.f,distThresh,255.f,0.f);
-                            //cout << dist << "\t" << distThresh << "\t" << alpha << "\n";
                             ofSetColor(255,alpha);
                             drawLine(&points[i], &points[j], dist, width, height, scale_factor);
                             n_lines++;
@@ -196,13 +209,14 @@ public:
         }
         
         waveformTracking = false;
+        
+        light.disable();
+        ofDisableLighting();
+//        ofDisableDepthTest();
     }
 
     void drawLine(PointTM* a, PointTM* b, float dist, int width, int height, float scale_factor) {
         ofSetLineWidth(line_width * scale_factor);
-        //float alpha = 5.0 / ((dist * dist) + 1);
-        //println(alpha);
-        //ofSetColor(255, alpha);
         ofDrawLine(a->x() * width, a->y() * height, a->z() * zDir * height, b->x() * width, b->y() * height, b->z() * zDir * height);
     }
 

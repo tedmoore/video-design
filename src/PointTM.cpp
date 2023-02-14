@@ -69,8 +69,6 @@ void PointTM::checkEdges() {
 }
 
 void PointTM::display(int width, int height, float size) {
-    //cout << pos.x * width << "\t" << pos.y * height << "\t" << pos.z * zDir * height << "\t" << size << "\n";
-    ofSetColor(255,255);
     ofDrawIcoSphere(pos.x * width, pos.y * height, pos.z * zDir * height, size);
 }
 

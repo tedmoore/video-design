@@ -27,7 +27,7 @@ modules:
   mesh: # module index: 1
     prob: 3 # int because it's how many times to put it in the pool of options
     line-width: 1.0 # must be a float
-    point-size: 2.0 # must be a float
+    point-size: 3.0 # must be a float
     flow-field-influence: 0.16
     n-points: 500
     speed: 0.012

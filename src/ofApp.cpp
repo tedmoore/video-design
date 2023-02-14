@@ -26,6 +26,7 @@ void ofApp::setup(){
     active_vc_i = new int[MAX_ACTIVE_MODULES];
     
     ofBackground(0);
+    ofEnableSmoothing();
     ofEnableAntiAliasing();
     ofEnableAlphaBlending();
 
@@ -602,7 +603,7 @@ void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
     
     // =============== visualModules ===================
     // TODO: investigate if it makes sense to just have this _always_ be OF_BLENDMODE_ADD
-    ofEnableBlendMode(OF_BLENDMODE_ADD)
+//    ofEnableBlendMode(OF_BLENDMODE_ADD);
 //    ofEnableBlendMode(blendMode);
     
     if(!debug){

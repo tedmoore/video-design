@@ -14,11 +14,13 @@ s.waitForBoot({
 	var outfile, render_data = false;
 	var freeables = List.new;
 
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
+	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
 
 	// var audio_buf = Buffer.read(s,"/Volumes/Ted's 10TB My Book (June 2020)/SOUND DESIGNS/spacy space/_bounces/spacy space test with sax.wav");
 
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/FIM-test.wav");
+
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/a-movement-itself?.aiff");
 
 	if(render_data){
 		outpath.mkdir;
@@ -45,8 +47,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 0;
-		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:1);
-		var sig = SoundIn.ar([2,3]);
+		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:1);
+		// var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 		var fft = FFT(LocalBuf(2048),sig_mono);
 		var trig = Impulse.kr(frame_rate);

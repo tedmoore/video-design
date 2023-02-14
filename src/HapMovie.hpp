@@ -368,7 +368,7 @@ public:
         int i = 0;
         int x_pos_scaled = 0;
         
-//        ofEnableDepthTest();
+        ofEnableDepthTest();
         ofEnableLighting();
         light.enable();
         
@@ -439,6 +439,7 @@ public:
         
         light.disable();
         ofDisableLighting();
+        ofDisableDepthTest();
         
         avg_mag = summingmag / i_counter;
     }

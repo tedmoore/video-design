@@ -15,12 +15,11 @@ s.waitForBoot({
 	var freeables = List.new;
 
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
-
 	// var audio_buf = Buffer.read(s,"/Volumes/Ted's 10TB My Book (June 2020)/SOUND DESIGNS/spacy space/_bounces/spacy space test with sax.wav");
-
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/FIM-test.wav");
-
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/a-movement-itself?.aiff");
+	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/a-movement-itself?.aiff");
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_reverb-feedback.wav");
+	// var audio-buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
 
 	if(render_data){
 		outpath.mkdir;

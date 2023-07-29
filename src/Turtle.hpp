@@ -24,6 +24,10 @@ public:
     int max_frames = 20;
     int frame_counter = 0;
     
+    string getName(){
+        return "Turtle";
+    }
+    
     void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
         
         type = TURTLE;

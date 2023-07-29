@@ -89,6 +89,10 @@ public:
     void chooseInv() {
         inv = ofRandom(1.0) > 0.5;
     }
+    
+    string getName(){
+        return "Lines";
+    }
 
     void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose) {
         ofSetLineWidth(0);
@@ -96,6 +100,19 @@ public:
         
         w = width / vec_len;// vec_len is a float
         h = height / vec_len;
+        
+        if(verbose){
+            cout << "Lines\n";
+            cout << "\tvec_len:         " << vec_len << endl;
+            cout << "\tdir:             " << dir << endl;
+            cout << "\tinv:             " << inv << endl;
+            cout << "\treceived width:  " << width << endl;
+            cout << "\treceived height: " << height << endl;
+            cout << "\tline width:      " << w << endl;
+            cout << "\tline height:     " << h << endl;
+        };
+        
+        ofSetRectMode(OF_RECTMODE_CORNER);
         
         for (int i = 0; i < vec_len; i++) {
             float alpha = pow(vec[i], 0.75) * 255.f * (vec[i] > 0);
@@ -109,23 +126,23 @@ public:
             }
         }
     }
-
+    
     void drawLine(int width, int height, int i) {
         switch(dir){
             case HORZ:
-                    ofDrawRectangle(
-                                    0,
-                                    ((height - ((i+1) * h)) * inv) + ((i * h) * (1-inv)),
-                                    width,
-                                    h
-                                    );
+                ofDrawRectangle(
+                                0,
+                                ((height - ((i+1) * h)) * inv) + ((i * h) * (1-inv)),
+                                width,
+                                h
+                                );
                 break;
             case VERT:
-                    ofDrawRectangle(
-                                    ((width - ((i+1) * w)) * inv) + ((i * w) * (1-inv)),
-                                    0,
-                                    w,
-                                    height);
+                ofDrawRectangle(
+                                ((width - ((i+1) * w)) * inv) + ((i * w) * (1-inv)),
+                                0,
+                                w,
+                                height);
                 break;
         }
     }

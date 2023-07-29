@@ -31,6 +31,10 @@ public:
         ofxYAML::Node dict;
         return dict;
     }
+    
+    void virtual post(){
+        cout << "post being called in Param parent class\n";
+    }
 };
 
 class ParamBool : public Param {
@@ -38,6 +42,10 @@ public:
     
     bool value = false;
     float trueProb = 0.5;
+    
+    void post(){
+        cout << value;
+    }
     
     ofxYAML::Node save(){
         ofxYAML::Node dict;
@@ -60,6 +68,10 @@ public:
     float min = 0.f;
     float max = 1.f;
     float power = 1.f;
+    
+    void post(){
+        cout << value;
+    }
     
     void setup(float min_, float max_, float power_, float val){
         min = min_;
@@ -89,6 +101,10 @@ public:
     int min = 0.f;
     int max = 1.f;
     
+    void post(){
+        cout << value;
+    }
+    
     void setup(int min_, int max_, int val){
         min = min_;
         max = max_;
@@ -115,6 +131,14 @@ public:
     vector<int> listOptions;
     int value = 0;
     
+    void post(){
+        cout << value << " (whole list:";
+        for(int op : listOptions){
+            cout << " " << op;
+        }
+        cout << ")";
+    }
+    
     void setup(vector<int> list, int val){
         listOptions = list;
         value = val;
@@ -140,6 +164,10 @@ public:
     int nEntries = 0;
     int value = 0;
     
+    void post(){
+        cout << value;
+    }
+    
     void setup(int nEntries_, int val){
         nEntries_ = nEntries;
         value = val;
@@ -164,6 +192,10 @@ class ParamEnumWeighted : public Param {
 public:
     vector<int> options;
     int value = 0;
+    
+    void post(){
+        cout << value;
+    }
     
     void setup(vector<int> options_, int val){
         options = options_;

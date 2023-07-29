@@ -44,6 +44,10 @@ public:
     
     ofLight light;
     
+    string getName(){
+        return "Mesh";
+    }
+    
     void processConfigFile(ofxYAML& config){
         line_width = config["modules"]["mesh"]["line-width"].as<float>();
         point_size = config["modules"]["mesh"]["point-size"].as<float>();

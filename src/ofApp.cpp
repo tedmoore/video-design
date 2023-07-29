@@ -541,7 +541,6 @@ void ofApp::renderFrame(int width, int height, unsigned long long frameNum, bool
     ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
     
     // =============== visualModules ===================
-    // TODO: investigate if it makes sense to just have this _always_ be OF_BLENDMODE_ADD
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     
     if(!debug){
@@ -549,7 +548,8 @@ void ofApp::renderFrame(int width, int height, unsigned long long frameNum, bool
         if(verbose){
             cout << "Active Module Indices:";
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-                cout << " " << typeid(modules[active_module_indices[i]]).name();
+                int index = active_module_indices[i];
+                if(index >= 0) cout << " " << modules[index]->getName();
             }
             cout << endl;
         }

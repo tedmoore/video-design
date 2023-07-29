@@ -66,7 +66,7 @@ s.waitForBoot({
 		WaveformToOSC(s,analysis_bus,i,~oF,i,false,outfile:if(render_data){outpath+/+"waveform-%.csv".format(i)}{nil});
 	};
 
-	MagsToOSC(s,analysis_bus,2,~oF,0,lag:30,outfile:if(render_data){outpath+/+"mags.csv"}{nil});
+	MagsToOSC(s,analysis_bus,2,~oF,0,outfile:if(render_data){outpath+/+"mags.csv"}{nil});
 
 	OSCdef(\send_data,{
 		arg msg;

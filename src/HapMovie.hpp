@@ -63,7 +63,7 @@ public:
     
     int zDir = -1;
     
-    int total_frames = 0;
+    unsigned long total_frames = 0;
     
     vector<Param*> params;
     
@@ -88,11 +88,18 @@ public:
     unsigned long long n_new_tiles_per_frame = 1;
     int counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
+    
+    //TODO: I'm not sure this is actually a weighted selection...
+    // see source code of ParamEnumWeighted
     ParamEnumWeighted rectType;
     
     ofLight light;
     ofVec3f lightPosition = {0,0,0};
 
+    string getName(){
+        return "HapMovie";
+    }
+    
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
         
         // speed
@@ -211,7 +218,7 @@ public:
             mini_img.allocate(mini_width, mini_height, OF_IMAGE_COLOR);
             mini_pix.allocate(mini_width, mini_height, OF_PIXELS_RGBA);
             
-            total_frames = MIN(bitexact_tiffs.size(),tiffs.size());
+            total_frames = (bitexact_tiffs.size() < tiffs.size()) ? bitexact_tiffs.size() : tiffs.size();
         } else { // is real-time
             player.load(dir.getAbsolutePath() + "/hap.mov");
             player.setLoopState(OF_LOOP_NORMAL);
@@ -284,7 +291,7 @@ public:
             int y_hop = h + y_off;
             int tileCounter = 0;
             
-            int make_n_tiles = (frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
+            unsigned long long make_n_tiles = (frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
             
             switch(unfold_tiles_order){
                 case LRTB: // 0
@@ -459,6 +466,15 @@ public:
     }
 
     void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){
+        
+        if(verbose){
+            cout << "HapVideo\n";
+            for(Param* p : params){
+                cout << "\t" << p->name << ": ";
+                p->post();
+                cout << endl;
+            }
+        }
         
         if(bShowHap.value){
             displayHap(width, height, frame_num, common_features, isNRT);

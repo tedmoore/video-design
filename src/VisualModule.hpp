@@ -48,6 +48,10 @@ public:
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;
     float newParamsProb = 1.f;
+    
+    virtual string getName(){
+        return "VisualModule";
+    }
 };
 
 #endif /* VisualContent_hpp */

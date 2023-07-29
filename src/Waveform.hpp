@@ -45,6 +45,10 @@ public:
     bool trianglesDir = true;
     bool scale_size = true;
     
+    string getName(){
+        return "Waveform";
+    }
+    
     void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
         lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
         waveform_line_width = config["modules"]["waveform"]["waveform-line-width"].as<float>();
@@ -77,7 +81,6 @@ public:
         if(verbose){
             cout << "Waveform::display\n";
             cout << "\twfType:   " << wfType << endl;
-            cout << "\trectsDir: " << rectsDir << endl;
         };
             
         switch(wfType){
@@ -110,6 +113,7 @@ public:
                 ofSetColor(255,pow(common_features->at("loudness"),2) * 255); // what should the ikeda alpha be
                 ofSetLineWidth(0);
                 float runningsum = 0;
+                ofSetRectMode(OF_RECTMODE_CORNER);
                 for (int i = 0; i < n_waveforms; i++) {
                     for(int y = 0; y < length; y++){
                         float absval = abs(waveforms[i][y]);
@@ -125,19 +129,21 @@ public:
                 break;
             case GRID:
             {
-                
+                if(verbose){
+                    cout << "\trectsDir: " << rectsDir << endl;
+                };
                 switch(rectsDir){
-                    case WIDTH_HEIGHT:
-                        traverseWidthHeight(width,height,rects_shape);
-                        break;
                     case HEIGHT_WIDTH:
-                        traverseHeightWidth(width,height,rects_shape);
+                        traverseHeightWidth(width,height,rects_shape,verbose);
+                        break;
+                    case WIDTH_HEIGHT:
+                        traverseWidthHeight(width,height,rects_shape, verbose);
                         break;
                     case ANGLE_L:
                         traverseAngleL(width,height,rects_shape);
                         break;
                     case ANGLE_R:
-                        traverseAngleR(width,height,rects_shape);
+                        traverseAngleR(width,height,rects_shape, verbose);
                         break;
                 }
             }
@@ -145,25 +151,44 @@ public:
         }
     }
     
-    void traverseWidthHeight(int width, int height, rectsShape rs){
+    void traverseHeightWidth(int width, int height, rectsShape rs, bool verbose){
         int counter = 0;
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
         
-        for(int x = 0; x < width; x+= side){
-            for(int y = 0; y < height; y += side){
-                drawShape(x,y,side,rs,counter);
+        if(verbose){
+            cout << "\treceived width:  " << width << endl;
+            cout << "\trecieved height: " << height << endl;
+            cout << "\tside: " << side << endl;
+        };
+        
+        int n_down = (height / side) + 1;
+        int n_across = (width / side) + 1;
+        
+        for(int j = 0; j < n_down; j++){
+            for(int i = 0; i < n_across; i++){
+                drawShape(i,j,side,rs,counter);
                 counter++;
             }
         }
     }
     
-    void traverseHeightWidth(int width, int height, rectsShape rs){
+    void traverseWidthHeight(int width, int height, rectsShape rs,bool verbose){
         int counter = 0;
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
         
-        for(int y = 0; y < height; y += side){
-            for(int x = 0; x < width; x += side){
-                drawShape(x,y,side,rs,counter);
+        if(verbose){
+            cout << "\treceived width:  " << width << endl;
+            cout << "\trecieved height: " << height << endl;
+            cout << "\tside: " << side << endl;
+        };
+        
+        int n_down = (height / side) + 1;
+        int n_across = (width / side) + 1;
+        
+        
+        for(int i = 0; i < n_across; i++){
+            for(int j = 0; j < n_down; j++){
+                drawShape(i,j,side,rs,counter);
                 counter++;
             }
         }
@@ -185,12 +210,18 @@ public:
         }
     }
     
-    void traverseAngleR(int width, int height, rectsShape rs){
+    void traverseAngleR(int width, int height, rectsShape rs, bool verbose){
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
         
         int i = (width / side) + 1;
         int j = (height / side) + 1;
         int counter = 0;
+        
+        if(verbose){
+            cout << "\t\tside: " << side << endl;
+            cout << "\t\ti:    " << i << endl;
+            cout << "\t\tj:    " << j << endl;
+        }
         
         for(int x = (i-1); x >= 0; x--){
             counter = getNextRect(x,0,i,j,counter,1,side,rs);
@@ -215,19 +246,19 @@ public:
         return counter++;
     }
     
-    void drawShape(int x, int y, int side, rectsShape rs, int counter){
+    void drawShape(int i, int j, int side, rectsShape rs, int counter){
         switch(rs){
             case SQUARE:
                 ofSetRectMode(OF_RECTMODE_CENTER);
-                drawSquare(x*side,y*side,side,abs(waveforms[int(counter / length)][counter % length]));
+                drawSquare(i*side,j*side,side,abs(waveforms[int(counter / length)][counter % length]));
                 break;
                 
             case CIRCLE:
-                drawCircle(x*side,y*side,side,abs(waveforms[int(counter / length)][counter % length]));
+                drawCircle(i*side,j*side,side,abs(waveforms[int(counter / length)][counter % length]));
                 break;
                 
             case TWO_TRIANGLES:
-                drawTwoTriangles(x*side,y*side,side,counter);
+                drawTwoTriangles(i*side,j*side,side,counter);
                 break;
                 
         }

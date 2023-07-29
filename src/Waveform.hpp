@@ -10,17 +10,17 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include <VisualContent.hpp>
+#include <VisualModule.hpp>
 #include "ofxYAML.h"
 #include <format>
 
-class Waveform: public VisualContent {
+class Waveform: public VisualModule {
 public:
-    enum waveformType { NORM = 0, LISSAJOUS , IKEDA, RECTS };
+    enum waveformType { NORM = 0, LISSAJOUS , IKEDA, GRID };
     enum rectsDirection { HEIGHT_WIDTH = 0, WIDTH_HEIGHT , ANGLE_L , ANGLE_R };
     enum rectsShape { SQUARE = 0, CIRCLE , TWO_TRIANGLES };
     
-    waveformType wfType = RECTS;
+    waveformType wfType = GRID;
     rectsDirection rectsDir = ANGLE_L;
     rectsShape rects_shape = SQUARE;
     
@@ -72,7 +72,13 @@ public:
 
     //void Waveform::update(){}
 
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){
+        
+        if(verbose){
+            cout << "Waveform::display\n";
+            cout << "\twfType:   " << wfType << endl;
+            cout << "\trectsDir: " << rectsDir << endl;
+        };
             
         switch(wfType){
             case LISSAJOUS:
@@ -117,9 +123,8 @@ public:
                 ikeda_avg = ofLerp(ikeda_avg, (runningsum / (n_waveforms * height)), 0.01);
             }
                 break;
-            case RECTS:
+            case GRID:
             {
-                // RECTS
                 
                 switch(rectsDir){
                     case WIDTH_HEIGHT:
@@ -280,7 +285,7 @@ public:
         ofEndShape();
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
 
         wfType = (waveformType)ofRandom(4);
         rectsDir = (rectsDirection)ofRandom(5);
@@ -345,7 +350,7 @@ public:
         }
     }
 
-    void interact(VisualContent* other){}
+    void interact(VisualModule* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
         if(label == "setMaxNWaveforms"){

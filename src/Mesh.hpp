@@ -9,16 +9,16 @@
 #define Mesh_hpp
 
 #include <stdio.h>
-#include "VisualContent.hpp"
+#include "VisualModule.hpp"
 #include "LagUD.hpp"
 #include "FlowField.hpp"
 #include "PointTM.hpp"
 #include "ofMain.h"
-#include "VisualContent.hpp"
+#include "VisualModule.hpp"
 #include "Waveform.hpp"
 #include "ofxYAML.h"
 
-class Mesh: public VisualContent {
+class Mesh: public VisualModule {
 public:
     
     int nPoints;
@@ -115,7 +115,7 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num) {
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num) {
         newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
         
         if (ofRandom(1.0) < 0.8) {
@@ -144,7 +144,7 @@ public:
         newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
     }
 
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) {
+    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose) {
 
 //        ofEnableDepthTest();
         ofEnableLighting();
@@ -220,7 +220,7 @@ public:
         ofDrawLine(a->x() * width, a->y() * height, a->z() * zDir * height, b->x() * width, b->y() * height, b->z() * zDir * height);
     }
 
-    void interact(VisualContent* vc) {
+    void interact(VisualModule* vc) {
         switch(vc->type){
             case WAVEFORM:
                 Waveform* wf = (Waveform*) vc;

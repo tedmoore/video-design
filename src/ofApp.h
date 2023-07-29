@@ -3,7 +3,7 @@
 #include "defines.h"
 #include "ofMain.h"
 #include "ofxOsc.h"
-#include "VisualContent.hpp"
+#include "VisualModule.hpp"
 #include "HapMovie.hpp"
 #include "Waveform.hpp"
 #include "Mesh.hpp"
@@ -42,11 +42,13 @@ public:
     void prUpdate(bool isNRT);
     void runNrtRender(int width,int height);
     void drawBounds();
-    void processConfigFile(string path){
+    void loadConfigFile(string path){
         config.load(path);
         
+        verbose = config["verbose"].as<bool>();
+        
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            active_vc_i[i] = config["initial-active-modules"][i].as<int>();
+            active_module_indices[i] = config["initial-active-modules"][i].as<int>();
         }
         
         onsetSwitchProb = config["onset-switch-prob"].as<float>();
@@ -86,7 +88,7 @@ public:
         }
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            visualModules[i]->processConfigFile(config);
+            modules[i]->processConfigFile(config);
         }
         
         for(int i = 0; i < N_STATE_SAVES; i++){
@@ -110,10 +112,12 @@ public:
         return counter + 1;
     }
     
-    VisualContent* visualModules[N_VISUAL_CONTENTS];
+    bool verbose = false;
+    
+    VisualModule* modules[N_VISUAL_CONTENTS];
     vector<int> vc_i_options;
     
-    int* active_vc_i;
+    int* active_module_indices;
     FlowField ff;
     
     // waveform data
@@ -180,11 +184,11 @@ public:
         ofxYAML dict;
         
         for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-            dict["vc-save-" + ofToString(i)] = visualModules[i]->saveState();
+            dict["vc-save-" + ofToString(i)] = modules[i]->saveState();
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            dict["active_vc" + ofToString(i)] = active_vc_i[i];
+            dict["active_vc" + ofToString(i)] = active_module_indices[i];
         }
         
         dict["postGlitch"] = postGlitch.saveState();
@@ -208,11 +212,11 @@ public:
             ofxYAML::Node child = dict["vc-save-" + ofToString(i)];
             // ====================================================
             
-            visualModules[i]->loadState(child,width,height,vec_history,vector_len,vec_history_length,vec_history_full);
+            modules[i]->loadState(child,width,height,vec_history,vector_len,vec_history_length,vec_history_full);
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            active_vc_i[i] = dict["active_vc" + ofToString(i)].as<int>();
+            active_module_indices[i] = dict["active_vc" + ofToString(i)].as<int>();
         }
         
         ofxYAML::Node child = dict["postGlitch"];

@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include <VisualContent.hpp>
+#include <VisualModule.hpp>
 #include "ofxHapPlayer.h"
 #include "MoviePoint.hpp"
 #include "FlowField.hpp"
@@ -23,7 +23,7 @@
 enum UnfoldTilesOrder { LRTB = 0 , LRBT, RLTB , RLBT , TBLR , TBRL , BTLR , BTRL };
 enum RectTypes { RECT = 0 , BOX , SPHERE };
 
-class HapMovie: public VisualContent {
+class HapMovie: public VisualModule {
 public:
     
     ofxHapPlayer player;
@@ -85,7 +85,7 @@ public:
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
     
-    int n_new_tiles_per_frame = 1;
+    unsigned long long n_new_tiles_per_frame = 1;
     int counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
     ParamEnumWeighted rectType;
@@ -248,7 +248,7 @@ public:
         light.setAmbientColor(0);
     }
 
-    void update(bool isNRT, std::unordered_map<std::string, float>* common_features){
+    void update(bool isNRT, std::unordered_map<std::string, float>* common_features, bool verbose){
         
         if(bReactiveSpeed.value){
             speed.value = ofMap(pow(common_features->at("specFlatness"),3.f),0.f,1.f,0.8,10);
@@ -265,7 +265,7 @@ public:
         }
     }
     
-    void displayHap(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+    void displayHap(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
                         
         if(isNRT){
             img.load(tiffs[int(nrtPlayHead.value)].getAbsolutePath());
@@ -350,7 +350,7 @@ public:
         }
     }
     
-    void displayRects(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+    void displayRects(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         // just getting the pixels
         if(isNRT){
             string path = bitexact_tiffs[int(nrtPlayHead.value)].getAbsolutePath();
@@ -458,7 +458,7 @@ public:
         }
     }
 
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){
         
         if(bShowHap.value){
             displayHap(width, height, frame_num, common_features, isNRT);
@@ -516,7 +516,7 @@ public:
         return speed.value * speedDir.value;
     }
     
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
         
         for(Param* p : params){
             p->newRandom();
@@ -543,7 +543,7 @@ public:
         light.setPosition(lightPosition);
     }
 
-    void interact(VisualContent* other){}
+    void interact(VisualModule* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
         if(label == "speed"){

@@ -5,8 +5,9 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    // the config file is loaded here just so that we know whether
+    // or not this is a nrt render
     config.load("config.yaml");
-
     nrtRender = config["nrt-render"].as<bool>();
         
     int width = 0;
@@ -23,7 +24,7 @@ void ofApp::setup(){
     main_fbo.allocate(width, height);
     postGlitch.setup(&main_fbo);
     
-    active_vc_i = new int[MAX_ACTIVE_MODULES];
+    active_module_indices = new int[MAX_ACTIVE_MODULES];
     
     ofBackground(0);
     ofEnableSmoothing();
@@ -90,7 +91,7 @@ void ofApp::setup(){
     // 0: waveform
     Waveform* wf = new Waveform;
     wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,config);
-    visualModules[vc_counter] = wf;
+    modules[vc_counter] = wf;
     vc_counter = addVCOptions(vc_counter,config["modules"]["waveform"]["prob"].as<int>());
 
     cout << "waveform loaded vc_i_options.size(): " << vc_i_options.size() << endl;
@@ -98,7 +99,7 @@ void ofApp::setup(){
     // 1: mesh
     Mesh* mesh = new Mesh;
     mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,config);
-    visualModules[vc_counter] = mesh;
+    modules[vc_counter] = mesh;
     vc_counter = addVCOptions(vc_counter,config["modules"]["mesh"]["prob"].as<int>());
     
     cout << "mesh loaded vc_i_options.size(): " << vc_i_options.size() << endl;
@@ -106,7 +107,7 @@ void ofApp::setup(){
     // 2: mag lines
     Lines* lines0 = new Lines;
     lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    visualModules[vc_counter] = lines0;
+    modules[vc_counter] = lines0;
     vc_counter = addVCOptions(vc_counter,config["modules"]["mag-lines"]["prob"].as<int>());
     
     cout << "maglines loaded vc_i_options.size(): " << vc_i_options.size() << endl;
@@ -114,7 +115,7 @@ void ofApp::setup(){
     // 3: turtle
     Turtle* turtle0 = new Turtle;
     turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,config);
-    visualModules[vc_counter] = turtle0;
+    modules[vc_counter] = turtle0;
     vc_counter = addVCOptions(vc_counter,config["modules"]["turtle"]["prob"].as<int>());
     
     cout << "turtle loaded vc_i_options.size(): " << vc_i_options.size() << endl;
@@ -133,13 +134,13 @@ void ofApp::setup(){
     }
     
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        cout << "vc index: " << i << visualModules[i]->type << endl;
+        cout << "vc index: " << i << modules[i]->type << endl;
     }
     
-    // add null options to vc options
-//    for(int i = 0; i < 1; i++){
-//        vc_i_options.push_back(-1);
-//    }
+    // add null option to vc options
+    for(int i = 0; i < 1; i++){
+        vc_i_options.push_back(-1);
+    }
     
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;
@@ -154,12 +155,12 @@ void ofApp::setup(){
     // ======================= OSC ================
     osc_receiver.setup(11000);
     
-    processConfigFile("config.yaml");
+    loadConfigFile("config.yaml");
     
     // =========================== INITIALIZATION =====================
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-        active_vc_i[i] = config["initial-active-modules"][i].as<int>();
-        cout << "initial active module " << i << ": " << active_vc_i[i] << endl;
+        active_module_indices[i] = config["initial-active-modules"][i].as<int>();
+        cout << "initial active module " << i << ": " << active_module_indices[i] << endl;
     }
     
     if(config["initial-onset"].as<bool>()){
@@ -286,25 +287,15 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
-//    cout << "reaper marker: " << cmd << endl;
-    
     while(index < tokens.size()){
-        
-//        cout << "index: " << index << " " << tokens[index] << endl;
         
         if(tokens[index] == "onset"){
             onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
-            
         } else if(tokens[index] == "setActiveIndices"){
             int ai[MAX_ACTIVE_MODULES];
-            
-//            cout << "setActiveIndices: ";
-            
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
                 ai[i] = ofToInt(tokens[++index]);
-//                cout << ai[i] << " ";
             }
-//            cout << endl;
             setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
         } else if(tokens[index] == "loadState"){
             load(saves[ofToInt(tokens[++index])],width,height);
@@ -323,7 +314,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
             int moduleIndex = ofToInt(tokens[++index]);
             string label = tokens[++index];
             float val = ofToFloat(tokens[++index]);
-            visualModules[moduleIndex]->receiveOSC(width,height,label,val);
+            modules[moduleIndex]->receiveOSC(width,height,label,val);
         }
         
         index++; // always increment at least one!
@@ -382,14 +373,14 @@ void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width
     vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,config, videoIndex);
     vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
     cout << "\t\tadding " << path << "\t at index " << index << endl;
-    visualModules[index] = vc;
+    modules[index] = vc;
 }
 
 void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long frame_num){
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-        active_vc_i[i] = ai[i];
-        if(active_vc_i[i] >= 0 && visualModules[active_vc_i[i]]->newParamsProb > ofRandom(1.f)){
-            visualModules[active_vc_i[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full,frame_num);
+        active_module_indices[i] = ai[i];
+        if(active_module_indices[i] >= 0 && modules[active_module_indices[i]]->newParamsProb > ofRandom(1.f)){
+            modules[active_module_indices[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full,frame_num);
         }
     }
 }
@@ -414,7 +405,7 @@ void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
                 }
             }
         }else{
-            ai[i] = active_vc_i[i];
+            ai[i] = active_module_indices[i];
             chosen_i.push_back(ai[i]);
         }
     }
@@ -470,7 +461,7 @@ void ofApp::update(){
             onsetSwitchProb = oscMsg.getArgAsFloat(0);
         } else if (address == "/setNewParamsProb"){
             int vc_i = oscMsg.getArgAsInt(0);
-            visualModules[vc_i]->newParamsProb = oscMsg.getArgAsFloat(1);
+            modules[vc_i]->newParamsProb = oscMsg.getArgAsFloat(1);
         } else if (address == "/setVCOptions"){
             int n_options = oscMsg.getArgAsInt(0);
             vc_i_options.resize(n_options);
@@ -481,7 +472,7 @@ void ofApp::update(){
             int index = oscMsg.getArgAsInt(0);
             std::string str = oscMsg.getArgAsString(1);
             float val = oscMsg.getArgAsFloat(2);
-            visualModules[index]->receiveOSC(ofGetWidth(),ofGetHeight(),str, val);
+            modules[index]->receiveOSC(ofGetWidth(),ofGetHeight(),str, val);
         } else if (address == "/waveform") {
             int index = oscMsg.getArgAsInt(0);
 //            cout << "received waveform: " << index << endl;
@@ -536,7 +527,7 @@ void ofApp::update(){
 void ofApp::prUpdate(bool isNRT){
         
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        visualModules[i]->update(isNRT,&common_features);
+        modules[i]->update(isNRT,&common_features,verbose);
     }
 }
 
@@ -554,17 +545,26 @@ void ofApp::renderFrame(int width, int height, unsigned long long frameNum, bool
     ofEnableBlendMode(OF_BLENDMODE_ADD);
     
     if(!debug){
+        
+        if(verbose){
+            cout << "Active Module Indices:";
+            for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+                cout << " " << typeid(modules[active_module_indices[i]]).name();
+            }
+            cout << endl;
+        }
+        
         ff.update(frameNum, &common_features);
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            int index = active_vc_i[i];
+            int index = active_module_indices[i];
             if(index >= 0){
                 for(int j = 0; j < MAX_ACTIVE_MODULES; j++){
-                    if((j != i) && (active_vc_i[j] >= 0)){
-                        visualModules[index]->interact(visualModules[active_vc_i[j]]);
+                    if((j != i) && (active_module_indices[j] >= 0)){
+                        modules[index]->interact(modules[active_module_indices[j]]);
                     }
                 }
-                visualModules[index]->display(width,height,frameNum,&common_features, isNRT);
+                modules[index]->display(width,height,frameNum,&common_features, isNRT,verbose);
             }
         }
     } else {
@@ -581,9 +581,7 @@ void ofApp::draw(){
     renderFrame(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     main_fbo.draw(0,0,ofGetWidth(),ofGetHeight());
     
-//    ofEnableDepthTest(); //this should be off!
-//    drawBounds();
-//    ofDisableDepthTest();
+    if(config["draw-bounds"].as<bool>()){ drawBounds(); };
 }
 
 void ofApp::drawBounds(){
@@ -699,13 +697,13 @@ void ofApp::keyPressed(int key){
         debug = !debug;
     }   
     
-    if (key == 'c') processConfigFile("config.yaml");
+    if (key == 'c') loadConfigFile("config.yaml");
     
     if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
     if (key == 'p'){
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            if(active_vc_i[i] >= 0){
-                visualModules[active_vc_i[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full,ofGetFrameNum());
+            if(active_module_indices[i] >= 0){
+                modules[active_module_indices[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full,ofGetFrameNum());
             }
         }
     }
@@ -793,7 +791,7 @@ void ofApp::windowResized(int w, int h){
     main_fbo.allocate(w, h);
     postGlitch.setup(&main_fbo);
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        visualModules[i]->screenResize(w, h);
+        modules[i]->screenResize(w, h);
     }
 }
 

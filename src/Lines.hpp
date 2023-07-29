@@ -9,13 +9,13 @@
 #define Lines_hpp
 
 #include <stdio.h>
-#include "VisualContent.hpp"
+#include "VisualModule.hpp"
 #include "ofMain.h"
 #include "HapMovie.hpp"
 
 enum lines_direction { HORZ , VERT };
 
-class Lines: public VisualContent {
+class Lines: public VisualModule {
 public:
 
     bool inv;
@@ -43,7 +43,7 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
         chooseDir();
         chooseInv();
         is_borrow_colors = ofRandom(1.f) < 0.5;
@@ -67,7 +67,7 @@ public:
         
     }
 
-    void interact(VisualContent* vc) {
+    void interact(VisualModule* vc) {
         switch(vc->type){
             case HAP:
                 if(can_borrow_colors){
@@ -90,7 +90,7 @@ public:
         inv = ofRandom(1.0) > 0.5;
     }
 
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) {
+    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose) {
         ofSetLineWidth(0);
         ofFill();
         

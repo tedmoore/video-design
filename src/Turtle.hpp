@@ -10,13 +10,12 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include "VisualContent.hpp"
+#include "VisualModule.hpp"
 #include "ofxYAML.h"
 
-class Turtle : public VisualContent {
+class Turtle : public VisualModule {
 public:
     
-    VIS_TYPE type = TURTLE;
     vector<ofVec3f> path;
     int divisor_i = 0;
     vector<int> divisors;
@@ -27,6 +26,7 @@ public:
     
     void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
         
+        type = TURTLE;
         for(int i = 0; i < config["modules"]["turtle"]["divisors"].size(); i++){
             divisors.push_back(config["modules"]["turtle"]["divisors"][i].as<int>());
         }
@@ -45,7 +45,7 @@ public:
         return a && b && c && d;
     }
     
-    void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
+    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){
         
         if(frame_counter < max_frames){
             float angle = 360.f / divisors[divisor_i];
@@ -86,7 +86,7 @@ public:
     }
     
     
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){
+    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
         restartPath(width,height);

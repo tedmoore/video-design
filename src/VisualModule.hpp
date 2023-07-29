@@ -16,23 +16,23 @@
 
 enum VIS_TYPE { NONE , HAP , WAVEFORM, MESH , LINES , TURTLE };
 
-class VisualContent {
+class VisualModule {
 public:
     
-    virtual void interact(VisualContent* other){
+    virtual void interact(VisualModule* other){
         //std::cout << "VisualContent::interact\n";
     }
     virtual void receiveOSC(int width, int height, std::string label, float val){
         std::cout << "VisualContent::receiveOSC\n";
     }
     
-    virtual void display(int width, int height, int frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){}
+    virtual void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){}
     
     virtual void screenResize(int w, int h){}
     
-    virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, int frame_num){}
+    virtual void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){}
     
-    virtual void update(bool isNRT, std::unordered_map<std::string, float>* common_features){}
+    virtual void update(bool isNRT, std::unordered_map<std::string, float>* common_features, bool verbose){}
     
     virtual void processConfigFile(ofxYAML& config){}
     

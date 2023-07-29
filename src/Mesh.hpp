@@ -29,7 +29,7 @@ public:
     int waveformEffectDim = 0;
     bool useFF = false, useFFmaster = true;
     float xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize;
-    int maxLines = 15000;
+    int maxLines = 1500;
     PointTM* points;
     
     float line_width = 1;

@@ -2,7 +2,7 @@
 
 (
 var folder = thisProcess.nowExecutingPath.dirname+/+"data-renders";
-s.options.numInputBusChannels_(4);
+s.options.numInputBusChannels_(8);
 s.options.sampleRate_(44100);
 s.options.device_("Fireface UC Mac (24006457)");
 s.waitForBoot({
@@ -14,12 +14,12 @@ s.waitForBoot({
 	var outfile, render_data = false;
 	var freeables = List.new, minBus, maxBus, lagUBus, lagDBus, nVecChans = 106, analyses;
 
-	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/saccades/reaper/_bounces/221121_170959_saccades-01-mvt-1.wav");
+	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
 	// var audio_buf = Buffer.read(s,"/Volumes/Ted's 10TB My Book (June 2020)/SOUND DESIGNS/spacy space/_bounces/spacy space test with sax.wav");
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/FIM-test.wav");
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/a-movement-itself?.aiff");
-	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_reverb-feedback.wav");
-	// var audio-buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
+	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_reverb-feedback.wav");
+	var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
 
 	if(render_data){
 		outpath.mkdir;
@@ -41,10 +41,15 @@ s.waitForBoot({
 	~oF = NetAddr("127.0.0.1",11000);
 
 	~synth = {
-		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 0, nMels = 40;
+		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 1, nMels = 40;
 		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:1);
-		var sig = SoundIn.ar([2,3]);
+		var sig = SoundIn.ar(2).dup;
+		// var sig = SoundIn.ar(6).dup;
 		var sig_mono = Mix(sig) * 0.5;
+
+		// var sig_mono = SoundIn.ar(0);
+		// var sig = sig_mono.dup;
+
 		var fft = FFT(LocalBuf(2048),sig_mono);
 		var trig = Impulse.kr(frame_rate);
 		var spec = FluidSpectralShape.kr(sig_mono);
@@ -68,11 +73,11 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		Out.ar(0,sig * -20.dbamp);
+		// Out.ar(0,sig * -20.dbamp);
 		nil;
 	}.play;
 
-	Window.closeAll;
+	// Window.closeAll;
 	guis[\win] = Window(bounds:Rect(0,0,1200,800)).front;
 	guis[\dropdown] = PopUpMenu(guis[\win],Rect(0,0,200,20))
 	.allowsReselection_(true)
@@ -138,14 +143,18 @@ s.waitForBoot({
 		guis[\sliders][i] = EZSlider(view,Rect(0,0,40,slHeight),"Val",layout:'vert',action:{
 			arg sl;
 			// "% value: %".format(name.asString.padRight(10),sl.value).postln;
+			~oF.sendMsg("/analysis/%".format(name.asString.toLower),sl.value);
 			if(sl.value > guis[\thresholds][i].value){
 				if(guis[\isAbove][i].not){
-					~oF.sendMsg("/threshold/%".format(name.asString.toLower));
+					~oF.sendMsg("/threshold/%".format(name.asString.toLower),1);
 					"% is above the threshold".format(name).postln;
 				};
 				sl.setColors(sliderBackground:Color.green);
 				guis[\isAbove][i] = true;
 			}{
+				if(guis[\isAbove][i]){
+					~oF.sendMsg("/threshold/%".format(name.asString.toLower),0);
+				};
 				sl.setColors(sliderBackground:Color.white);
 				guis[\isAbove][i] = false;
 			};
@@ -160,7 +169,7 @@ s.waitForBoot({
 	guis[\dropdown].valueAction_(0);
 
 	// s.sync;
-	WaveformToOSC(s,analysis_bus,0,~oF,0,true,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil},action:{
+	WaveformToOSC(s,analysis_bus,0,~oF,0,false,outfile:if(render_data){outpath+/+"waveform-0.csv"}{nil},action:{
 		arg sy;
 		freeables.add(sy);
 	},callback:{
@@ -192,7 +201,8 @@ s.waitForBoot({
 			outfile.writeLine(vec);
 		};
 		if(vec[vec.size - 1] > 0.5){
-			"onset".postln;
+			// "onset".postln;
+			~oF.sendMsg("/onset");
 		};
 		message = ["/vector"] ++ vec;
 
@@ -210,7 +220,7 @@ s.waitForBoot({
 
 	freeables.add(~synth);
 
-	guis[\win].onClose_({freeables.do(_.free)});
+	// guis[\win].onClose_({freeables.do(_.free)});
 
 	if(render_data){
 		audio_buf.duration.wait;
@@ -221,11 +231,11 @@ s.waitForBoot({
 });
 )
 
-~synth.set(\t_force_onset,1);
-~synth.set(\onset_thresh,0.2);
+/*~synth.set(\t_force_onset,1);
+~synth.set(\onset_thresh,0.5);
 ~synth.set(\allow_onsets,0);
 ~synth.set(\allow_onsets,1);
 
 
 
-m.getn(5,{arg v; v.postln});
+m.getn(5,{arg v; v.postln});*/

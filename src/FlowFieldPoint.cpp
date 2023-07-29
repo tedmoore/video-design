@@ -22,7 +22,7 @@ void FlowFieldPoint::randomOrientation() {
     orientation.y = ofRandom(-1.0, 1.0);
     orientation.z = ofRandom(-1.0, 1.0);
     orientation.normalize();
-    orientation.operator*=(20);
+    orientation *= 20;
 }
 
 void FlowFieldPoint::update(float time, float thetaRot, float phiRot, float azoff, float eloff) {
@@ -49,5 +49,6 @@ void FlowFieldPoint::display() {
     ofDrawLine(pos.x, pos.y, -pos.z, pos.x + orientation.x, pos.y + orientation.y, (-pos.z) + orientation.z);
     ofSetColor(255);
     ofSetLineWidth(2);
-    ofDrawSphere(pos.x, pos.y, -pos.z, 1);
+    //ofDrawSphere(pos.x, pos.y, -pos.z, 1);
+    ofDrawBox(pos,1);
 }

@@ -285,7 +285,7 @@ void ofApp::runNrtRender(int width, int height){
             magnitudes[0][i] = ofToFloat(csv_line[i]);
         }
         
-        // ============ UPDATE ================
+        // ============     ================
         prUpdate(true);
         
         // ============ DRAW ====================
@@ -306,7 +306,7 @@ void ofApp::runNrtRender(int width, int height){
     ofExit();
 }
 
-void ofApp::processReaperMarker(string& cmd, int width, int height, int frame_num){
+void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned long long frame_num){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
@@ -354,7 +354,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, int frame_nu
     }
 }
 
-void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, int frame_num){
+void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num){
     
     common_features["specCentroid"] = vector_data[0];
     common_features["specSpread"] = vector_data[1];
@@ -409,7 +409,7 @@ void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width
     visualModules[index] = vc;
 }
 
-void ofApp::setActiveIndices(int* ai,int width, int height, int frame_num){
+void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long frame_num){
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
         active_vc_i[i] = ai[i];
         if(active_vc_i[i] >= 0 && visualModules[active_vc_i[i]]->newParamsProb > ofRandom(1.f)){
@@ -418,7 +418,7 @@ void ofApp::setActiveIndices(int* ai,int width, int height, int frame_num){
     }
 }
 
-void ofApp::onsetOccured(int width, int height,int frame_num){
+void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
 
     // new active vc i
     
@@ -592,7 +592,7 @@ void ofApp::prUpdate(bool isNRT){
     fluidFlow.update(dt);
 }
 
-void ofApp::drawScreen(int width, int height, int frameNum, bool isNRT){
+void ofApp::drawScreen(int width, int height, unsigned long long frameNum, bool isNRT){
     
     main_fbo.begin();
     

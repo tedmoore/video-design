@@ -1,4 +1,3 @@
-ofxFlowTools
 ofxHapPlayer
 ofxOsc
 ofxPostGlitch

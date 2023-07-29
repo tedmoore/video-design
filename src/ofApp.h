@@ -11,9 +11,6 @@
 #include "Lines.hpp"
 #include "ofxPostGlitch.h"
 #include "ofxYAML.h"
-#include "ofxFlowTools.h"
-
-enum FluidFlowOrientation { TOP = 0, RIGHT, BOTTOM, LEFT };
 
 class ofApp : public ofBaseApp{
     
@@ -37,13 +34,12 @@ public:
     void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex);
     void displayIncomingData(int width, int height);
     void onsetOccured(int width, int height, unsigned long long frame_num);
-    void drawScreen(int width, int height, unsigned long long frameNum, bool isNRT);
+    void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
     void setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num);
     void incrementVecHistoryCounter();
     void processReaperMarker(string& cmd,int width, int height, unsigned long long frame_num);
     void setActiveIndices(int* ai,int width, int height, unsigned long long frame_num);
     void prUpdate(bool isNRT);
-    void drawFluidFlow(int width, int height);
     void runNrtRender(int width,int height);
     void drawBounds();
     void processConfigFile(string path){
@@ -63,8 +59,6 @@ public:
         postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
         
         use_sc_onsets = config["use-sc-onsets"].as<bool>();
-        
-        show_flow_prob = config["show-flow-prob"].as<float>();
         
         postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
         postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
@@ -198,10 +192,6 @@ public:
         dict["blendMode"] = (int)blendMode;
         dict["debug"] = debug;
         
-        dict["flow_then_postGlitch"] = flow_then_postGlitch;
-        dict["show_flow_tools"] = show_flow_tools;
-        dict["fluid_flow_orientation"] = (int)fluid_flow_orientation;
-        
         return dict;
     }
     
@@ -231,22 +221,5 @@ public:
         feedback_amt = dict["feedback_amt"].as<int>();
         blendMode = (ofBlendMode)dict["blendMode"].as<int>();
         debug = dict["debug"].as<bool>();
-        
-        flow_then_postGlitch = dict["flow_then_postGlitch"].as<bool>();
-        show_flow_tools = dict["show_flow_tools"].as<bool>();
-        fluid_flow_orientation = (FluidFlowOrientation)dict["fluid_flow_orientation"].as<int>();
     }
-    
-    // === ofxFlowTools ===
-    vector<flowTools::ftFlow*> flows;
-    flowTools::ftOpticalFlow            opticalFlow;
-//    ftVelocityBridgeFlow    velocityBridgeFlow;
-//    ftDensityBridgeFlow        densityBridgeFlow;
-//    ftTemperatureBridgeFlow temperatureBridgeFlow;
-    flowTools::ftCombinedBridgeFlow     combinedBridgeFlow;
-    flowTools::ftFluidFlow                fluidFlow;
-    bool flow_then_postGlitch = true;
-    bool show_flow_tools = false;
-    float show_flow_prob = 0.1;
-    FluidFlowOrientation fluid_flow_orientation = TOP;
 };

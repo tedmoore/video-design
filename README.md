@@ -1,0 +1,3 @@
+## After building...
+
+The `.app` file needs to me moved out of the folder it is in in order to be able to open.

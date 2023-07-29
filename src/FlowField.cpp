@@ -31,10 +31,6 @@ void FlowField::setup(int res, float xmin_, float xmax_, float ymin_, float ymax
             float y = ((yrange / resolution) * j) + ymin;
             for(int k = 0; k < resolution; k++){
                 float z = ((zrange / resolution) * k) + zmin;
-                //                PointTM* pt;
-                //                pt = new PointTM;
-                //                pt->setup(xsize, ysize, xmin, xmax, ymin, ymax, zmin, zmax, zDir);
-                //                points[i] = *pt;
                 FlowFieldPoint* ffp;
                 ffp = new FlowFieldPoint;
                 ffp->setup(x, y, z, i, j, k);
@@ -42,35 +38,6 @@ void FlowField::setup(int res, float xmin_, float xmax_, float ymin_, float ymax
             }
         }
     }
-    //    points = new FlowFieldPoint***[resolution];
-    //    for(int i = 0; i < resolution; i++){
-    //        float x = ((xrange / resolution) * i) + xmin;
-    //        points[i] = new FlowFieldPoint**[resolution];
-//        for(int j = 0; j < 0; j++){
-//            float y = ((yrange / resolution) * j) + ymin;
-//            points[i][j] = new FlowFieldPoint*[resolution];
-//            for(int k = 0; k < resolution; k++){
-//                float z = ((zrange / resolution) * k) + zmin;
-//                FlowFieldPoint* ffp;
-//                ffp = new FlowFieldPoint;
-//                ffp->setup(x,y,z,i,j,k);
-//                points[i][j][k] = ffp;
-//            }
-//        }
-//    }
-    
-//    for (int i = 0; i < resolution; i++) {
-//        float x = ((xrange / resolution) * i) + xmin;
-//        for (int j = 0; j < resolution; j++) {
-//            float y = ((yrange / resolution) * j) + ymin;
-//            for (int k = 0; k < resolution; k++) {
-//                float z = ((zrange / resolution) * k) + zmin;
-//                FlowFieldPoint* ffpt = new FlowFieldPoint;
-//                ffpt->setup(x, y, z, i, j, k);
-//                points[i][j][k] = ffpt;
-//            }
-//        }
-//    }
     
     timeMul.setup(1.0, 0.14, 0);
 }
@@ -96,21 +63,6 @@ void FlowField::display() {
         for (int j = 0; j < resolution; j++) {
             for (int k = 0; k < resolution; k++)
             points[ijk2offset(i, j, k)].display();
-        }
-    }
-}
-
-void FlowField::update(int frame_num, std::unordered_map<std::string, float>* common_features) {
-    float amp = common_features->at("loudness");
-    float diss = common_features->at("sensoryDissonance");
-    float time = (frame_num * 0.0065 * timeMul.update(diss * amp)) + 0.0001;
-    float thetaRot = fmod(frame_num * 0.007,TWO_PI);
-    float phiRot = fmod(frame_num * 0.009,TWO_PI);
-    for (int i = 0; i < resolution; i++) {
-        for (int j = 0; j < resolution; j++) {
-            for (int k = 0; k < resolution; k++) {
-                points[ijk2offset(i, j, k)].update(time, thetaRot, phiRot, azOff, elOff);
-            }
         }
     }
 }

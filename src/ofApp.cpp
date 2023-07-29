@@ -166,30 +166,6 @@ void ofApp::setup(){
         onsetOccured(width, height, 0);
     }
     
-    // ofxFlowTools
-    
-    int densityWidth = 720;
-    int densityHeight = 720;
-    int simulationWidth = densityWidth / 2;
-    int simulationHeight = densityHeight / 2;
-    
-    opticalFlow.setup(simulationWidth, simulationHeight);
-//    velocityBridgeFlow.setup(simulationWidth, simulationHeight);
-//    densityBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
-//    temperatureBridgeFlow.setup(simulationWidth, simulationHeight);
-    combinedBridgeFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
-    fluidFlow.setup(simulationWidth, simulationHeight, densityWidth, densityHeight);
-    
-    flows.push_back(&opticalFlow);
-//    flows.push_back(&velocityBridgeFlow);
-//    flows.push_back(&densityBridgeFlow);
-//    flows.push_back(&temperatureBridgeFlow);
-    flows.push_back(&combinedBridgeFlow);
-    flows.push_back(&fluidFlow);
-    
-    //flowToolsLogo.load("flowtools.png");
-    //fluidFlow.addObstacle(flowToolsLogo.getTexture());
-    
     // =========== NRT RENDERING
     if(nrtRender){
         runNrtRender(width,height);
@@ -289,7 +265,7 @@ void ofApp::runNrtRender(int width, int height){
         prUpdate(true);
         
         // ============ DRAW ====================
-        drawScreen(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
+        renderFrame(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
 
         // save to disk
         main_fbo.readToPixels(pix);
@@ -452,12 +428,9 @@ void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
     }
     
     feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
-    show_flow_tools = ofRandom(1.f) < show_flow_prob;
     
     // ofx post glitch
     postGlitch.newParams();
-    flow_then_postGlitch = ofRandom(1.f) < 0.95;
-    fluid_flow_orientation = (FluidFlowOrientation)ofRandom(4);
     
     for(int i = 0; i < GLITCH_NUM; i++){
         if(ofRandom(1.f) < postGlitchChangeProb){
@@ -565,34 +538,9 @@ void ofApp::prUpdate(bool isNRT){
     for(int i = 0; i < N_VISUAL_CONTENTS; i++){
         visualModules[i]->update(isNRT,&common_features);
     }
-    
-    // ofxFlowTools
-            
-    opticalFlow.setInput(main_fbo.getTexture());
-    
-    opticalFlow.update();
-    
-    combinedBridgeFlow.setVelocity(opticalFlow.getVelocity());
-    combinedBridgeFlow.setDensity(main_fbo.getTexture());
-    float dt = 1.0 / max(ofGetFrameRate(), 1.f); // more smooth as 'real' deltaTime.
-    combinedBridgeFlow.update(dt);
-    
-//    velocityBridgeFlow.setVelocity(opticalFlow.getVelocity());
-//    velocityBridgeFlow.update(dt);
-//    densityBridgeFlow.setDensity(cameraFbo.getTexture());
-//    densityBridgeFlow.setVelocity(opticalFlow.getVelocity());
-//    densityBridgeFlow.update(dt);
-//    temperatureBridgeFlow.setDensity(cameraFbo.getTexture());
-//    temperatureBridgeFlow.setVelocity(opticalFlow.getVelocity());
-//    temperatureBridgeFlow.update(dt);
-    
-    fluidFlow.addVelocity(combinedBridgeFlow.getVelocity());
-    fluidFlow.addDensity(combinedBridgeFlow.getDensity());
-    fluidFlow.addTemperature(combinedBridgeFlow.getTemperature());
-    fluidFlow.update(dt);
 }
 
-void ofApp::drawScreen(int width, int height, unsigned long long frameNum, bool isNRT){
+void ofApp::renderFrame(int width, int height, unsigned long long frameNum, bool isNRT){
     
     main_fbo.begin();
     
@@ -603,8 +551,7 @@ void ofApp::drawScreen(int width, int height, unsigned long long frameNum, bool 
     
     // =============== visualModules ===================
     // TODO: investigate if it makes sense to just have this _always_ be OF_BLENDMODE_ADD
-//    ofEnableBlendMode(OF_BLENDMODE_ADD);
-//    ofEnableBlendMode(blendMode);
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
     
     if(!debug){
         ff.update(frameNum, &common_features);
@@ -624,85 +571,14 @@ void ofApp::drawScreen(int width, int height, unsigned long long frameNum, bool 
         displayIncomingData(width,height);
     }
     
-    // ============ ofxPostGlitch & ofxFlowTools ===============
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    if(flow_then_postGlitch){
-        if(show_flow_tools){
-            //    combinedBridgeFlow.drawInput(0, 0, width, height);
-            //    opticalFlow.drawInput(0, 0, width, height);
-            //    opticalFlow.draw(0, 0, width, height);
-            //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
-            //    combinedBridgeFlow.drawDensity(0, 0, width, height);
-            //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
-            //    fluidFlow.drawObstacle(0, 0, width, height);
-            //    fluidFlow.drawObstacleOffset(0, 0, width, height);
-            //    fluidFlow.drawBuoyancy(0, 0, width, height);
-            //    fluidFlow.drawVorticity(0, 0, width, height);
-            //    fluidFlow.drawDivergence(0, 0, width, height);
-            //    fluidFlow.drawTemperature(0, 0, width, height);
-            //    fluidFlow.drawPressure(0, 0, width, height);
-            //    fluidFlow.drawVelocity(0, 0, width, height);
-            drawFluidFlow(width,height);
-        }
-        main_fbo.end();
-        postGlitch.generateFx(&common_features);
-    } else {
-        main_fbo.end();
-        postGlitch.generateFx(&common_features);
-        if(show_flow_tools){
-            main_fbo.begin();
-            //    combinedBridgeFlow.drawInput(0, 0, width, height);
-            //    opticalFlow.drawInput(0, 0, width, height);
-            //    opticalFlow.draw(0, 0, width, height);
-            //    combinedBridgeFlow.drawVelocity(0, 0, width, height);
-            //    combinedBridgeFlow.drawDensity(0, 0, width, height);
-            //    combinedBridgeFlow.drawTemperature(0, 0, width, height);
-            //    fluidFlow.drawObstacle(0, 0, width, height);
-            //    fluidFlow.drawObstacleOffset(0, 0, width, height);
-            //    fluidFlow.drawBuoyancy(0, 0, width, height);
-            //    fluidFlow.drawVorticity(0, 0, width, height);
-            //    fluidFlow.drawDivergence(0, 0, width, height);
-            //    fluidFlow.drawTemperature(0, 0, width, height);
-            //    fluidFlow.drawPressure(0, 0, width, height);
-            //    fluidFlow.drawVelocity(0, 0, width, height);
-            drawFluidFlow(width,height);
-            main_fbo.end();
-        }
-    }
-}
-
-void ofApp::drawFluidFlow(int width, int height){
-    switch(fluid_flow_orientation){
-        case TOP:
-            fluidFlow.draw(0, 0, width, height);
-            break;
-        case RIGHT:
-            ofPushMatrix();
-//            ofRotateDeg(90, width/2, height/2, 0);
-            ofTranslate(width/2,height/2);
-            ofRotateZDeg(90);
-            fluidFlow.draw(height * -0.5, width * -0.5, height, width);
-            ofPopMatrix();
-            break;
-        case BOTTOM:
-            fluidFlow.draw(width, height, -width, -height);
-            break;
-        case LEFT:
-            ofPushMatrix();
-            //ofRotateDeg(-90, width/2, height/2, 0);
-            ofTranslate(width/2,height/2);
-            ofRotateZDeg(-90);
-            fluidFlow.draw(height * -0.5, width * -0.5, height, width);
-            ofPopMatrix();
-            break;
-    }
-    
+    main_fbo.end();
+    postGlitch.generateFx(&common_features);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    drawScreen(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
+    renderFrame(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     main_fbo.draw(0,0,ofGetWidth(),ofGetHeight());
     
 //    ofEnableDepthTest(); //this should be off!
@@ -821,31 +697,7 @@ void ofApp::displayIncomingData(int width, int height){
 void ofApp::keyPressed(int key){
     if(key == 'd'){
         debug = !debug;
-    }
-    
-//    if(key == 'g'){
-//        flow_then_postGlitch = !flow_then_postGlitch;
-//    }
-    
-    // post glitch manual controls
-//    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , true);
-//    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , true);
-//    if (key == '3') postGlitch.setFx(OFXPOSTGLITCH_SHAKER            , true);
-//    if (key == '4') postGlitch.setFx(OFXPOSTGLITCH_CUTSLIDER        , true);
-//    if (key == '5') postGlitch.setFx(OFXPOSTGLITCH_TWIST            , true);
-//    if (key == '6') postGlitch.setFx(OFXPOSTGLITCH_OUTLINE        , true);
-//    if (key == '7') postGlitch.setFx(OFXPOSTGLITCH_NOISE            , true);
-//    if (key == '8') postGlitch.setFx(OFXPOSTGLITCH_SLITSCAN        , true);
-//    if (key == '9') postGlitch.setFx(OFXPOSTGLITCH_SWELL            , true);
-//    if (key == '0') postGlitch.setFx(OFXPOSTGLITCH_INVERT            , true);
-//
-//    if (key == 'q') postGlitch.setFx(OFXPOSTGLITCH_CR_HIGHCONTRAST, true);
-//    if (key == 'w') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUERAISE    , true);
-//    if (key == 'e') postGlitch.setFx(OFXPOSTGLITCH_CR_REDRAISE    , true);
-//    if (key == 'r') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENRAISE    , true);
-//    if (key == 't') postGlitch.setFx(OFXPOSTGLITCH_CR_BLUEINVERT    , true);
-//    if (key == 'y') postGlitch.setFx(OFXPOSTGLITCH_CR_REDINVERT    , true);
-//    if (key == 'u') postGlitch.setFx(OFXPOSTGLITCH_CR_GREENINVERT    , true);
+    }   
     
     if (key == 'c') processConfigFile("config.yaml");
     

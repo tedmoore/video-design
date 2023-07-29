@@ -28,6 +28,20 @@ public:
     float azOff;
     float elOff;
     
+    void update(unsigned long long frame_num, std::unordered_map<std::string, float>* common_features) {
+        float amp = common_features->at("loudness");
+        float diss = common_features->at("sensoryDissonance");
+        float time = (frame_num * 0.0065 * timeMul.update(diss * amp)) + 0.0001;
+        float thetaRot = fmod(frame_num * 0.007,TWO_PI);
+        float phiRot = fmod(frame_num * 0.009,TWO_PI);
+        for (int i = 0; i < resolution; i++) {
+            for (int j = 0; j < resolution; j++) {
+                for (int k = 0; k < resolution; k++) {
+                    points[ijk2offset(i, j, k)].update(time, thetaRot, phiRot, azOff, elOff);
+                }
+            }
+        }
+    }
 };
 
 #endif /* FlowField_hpp */

@@ -4,7 +4,7 @@
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "VisualModule.hpp"
-#include "HapMovie.hpp"
+#include "VideoModule.hpp"
 #include "Waveform.hpp"
 #include "Mesh.hpp"
 #include "Turtle.hpp"
@@ -87,7 +87,7 @@ public:
             }
         }
         
-        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+        for(int i = 0; i < n_modules; i++){
             modules[i]->processConfigFile(config);
         }
         
@@ -114,7 +114,8 @@ public:
     
     bool verbose = false;
     
-    VisualModule* modules[N_VISUAL_CONTENTS];
+    int n_modules = 0;
+    vector<VisualModule*> modules;
     vector<int> vc_i_options;
     
     int* active_module_indices;
@@ -183,7 +184,7 @@ public:
     ofxYAML save(){
         ofxYAML dict;
         
-        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+        for(int i = 0; i < n_modules; i++){
             dict["vc-save-" + ofToString(i)] = modules[i]->saveState();
         }
         
@@ -201,7 +202,7 @@ public:
     
     void load(ofxYAML &dict, int width, int height){
         
-        for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+        for(int i = 0; i < n_modules; i++){
             
             // ====================================================
             // this line actually is important because i think

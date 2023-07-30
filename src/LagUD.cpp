@@ -14,11 +14,8 @@ void LagUD::setup(float upLerp_, float downLerp_, float initValue) {
 }
 
 float LagUD::update(float newValue) {
-    if (newValue > value) {
-        value = ofLerp(value,newValue,upLerp);
-    } else {
-        value = ofLerp(value,newValue,downLerp);
-    }
-    //println(value);
+    const float lerpFactor = (newValue > value) ? upLerp : downLerp;
+    value = ofLerp(value, newValue, lerpFactor);
     return value;
 }
+

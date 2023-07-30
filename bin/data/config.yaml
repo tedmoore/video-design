@@ -21,13 +21,13 @@ show-flow-prob: 0.99 # 0.16
 
 modules:
   waveform: # module index: 0
-    prob: 3 # int because it's how many times to put it in the pool of options
+    prob: 2 # int because it's how many times to put it in the pool of options
     lissajous-line-width: 1.0 # must be a float
     waveform-line-width: 1.0 # must be a float
     ikeda-prob: 0.2
     max-waveforms: 2
   mesh: # module index: 1
-    prob: 3 # int because it's how many times to put it in the pool of options
+    prob: 2 # int because it's how many times to put it in the pool of options
     line-width: 1.0 # must be a float
     point-size: 3.0 # must be a float
     flow-field-influence: 0.16
@@ -37,7 +37,7 @@ modules:
     jitter-mul: 0.003
     dist-thresh-mul: 0.015 # 0.15
   mag-lines: # module index: 2
-    prob: 3 # int because it's how many times to put it in the pool of options
+    prob: 2 # int because it's how many times to put it in the pool of options
   turtle: # module index: 3
     divisors: [ 3, 4, 6 ]
     prob: 1 # int because it's how many times to put it in the pool of options
@@ -45,20 +45,30 @@ modules:
 
 videos:
   - # module index: 4
-    name: "west-rock-stylegan-tiled"
-    prob: 1
-    show-hap-prob: 0.2
-    show-rects-prob: 0.4
+    name: "westrock"
+    prob: 2
+    sub-videos: ["tiled"]
+    show-hap-prob: 0.4
     use-ff-prob: 0.18
     boxes-prob: 0.2
     speed-min: 0.9
     speed-max: 10.0 # must be a float
     speed-pow: 4.0 # must be a float
   - # module index: 5
-    name: "test"
-    prob: 1
-    show-hap-prob: 0.2
-    show-rects-prob: 0.4
+    name: "leaf"
+    prob: 2
+    sub-videos: ["original","canny"]
+    show-hap-prob: 0.4
+    use-ff-prob: 0.18
+    boxes-prob: 0.2
+    speed-min: 0.9
+    speed-max: 10.0 # must be a float
+    speed-pow: 4.0 # must be a float
+  - # module index: 6
+    name: "tree"
+    prob: 2
+    sub-videos: ["original","max-area"]
+    show-hap-prob: 0.4
     use-ff-prob: 0.18
     boxes-prob: 0.2
     speed-min: 0.9

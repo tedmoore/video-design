@@ -19,23 +19,69 @@
 #include "Param.hpp"
 
 #define N_CLUSTERS 4
+#define VIDEO_MINI_WIDTH 32
+#define VIDEO_MINI_HEIGHT 32
+#define N_MOVIEPOINTS 1024 // **MUST BE VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT
 
 enum UnfoldTilesOrder { LRTB = 0 , LRBT, RLTB , RLBT , TBLR , TBRL , BTLR , BTRL };
 enum RectTypes { RECT = 0 , BOX , SPHERE };
 
-class HapMovie: public VisualModule {
+class Video{
 public:
-    
-    ofxHapPlayer player;
-    ofTexture texture;
-    ofVec3f points[4];
+    ofxHapPlayer hap;
     ofVideoPlayer mini_vid;
-    ofPixels mini_pix;
-    
     ofColor center_colors[N_CLUSTERS];
     int center_color_indices[N_CLUSTERS];
     
     bool clustered = true;
+    vector<ofFile> pngs;
+    vector<ofFile> bitexact_pngs;
+    string src_path;
+    
+    void setup(string dir, bool isNRT){
+        
+        src_path = dir;
+        
+        if(isNRT){ // is non-real-time
+            ofDirectory pngs_dir(dir + "/frames");
+            cout << "\t\t" << pngs_dir.getAbsolutePath() << "\n";
+            pngs_dir.listDir();
+            pngs_dir.sort();
+            pngs = pngs_dir.getFiles();
+        
+            ofDirectory bitexact_pngs_dir(dir + "/mini-frames");
+            cout << "\t\t" << bitexact_pngs_dir.getAbsolutePath() << "\n";
+            bitexact_pngs_dir.listDir();
+            bitexact_pngs_dir.sort();
+            bitexact_pngs = bitexact_pngs_dir.getFiles();
+            
+        } else { // is real-time
+            hap.load(dir + "/hap.mov");
+            hap.setLoopState(OF_LOOP_NORMAL);
+            hap.play();
+            hap.setVolume(0);
+
+            mini_vid.load(dir + "/mini.mp4");
+            mini_vid.setVolume(0);
+            mini_vid.setLoopState(OF_LOOP_NORMAL);
+            mini_vid.play();
+        }
+        
+        for(int i = 0; i < N_CLUSTERS; i++){
+            center_color_indices[i] = ofRandom(MAGNITUDES_LEN);
+        }
+    }
+};
+
+class VideoModule: public VisualModule {
+public:
+    
+    vector<Video*> videos;
+    
+    ofTexture texture;
+    ofVec3f points[4];
+    ofPixels mini_pix;
+    
     int cluster_freq;
     
     float** mags;
@@ -45,18 +91,11 @@ public:
     int alpha = 255;
         
     float avg_mag = 0.5;
-    
-    int mini_width = 32;
-    int mini_height = 32;
-    
-    vector<ofFile> tiffs;
-    vector<ofFile> bitexact_tiffs;
-    
+            
     ofImage img;
     ofImage mini_img;
-        
-    MoviePoint* moviePoints;
-    int nMoviePoints;
+    
+    vector<MoviePoint> moviePoints;
     FlowField *ff;
     
     bool bUseFFMaster = true;
@@ -70,7 +109,6 @@ public:
     ParamFloat speed;
     ParamIntList speedDir;
     ParamBool bShowHap;
-    ParamBool bShowRects;
     ParamBool bUseFF;
     ParamBool bReactiveSpeed;
     ParamBool bTile;
@@ -84,27 +122,45 @@ public:
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
+    ParamInt currentIndex;
     
     unsigned long long n_new_tiles_per_frame = 1;
-    int counting_tiles_start_frame = 0;
+    unsigned long long counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
     
-    //TODO: I'm not sure this is actually a weighted selection...
-    // see source code of ParamEnumWeighted
     ParamEnumWeighted rectType;
     
     ofLight light;
     ofVec3f lightPosition = {0,0,0};
     
-    string src_path;
-
     string getName(){
         return "HapMovie";
     }
     
+    Video* getCurrentVideo(){
+        return videos[currentIndex.value];
+    }
+    
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
         
-        src_path = path;
+        ofDirectory topDir("videos/" + path);
+        vector<ofFile> subDirs = topDir.getFiles();
+        videos.resize(subDirs.size());
+        
+        for(int i = 0; i < subDirs.size(); i++){
+            Video* v = new Video();
+            videos[i] = v;
+            videos[i]->setup(subDirs[i].getAbsolutePath(),isNRT);
+        }
+        
+        if(isNRT){
+            // is nrt
+            mini_img.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_IMAGE_COLOR);
+            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_PIXELS_RGBA);
+        } else {
+            // is real-time
+            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, videos[0]->mini_vid.getPixelFormat());
+        }
         
         // speed
         speed.name = "speed";
@@ -123,11 +179,6 @@ public:
         bShowHap.name = "showHap";
         bShowHap.trueProb = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
         params.push_back(&bShowHap);
-        
-        // show_rects
-        bShowRects.name = "showRects";
-        bShowRects.trueProb = config["videos"][videoIndex]["show-rects-prob"].as<float>(); // 0.4
-        params.push_back(&bShowRects);
         
         // use_ff
         bUseFF.name = "bUseFF";
@@ -190,12 +241,16 @@ public:
         rectType.setup({0,0,0,0,1,1,1,1,2},0);
         params.push_back(&rectType);
         
+        // nrtPlayHead
         nrtPlayHead.name = "nrtPlayHead";
         nrtPlayHead.setup(0.f,total_frames,1.f,0.f);
         params.push_back(&nrtPlayHead);
         
-        n_mag = n_mag_;
-        mag_len = mag_len_;
+        // currentIndex
+        currentIndex.name = "currentIndex";
+        currentIndex.setup(0,videos.size(),0); // max argument is just used for randomness, it is [min,max)
+        params.push_back(&currentIndex);
+        
         mags = mags_;
         points[0] = pt0;
         points[1] = pt1;
@@ -206,52 +261,15 @@ public:
         
         ofDirectory dir(path);
         
-        if(isNRT){ // is non-real-time
-            ofDirectory tiffs_dir(dir.getAbsolutePath() + "/frames");
-            cout << "\t\t" << tiffs_dir.getAbsolutePath() << "\n";
-            tiffs_dir.listDir();
-            tiffs_dir.sort();
-            tiffs = tiffs_dir.getFiles();
-        
-            ofDirectory bitexact_tiffs_dir(dir.getAbsolutePath() + "/mini-frames");
-            cout << "\t\t" << bitexact_tiffs_dir.getAbsolutePath() << "\n";
-            bitexact_tiffs_dir.listDir();
-            bitexact_tiffs_dir.sort();
-            bitexact_tiffs = bitexact_tiffs_dir.getFiles();
-            
-            mini_img.allocate(mini_width, mini_height, OF_IMAGE_COLOR);
-            mini_pix.allocate(mini_width, mini_height, OF_PIXELS_RGBA);
-            
-            total_frames = (bitexact_tiffs.size() < tiffs.size()) ? bitexact_tiffs.size() : tiffs.size();
-        } else { // is real-time
-            player.load(dir.getAbsolutePath() + "/hap.mov");
-            player.setLoopState(OF_LOOP_NORMAL);
-            player.play();
-            player.setVolume(0);
-
-            mini_vid.load(dir.getAbsolutePath() + "/mini.mp4");
-            mini_vid.setVolume(0);
-            mini_vid.setLoopState(OF_LOOP_NORMAL);
-            mini_vid.play();
-            mini_pix.allocate(mini_vid.getWidth(),mini_vid.getHeight(),mini_vid.getPixelFormat());
-        }
-        
         cluster_freq = config["target-framerate"].as<int>() * ofRandom(15,25);
         
         type = HAP;
         
-        for(int i = 0; i < N_CLUSTERS; i++){
-            center_color_indices[i] = ofRandom(mag_len);
-        }
-        
-        nMoviePoints = mini_width * mini_height;
-        
-        moviePoints = new MoviePoint[nMoviePoints];
-        for(int i = 0; i < mini_width; i++){
-            for(int j = 0; j < mini_height; j++){
-                MoviePoint *mp = new MoviePoint;
-                mp->setup(i / float(mini_width),j / float(mini_height));
-                moviePoints[(j * mini_width) + i] = *mp;
+        moviePoints.resize(VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT);
+        for(int i = 0; i < VIDEO_MINI_WIDTH; i++){
+            for(int j = 0; j < VIDEO_MINI_HEIGHT; j++){
+                cout << "setup movie point " << i << " " << j << endl;
+                moviePoints[(j * VIDEO_MINI_WIDTH) + i].setup(i / float(VIDEO_MINI_WIDTH),j / float(VIDEO_MINI_HEIGHT));
             }
         }
         
@@ -265,24 +283,25 @@ public:
             speed.value = ofMap(pow(common_features->at("specFlatness"),3.f),0.f,1.f,0.8,10);
         }
         
-        player.setSpeed(getSpeed());
-        
         if(isNRT){
             nrtPlayHead.value += getSpeed();
             while(nrtPlayHead.value < 0) nrtPlayHead.value += total_frames;
             while(nrtPlayHead.value >= total_frames) nrtPlayHead.value -= total_frames;
         } else {
-            mini_vid.update();
+            for(int i = 0; i < videos.size(); i++){
+                videos[i]->mini_vid.update();
+                videos[i]->hap.setSpeed(getSpeed());
+            }
         }
     }
     
     void displayHap(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
                         
         if(isNRT){
-            img.load(tiffs[int(nrtPlayHead.value)].getAbsolutePath());
+            img.load(videos[currentIndex.value]->pngs[int(nrtPlayHead.value)].getAbsolutePath());
             texture = img.getTexture();
         } else {
-            texture = *player.getTexture();
+            texture = *videos[currentIndex.value]->hap.getTexture();
         }
         
         if(bTile.value){
@@ -364,18 +383,18 @@ public:
     void displayRects(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         // just getting the pixels
         if(isNRT){
-            string path = bitexact_tiffs[int(nrtPlayHead.value)].getAbsolutePath();
+            string path = videos[currentIndex.value]->bitexact_pngs[int(nrtPlayHead.value)].getAbsolutePath();
             mini_img.load(path);
             mini_pix = mini_img.getPixels();
         } else {
-            if(mini_vid.isFrameNew()) mini_pix = mini_vid.getPixels();
+            if(videos[currentIndex.value]->mini_vid.isFrameNew()) mini_pix = videos[currentIndex.value]->mini_vid.getPixels();
         }
 
         ofSetLineWidth(1);
         int i_counter = 0;
         float summingmag = 0;
-        float rec_w = (width / mini_width) * rect_w_mul.value;
-        float rec_h = (height / mini_height) * rect_h_mul.value;
+        float rec_w = (width / VIDEO_MINI_WIDTH) * rect_w_mul.value;
+        float rec_h = (height / VIDEO_MINI_HEIGHT) * rect_h_mul.value;
         int i = 0;
         int x_pos_scaled = 0;
         
@@ -383,63 +402,61 @@ public:
         ofEnableLighting();
         light.enable();
         
-        while(i < mini_width && x_pos_scaled < width){
+        while(i < VIDEO_MINI_WIDTH && x_pos_scaled < width){
             int j = 0;
             int y_pos_scaled = 0;
-            while(j < mini_height && y_pos_scaled < height){
+            while(j < VIDEO_MINI_HEIGHT && y_pos_scaled < height){
                 ofColor col = mini_pix.getColor(i,j);
                 
                 for(int i = 0; i < N_CLUSTERS; i++){
-                    if(center_color_indices[i] == i_counter){
-                        center_colors[i] = col;
+                    if(videos[currentIndex.value]->center_color_indices[i] == i_counter){
+                        videos[currentIndex.value]->center_colors[i] = col;
                         break;
                     }
                 }
-                if(bShowRects.value){
-                    // showing the rectangles
-                    
-                    // figure out the alpha
-                    float local_mag = mags[0][i_counter];
-                    summingmag += local_mag;
-                    float local_alpha = ofMap(pow(local_mag,0.5),0.f,1.f,-10.f,255.f);
-                    
-                    int x = x_pos_scaled;
-                    int y = y_pos_scaled;
-                    int z = ofMap(local_mag,0.f,1.f,height * 0.5,0) * bZShiftBoxes.value * ((RectTypes)rectType.value != SPHERE);
                 
-                    // get the point at this i, j and apply the force from the ff
-                    MoviePoint &mp = moviePoints[(j * mini_width) + i];
-                    if(bUseFF.value && bUseFFMaster){
-                        ofVec3f force = ff->getOrientationFromPos(mp.pos);
-                        force.normalize();
-                        force.operator*=(common_features->at("specCentroid") * 0.002);
-                        force.z = 0.0005 * common_features->at("specFlatness");
-                        mp.applyForce(&force);
-                        mp.move(common_features->at("loudness") * 0.05);
-                        x = mp.pos.x * rect_w_mul.value * width;
-                        y = mp.pos.y * rect_h_mul.value * height;
-                        z = mp.pos.z * rect_h_mul.value * height * zDir;
-                    }
-                    
-                    // move to the point on the screen that we want to put the rectangle
-                    ofPushMatrix();
-                    ofTranslate(x, y, z);
-                    
-                    ofFill();
-                    ofSetColor(col,local_alpha);
-                    
-                    ofSetRectMode(OF_RECTMODE_CENTER);
-                    float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
-                    drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag, j);
-                    
-                    if((local_mag > avg_mag) && ((RectTypes)rectType.value != SPHERE)){
-                        if(ofRandom(1.f) < 0.9999) ofNoFill();
-                        ofSetColor(255,mp.rect_outline_alpha.update(255));
-                        drawRect(rec_w * 0.5,rec_h * 0.5,box_depth * -0.5,rec_w,rec_h,box_depth,local_mag,j);
-                    }
-                    
-                    ofPopMatrix();
+                // figure out the alpha
+                float local_mag = mags[0][i_counter];
+                summingmag += local_mag;
+                float local_alpha = ofMap(pow(local_mag,0.5),0.f,1.f,-10.f,255.f);
+                
+                int x = x_pos_scaled;
+                int y = y_pos_scaled;
+                int z = ofMap(local_mag,0.f,1.f,height * 0.5,0) * bZShiftBoxes.value * ((RectTypes)rectType.value != SPHERE);
+                
+                // get the point at this i, j and apply the force from the ff
+                MoviePoint &mp = moviePoints[(j * VIDEO_MINI_WIDTH) + i];
+                if(bUseFF.value && bUseFFMaster){
+                    ofVec3f force = ff->getOrientationFromPos(mp.pos);
+                    force.normalize();
+                    force.operator*=(common_features->at("specCentroid") * 0.002);
+                    force.z = 0.0005 * common_features->at("specFlatness");
+                    mp.applyForce(&force);
+                    mp.move(common_features->at("loudness") * 0.05);
+                    x = mp.pos.x * rect_w_mul.value * width;
+                    y = mp.pos.y * rect_h_mul.value * height;
+                    z = mp.pos.z * rect_h_mul.value * height * zDir;
                 }
+                
+                // move to the point on the screen that we want to put the rectangle
+                ofPushMatrix();
+                ofTranslate(x, y, z);
+                
+                ofFill();
+                ofSetColor(col,local_alpha);
+                
+                ofSetRectMode(OF_RECTMODE_CENTER);
+                float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
+                drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag, j);
+                
+                if((local_mag > avg_mag) && ((RectTypes)rectType.value != SPHERE)){
+                    if(ofRandom(1.f) < 0.9999) ofNoFill();
+                    ofSetColor(255,mp.rect_outline_alpha.update(255));
+                    drawRect(rec_w * 0.5,rec_h * 0.5,box_depth * -0.5,rec_w,rec_h,box_depth,local_mag,j);
+                }
+                
+                ofPopMatrix();
+                
                 i_counter++;
                 j++;
                 y_pos_scaled += rec_h;
@@ -472,20 +489,19 @@ public:
     void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose){
         
         if(verbose){
-            cout << "HapVideo\n";
-            cout << "\tsrc: " << src_path << endl;
+            cout << "VideoModule::display\n";
+            cout << "\tsrc: " << videos[currentIndex.value]->src_path << endl;
             for(Param* p : params){
                 cout << "\t" << p->name << ": ";
                 p->post();
                 cout << endl;
             }
+            cout << "\tunfold tiles order: " << unfold_tiles_order << endl;
         }
         
         if(bShowHap.value){
             displayHap(width, height, frame_num, common_features, isNRT);
-        }
-        
-        if(bShowRects.value){
+        } else {
             displayRects(width, height, frame_num, common_features, isNRT);
         }
         
@@ -505,7 +521,7 @@ public:
         dict["lightPosition"] = lightPosition;
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            dict["center_color_indices" + ofToString(i)] = center_color_indices[i];
+            dict["center_color_indices" + ofToString(i)] = videos[currentIndex.value]->center_color_indices[i];
         }
         
         return dict;
@@ -525,10 +541,10 @@ public:
         lightPosition = dict["lightPosition"].as<ofVec3f>();
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
+            videos[currentIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
         }
         
-        for(int i = 0; i < nMoviePoints; i ++){
+        for(int i = 0; i < N_MOVIEPOINTS; i ++){
             moviePoints[i].resetPos();
         }
     }
@@ -546,10 +562,10 @@ public:
         unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            center_color_indices[i] = ofRandom(mag_len);
+            videos[currentIndex.value]->center_color_indices[i] = ofRandom(mag_len);
         }
        
-        for(int i = 0; i < nMoviePoints; i ++){
+        for(int i = 0; i < N_MOVIEPOINTS; i ++){
             moviePoints[i].resetPos();
         }
         
@@ -572,12 +588,12 @@ public:
             speedDir.value = (val > 0) + ((val < 0) * -1);
             bReactiveSpeed.value = false;
         } else if(label == "position"){
-//            nrt_playHead
+            //            nrt_playHead
             nrtPlayHead.value = val * (total_frames-1);
-//            mini_video
-            mini_vid.setPosition(val);
-//            player
-            player.setPosition(val);
+            //            mini_video
+            videos[currentIndex.value]->mini_vid.setPosition(val);
+            //            hap
+            videos[currentIndex.value]->hap.setPosition(val);
         }
     }
 

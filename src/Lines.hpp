@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "VisualModule.hpp"
 #include "ofMain.h"
-#include "HapMovie.hpp"
+#include "VideoModule.hpp"
 
 enum lines_direction { HORZ , VERT };
 
@@ -71,10 +71,10 @@ public:
         switch(vc->type){
             case HAP:
                 if(can_borrow_colors){
-                    HapMovie* hm = (HapMovie*) vc;
-                    if(hm->clustered){
+                    VideoModule* vm = (VideoModule*) vc;
+                    if(vm->getCurrentVideo()->clustered){
                         for(int i = 0; i < N_CLUSTERS; i++){
-                            borrowed_colors[i] = hm->center_colors[i];
+                            borrowed_colors[i] = vm->getCurrentVideo()->center_colors[i];
                         }
                     }
                 }

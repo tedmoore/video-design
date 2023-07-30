@@ -109,7 +109,7 @@
 		76305C2A2D12594585531AFF /* emit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emit.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/emit.h"; sourceTree = SOURCE_ROOT; };
 		7689F8A0F3D0B7635A8C3104 /* ofxOscArg.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscArg.h; path = ../../../addons/ofxOsc/src/ofxOscArg.h; sourceTree = SOURCE_ROOT; };
 		77AC83A7566E052535EFA339 /* AudioResampler.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioResampler.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioResampler.h; sourceTree = SOURCE_ROOT; };
-		7927B6DF17D7A3588E995DA7 /* HapMovie.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = HapMovie.hpp; path = src/HapMovie.hpp; sourceTree = SOURCE_ROOT; };
+		7927B6DF17D7A3588E995DA7 /* VideoModule.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoModule.hpp; path = src/VideoModule.hpp; sourceTree = SOURCE_ROOT; };
 		81967292BFC87A0144BD32C6 /* ofxOscSender.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscSender.cpp; path = ../../../addons/ofxOsc/src/ofxOscSender.cpp; sourceTree = SOURCE_ROOT; };
 		820CE049132FFD959FDD1A4D /* parser.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = parser.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/parser.h"; sourceTree = SOURCE_ROOT; };
 		883BAAD477BA5093693B5C2E /* memory.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = memory.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/memory.h"; sourceTree = SOURCE_ROOT; };
@@ -972,7 +972,7 @@
 				9BDD617824DC467BA47CF347 /* PointTM.hpp */,
 				E58EE9F34BBF673FC5416569 /* FlowField.cpp */,
 				982E6E7FB6F1565B8BD352BC /* Waveform.hpp */,
-				7927B6DF17D7A3588E995DA7 /* HapMovie.hpp */,
+				7927B6DF17D7A3588E995DA7 /* VideoModule.hpp */,
 				6B28D788707CEAF5202F5634 /* LagUD.hpp */,
 				B35F955F8575F028AECDEF42 /* Param.hpp */,
 				D698A99C85D3DD72B413F772 /* FlowFieldPoint.cpp */,

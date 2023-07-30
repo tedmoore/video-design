@@ -9,7 +9,8 @@
 #define defines_h
 
 #define MAX_ACTIVE_MODULES 4
-#define N_VISUAL_CONTENTS 6
 #define N_STATE_SAVES 10
+#define N_MAGNITUDES 1
+#define MAGNITUDES_LEN 513
 
 #endif /* defines_h */

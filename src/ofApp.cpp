@@ -88,6 +88,8 @@ void ofApp::setup(){
     
     vc_i_options.clear();
     
+    modules.resize(config["modules"].size() + config["videos"].size());
+    
     // 0: waveform
     Waveform* wf = new Waveform;
     wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,config);
@@ -133,14 +135,8 @@ void ofApp::setup(){
         cout << "\t\tvc_counter = " << vc_counter << "\n\n";
     }
     
-    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
-        cout << "vc index: " << i << modules[i]->type << endl;
-    }
-    
-    // add null option to vc options
-    for(int i = 0; i < 1; i++){
-        vc_i_options.push_back(-1);
-    }
+    // set how many modules there are total
+    n_modules = vc_counter;
     
     // ============ setup vecHistory
     vec_history_length = mesh->nPoints;
@@ -368,7 +364,7 @@ void ofApp::incrementVecHistoryCounter(){
 }
 
 void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex){
-    HapMovie* vc = new HapMovie;
+    VideoModule* vc = new VideoModule;
     cout << "\t\tofApp::newHapMovie loading " << path << endl;
     vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,config, videoIndex);
     vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
@@ -526,7 +522,7 @@ void ofApp::update(){
 
 void ofApp::prUpdate(bool isNRT){
         
-    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+    for(int i = 0; i < n_modules; i++){
         modules[i]->update(isNRT,&common_features,verbose);
     }
 }
@@ -790,7 +786,7 @@ void ofApp::mouseExited(int x, int y){
 void ofApp::windowResized(int w, int h){
     main_fbo.allocate(w, h);
     postGlitch.setup(&main_fbo);
-    for(int i = 0; i < N_VISUAL_CONTENTS; i++){
+    for(int i = 0; i < n_modules; i++){
         modules[i]->screenResize(w, h);
     }
 }

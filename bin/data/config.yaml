@@ -3,7 +3,7 @@ nrt-render: false
 draw-bounds: false
 csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
 max-frames: 99999
-use-sc-onsets: false
+use-sc-onsets: true
 initial-active-modules: [0,1,3,4] # only 4!
 initial-onset: false
 verbose: true

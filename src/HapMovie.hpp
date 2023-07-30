@@ -95,12 +95,16 @@ public:
     
     ofLight light;
     ofVec3f lightPosition = {0,0,0};
+    
+    string src_path;
 
     string getName(){
         return "HapMovie";
     }
     
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
+        
+        src_path = path;
         
         // speed
         speed.name = "speed";
@@ -469,6 +473,7 @@ public:
         
         if(verbose){
             cout << "HapVideo\n";
+            cout << "\tsrc: " << src_path << endl;
             for(Param* p : params){
                 cout << "\t" << p->name << ": ";
                 p->post();

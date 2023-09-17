@@ -19,12 +19,10 @@ public:
     LagUD rect_outline_alpha;
     
     void resetPos(){
-        cout << "MoviePoint::resetPos " << origx << " " << origy << endl;
         pos.set(origx,origy,0);
     }
     
     void setup(float origx_, float origy_){
-        cout << "MoviePoint::setup " << origx_ << " " << origy_ << endl;
         origx = origx_;
         origy = origy_;
         

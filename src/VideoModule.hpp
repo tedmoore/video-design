@@ -122,7 +122,7 @@ public:
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
-    ParamInt currentIndex;
+    ParamInt currentSubVideoIndex;
     
     unsigned long long n_new_tiles_per_frame = 1;
     unsigned long long counting_tiles_start_frame = 0;
@@ -138,7 +138,7 @@ public:
     }
     
     Video* getCurrentVideo(){
-        return videos[currentIndex.value];
+        return videos[currentSubVideoIndex.value];
     }
     
     void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
@@ -247,9 +247,9 @@ public:
         params.push_back(&nrtPlayHead);
         
         // currentIndex
-        currentIndex.name = "currentIndex";
-        currentIndex.setup(0,videos.size(),0); // max argument is just used for randomness, it is [min,max)
-        params.push_back(&currentIndex);
+        currentSubVideoIndex.name = "currentSubVideoIndex";
+        currentSubVideoIndex.setup(0,videos.size(),0); // max argument is just used for randomness, it is [min,max)
+        params.push_back(&currentSubVideoIndex);
         
         mags = mags_;
         points[0] = pt0;
@@ -268,7 +268,6 @@ public:
         moviePoints.resize(VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT);
         for(int i = 0; i < VIDEO_MINI_WIDTH; i++){
             for(int j = 0; j < VIDEO_MINI_HEIGHT; j++){
-                cout << "setup movie point " << i << " " << j << endl;
                 moviePoints[(j * VIDEO_MINI_WIDTH) + i].setup(i / float(VIDEO_MINI_WIDTH),j / float(VIDEO_MINI_HEIGHT));
             }
         }
@@ -298,10 +297,10 @@ public:
     void displayHap(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
                         
         if(isNRT){
-            img.load(videos[currentIndex.value]->pngs[int(nrtPlayHead.value)].getAbsolutePath());
+            img.load(videos[currentSubVideoIndex.value]->pngs[int(nrtPlayHead.value)].getAbsolutePath());
             texture = img.getTexture();
         } else {
-            texture = *videos[currentIndex.value]->hap.getTexture();
+            texture = *videos[currentSubVideoIndex.value]->hap.getTexture();
         }
         
         if(bTile.value){
@@ -383,11 +382,11 @@ public:
     void displayRects(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
         // just getting the pixels
         if(isNRT){
-            string path = videos[currentIndex.value]->bitexact_pngs[int(nrtPlayHead.value)].getAbsolutePath();
+            string path = videos[currentSubVideoIndex.value]->bitexact_pngs[int(nrtPlayHead.value)].getAbsolutePath();
             mini_img.load(path);
             mini_pix = mini_img.getPixels();
         } else {
-            if(videos[currentIndex.value]->mini_vid.isFrameNew()) mini_pix = videos[currentIndex.value]->mini_vid.getPixels();
+            if(videos[currentSubVideoIndex.value]->mini_vid.isFrameNew()) mini_pix = videos[currentSubVideoIndex.value]->mini_vid.getPixels();
         }
 
         ofSetLineWidth(1);
@@ -409,8 +408,8 @@ public:
                 ofColor col = mini_pix.getColor(i,j);
                 
                 for(int i = 0; i < N_CLUSTERS; i++){
-                    if(videos[currentIndex.value]->center_color_indices[i] == i_counter){
-                        videos[currentIndex.value]->center_colors[i] = col;
+                    if(videos[currentSubVideoIndex.value]->center_color_indices[i] == i_counter){
+                        videos[currentSubVideoIndex.value]->center_colors[i] = col;
                         break;
                     }
                 }
@@ -490,7 +489,7 @@ public:
         
         if(verbose){
             cout << "VideoModule::display\n";
-            cout << "\tsrc: " << videos[currentIndex.value]->src_path << endl;
+            cout << "\tsrc: " << videos[currentSubVideoIndex.value]->src_path << endl;
             for(Param* p : params){
                 cout << "\t" << p->name << ": ";
                 p->post();
@@ -521,7 +520,7 @@ public:
         dict["lightPosition"] = lightPosition;
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            dict["center_color_indices" + ofToString(i)] = videos[currentIndex.value]->center_color_indices[i];
+            dict["center_color_indices" + ofToString(i)] = videos[currentSubVideoIndex.value]->center_color_indices[i];
         }
         
         return dict;
@@ -541,7 +540,7 @@ public:
         lightPosition = dict["lightPosition"].as<ofVec3f>();
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            videos[currentIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
+            videos[currentSubVideoIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
         }
         
         for(int i = 0; i < N_MOVIEPOINTS; i ++){
@@ -562,7 +561,7 @@ public:
         unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            videos[currentIndex.value]->center_color_indices[i] = ofRandom(mag_len);
+            videos[currentSubVideoIndex.value]->center_color_indices[i] = ofRandom(mag_len);
         }
        
         for(int i = 0; i < N_MOVIEPOINTS; i ++){
@@ -584,9 +583,14 @@ public:
 
     void receiveOSC(int width, int height, std::string label, float val){
         
-//        TODO: check all "params" first and if none match then go to other options
+        for(Param* p : params){
+            if(label == p->name){
+                cout << "VideoModule::receiveOSC setting " << label << " to " << val <<endl;
+                p->setValue(val);
+            }
+        }
         
-        if(label == "speed"){
+        if(label == "speedAndDir"){
             speed.value = abs(val);
             speedDir.value = (val > 0) + ((val < 0) * -1);
             bReactiveSpeed.value = false;
@@ -594,9 +598,9 @@ public:
             //            nrt_playHead
             nrtPlayHead.value = val * (total_frames-1);
             //            mini_video
-            videos[currentIndex.value]->mini_vid.setPosition(val);
+            videos[currentSubVideoIndex.value]->mini_vid.setPosition(val);
             //            hap
-            videos[currentIndex.value]->hap.setPosition(val);
+            videos[currentSubVideoIndex.value]->hap.setPosition(val);
         }
     }
 

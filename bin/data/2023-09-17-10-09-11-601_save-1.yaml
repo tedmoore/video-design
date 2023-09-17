@@ -1,0 +1,196 @@
+vc-save-0:
+  wfType: 3
+  rectsDir: 3
+  rects_shape: 0
+  trianglesDir: false
+  scale_size: false
+  hmul-0: 0.7496505
+  xoff-1: -1492
+  yoff-1: 546
+  zoff-1: 1058
+  show-1: true
+  hmul-1: 0.5929235
+vc-save-1:
+  useFF: true
+  waveformEffectDim: 0
+vc-save-2:
+  dir: 1
+  inv: true
+  is_borrow_colors: false
+vc-save-3:
+  divisor_i: 1
+  stepSize: 58.16071
+vc-save-4:
+  speed:
+    value: 0.8
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  bUseFF:
+    value: true
+  reactiveSpeed:
+    value: true
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: true
+  rect_w_mul:
+    value: 2.390094
+  rect_h_mul:
+    value: 2.309946
+  tile_scale:
+    value: 0.09052987
+  tile_offset_scale:
+    value: 0.2090137
+  i_x:
+    value: 0.2320137
+  i_y:
+    value: 0.4551196
+  tiles_alpha:
+    value: 50
+  bZShiftBoxes:
+    value: false
+  rectType:
+    value: 0
+  nrtPlayHead:
+    value: 0
+  currentIndex:
+    value: 0
+  n_new_tiles_per_frame: 1000
+  unfold_tiles_order: 3
+  lightPosition:
+    - 566.814
+    - 744.5525
+    - 814.3032
+  center_color_indices0: 0
+  center_color_indices1: 0
+  center_color_indices2: 0
+  center_color_indices3: 0
+vc-save-5:
+  speed:
+    value: 8.710629
+  speedDir:
+    value: -1
+  showHap:
+    value: true
+  bUseFF:
+    value: true
+  reactiveSpeed:
+    value: false
+  bTile:
+    value: true
+  bDontUnfoldTiles:
+    value: false
+  rect_w_mul:
+    value: 1.692358
+  rect_h_mul:
+    value: 1.460586
+  tile_scale:
+    value: 0.2817418
+  tile_offset_scale:
+    value: 0.07216541
+  i_x:
+    value: 0.2103523
+  i_y:
+    value: 0.3914711
+  tiles_alpha:
+    value: 116
+  bZShiftBoxes:
+    value: true
+  rectType:
+    value: 0
+  nrtPlayHead:
+    value: 0
+  currentIndex:
+    value: 1
+  n_new_tiles_per_frame: 3
+  unfold_tiles_order: 3
+  lightPosition:
+    - 1850.344
+    - 276.6744
+    - 666.7194
+  center_color_indices0: 0
+  center_color_indices1: 0
+  center_color_indices2: 0
+  center_color_indices3: 0
+vc-save-6:
+  speed:
+    value: 0.8
+  speedDir:
+    value: -1
+  showHap:
+    value: false
+  bUseFF:
+    value: false
+  reactiveSpeed:
+    value: true
+  bTile:
+    value: false
+  bDontUnfoldTiles:
+    value: true
+  rect_w_mul:
+    value: 2.69341
+  rect_h_mul:
+    value: 2.15135
+  tile_scale:
+    value: 0.2051336
+  tile_offset_scale:
+    value: 0.2818286
+  i_x:
+    value: 0.7360775
+  i_y:
+    value: 0.2551124
+  tiles_alpha:
+    value: 172
+  bZShiftBoxes:
+    value: true
+  rectType:
+    value: 1
+  nrtPlayHead:
+    value: 0
+  currentIndex:
+    value: 1
+  n_new_tiles_per_frame: 1002
+  unfold_tiles_order: 3
+  lightPosition:
+    - 336.9185
+    - 286.7198
+    - 1019.904
+  center_color_indices0: 6365669
+  center_color_indices1: 6182778
+  center_color_indices2: 57951348
+  center_color_indices3: 907560
+active_vc0: 1
+active_vc1: 3
+active_vc2: 5
+active_vc3: 2
+postGlitch:
+  features_map0: 3
+  invert_param0: false
+  features_map1: 3
+  invert_param1: false
+  features_map2: 3
+  invert_param2: false
+  features_map3: 3
+  invert_param3: false
+  bShading0: false
+  bShading1: true
+  bShading2: false
+  bShading3: false
+  bShading4: false
+  bShading5: false
+  bShading6: false
+  bShading7: false
+  bShading8: false
+  bShading9: false
+  bShading10: false
+  bShading11: false
+  bShading12: false
+  bShading13: true
+  bShading14: false
+  bShading15: false
+  bShading16: false
+feedback_amt: 162
+blendMode: 1
+debug: false

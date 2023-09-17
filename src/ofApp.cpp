@@ -285,9 +285,9 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
     
     while(index < tokens.size()){
         
-        if(tokens[index] == "onset"){
+        if(tokens[index] == "o"){
             onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
-        } else if(tokens[index] == "setActiveIndices"){
+        } else if(tokens[index] == "sai"){
             int ai[MAX_ACTIVE_MODULES];
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
                 ai[i] = ofToInt(tokens[++index]);
@@ -306,7 +306,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
             }else{
                 cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
             }
-        } else if(tokens[index] == "setParameter"){
+        } else if(tokens[index] == "sp"){ // set parameter
             int moduleIndex = ofToInt(tokens[++index]);
             string label = tokens[++index];
             float val = ofToFloat(tokens[++index]);
@@ -438,6 +438,8 @@ void ofApp::update(){
     while(osc_receiver.hasWaitingMessages()){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
+        
+        cout << oscMsg << endl;
         
         string address = oscMsg.getAddress();
         

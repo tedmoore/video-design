@@ -35,6 +35,10 @@ public:
     void virtual post(){
         cout << "post being called in Param parent class\n";
     }
+    
+    void virtual setValue(float val){
+        cout << "Param::setValue being called in Param parent class\n";
+    }
 };
 
 class ParamBool : public Param {
@@ -59,6 +63,10 @@ public:
     
     void newRandom(){
         value = ofRandom(1.f) < trueProb;
+    }
+    
+    void setValue(float val){
+        value = val > 0.5;
     }
 };
 
@@ -93,6 +101,10 @@ public:
     void newRandom(){
         value = ofMap(pow(ofRandom(1.f),power),0.f,1.f,min,max);
     }
+    
+    void setValue(float val){
+        value = val;
+    }
 };
 
 class ParamInt : public Param {
@@ -123,6 +135,10 @@ public:
     
     void newRandom(){
         value = ofRandom(min,max);
+    }
+    
+    void setValue(float val){
+        value = static_cast<int>(round(val));
     }
 };
 
@@ -157,6 +173,10 @@ public:
     void newRandom(){
         value = listOptions[ofRandom(listOptions.size())];
     }
+    
+    void setValue(float val){
+        value = static_cast<int>(round(val));
+    }
 };
 
 class ParamEnum : public Param {
@@ -186,6 +206,10 @@ public:
     void newRandom(){
         value = (int)ofRandom(nEntries);
     }
+    
+    void setValue(float val){
+        value = static_cast<int>(round(val));
+    }
 };
 
 class ParamEnumWeighted : public Param {
@@ -214,6 +238,10 @@ public:
     
     void newRandom(){
         value = options[ofRandom(options.size())];
+    }
+    
+    void setValue(float val){
+        value = static_cast<int>(round(val));
     }
 };
 

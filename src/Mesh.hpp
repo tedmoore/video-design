@@ -12,7 +12,7 @@
 #include "VisualModule.hpp"
 #include "LagUD.hpp"
 #include "FlowField.hpp"
-#include "PointTM.hpp"
+#include "VideoDesignPoint.hpp"
 #include "ofMain.h"
 #include "VisualModule.hpp"
 #include "Waveform.hpp"
@@ -30,7 +30,7 @@ public:
     bool useFF = false, useFFmaster = true;
     float xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize;
     int maxLines = 1500;
-    PointTM* points;
+    VideoDesignPoint* points;
     
     float line_width = 1;
     float point_size = 1;
@@ -74,12 +74,12 @@ public:
         
         ff = ff_;
         nPoints = nPoints_;
-        points = new PointTM[nPoints];
+        points = new VideoDesignPoint[nPoints];
 
         
         for(int i = 0; i < nPoints; i++) {
-            PointTM* pt;
-            pt = new PointTM;
+            VideoDesignPoint* pt;
+            pt = new VideoDesignPoint;
             pt->setup(xsize, ysize, xmin, xmax, ymin, ymax, zmin, zmax, zDir);
             points[i] = *pt;
         }
@@ -219,7 +219,7 @@ public:
 //        ofDisableDepthTest();
     }
 
-    void drawLine(PointTM* a, PointTM* b, float dist, int width, int height, float scale_factor) {
+    void drawLine(VideoDesignPoint* a, VideoDesignPoint* b, float dist, int width, int height, float scale_factor) {
         ofSetLineWidth(line_width * scale_factor);
         ofDrawLine(a->x() * width, a->y() * height, a->z() * zDir * height, b->x() * width, b->y() * height, b->z() * zDir * height);
     }

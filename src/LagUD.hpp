@@ -13,13 +13,23 @@
 
 class LagUD {
 public:
-    void setup(float upLerp_, float downLerp_, float initValue);
-    float update(float newValue);
     
     float value;
     float upLerp;
     float downLerp;
     
+    void setup(float upLerp_, float downLerp_, float initValue) {
+        value = initValue;
+        upLerp = upLerp_;
+        downLerp = downLerp_;
+    }
+
+    float update(float newValue) {
+        const float lerpFactor = (newValue > value) ? upLerp : downLerp;
+        value = ofLerp(value, newValue, lerpFactor);
+        return value;
+    }
+
 };
 
 #endif /* LagUD_hpp */

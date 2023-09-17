@@ -9,3 +9,5 @@ obj
 *.tif
 *.tiff
 *.csv
+*.reapeaks
+.DS_Store

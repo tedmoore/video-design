@@ -583,6 +583,9 @@ public:
     void interact(VisualModule* other){}
 
     void receiveOSC(int width, int height, std::string label, float val){
+        
+//        TODO: check all "params" first and if none match then go to other options
+        
         if(label == "speed"){
             speed.value = abs(val);
             speedDir.value = (val > 0) + ((val < 0) * -1);

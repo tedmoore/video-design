@@ -1,0 +1,1047 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		"02D8FBE6-413D-44B6-BB18-1E3B2E1DBF16" /* AudioThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "607D2EE6-CAD2-4F62-BC32-12CDA5AC1316" /* AudioThread.cpp */; };
+		"03663A49-5080-4F0D-9F38-DC4244BF1E9B" /* libavformat.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "A03C28B4-DEBB-43F5-9956-7DCE403210F5" /* libavformat.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"12D79C16-44FB-4F81-A976-84768756A61F" /* hap.c in Sources */ = {isa = PBXBuildFile; fileRef = "272A73F6-D640-4D73-9A57-86FF88792E29" /* hap.c */; };
+		"14772C64-5D82-44F6-A764-D13DB2944971" /* LagUD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DD680BAD-57F7-47CD-B41D-D518455AFDF5" /* LagUD.cpp */; };
+		"1C4F9749-7774-4B71-AA82-FA1BFA5DE50B" /* UdpSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A96BC922-73AA-4758-BC99-396345E916F1" /* UdpSocket.cpp */; };
+		"20498185-7544-4BBF-9D98-B7FF674D7F31" /* libavutil.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "5CFC1348-6680-472C-BBC2-3A4D0F6B3974" /* libavutil.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"2B7A7282-7A82-43B0-9A93-37A1D4DA2F2E" /* libswresample.3.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "9F1169A0-9D4E-4947-AD8F-F5F215FF0B8A" /* libswresample.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"2C088477-7676-4AEC-874C-5C3247CBC05E" /* libavutil.56.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "5BF19A25-28DC-4125-8606-47A6B9184146" /* libavutil.56.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"2E691A9C-E03F-4061-8694-FE85A3500FD8" /* ofxOscSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "02185055-D88B-4FE6-8B77-F3E830B51D89" /* ofxOscSender.cpp */; };
+		"2EA06F8F-2FA5-4DD8-85C5-E4B13F2579C8" /* Clock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D4BABE0F-2C25-4B9A-881D-373D197ED143" /* Clock.cpp */; };
+		"406576E2-A8DD-427F-9093-6D2A98780262" /* ofxOscBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "5F514058-732B-43AB-8EEE-2F5FD27F9DE6" /* ofxOscBundle.cpp */; };
+		"417FB572-723B-4D81-B333-62F460B226FF" /* FlowFieldPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "20626DE5-68DF-481D-9301-92F3E84AE711" /* FlowFieldPoint.cpp */; };
+		"470A62E9-AC55-4FE2-87A4-70E799CFCC1C" /* ofxYAML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2311056B-275A-47CD-B37F-72FE98FF51D8" /* ofxYAML.cpp */; };
+		"48AEAC73-5040-4EB1-9A2A-D1CF66E3B0F7" /* PointTM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "9FB24794-918E-4A89-B906-7D9872FF1B90" /* PointTM.cpp */; };
+		"55C4C49C-CA62-4CB4-82A0-2D9EDBD62774" /* libavcodec.58.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "D6DB17EB-6F9B-467D-8A6E-B2EA4E2EDD62" /* libavcodec.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"57CB70C3-5F9C-41D7-91C9-7BB82A7AD1EC" /* OscOutboundPacketStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "235DBBF6-29A3-4639-A885-4BF0CF3B0B36" /* OscOutboundPacketStream.cpp */; };
+		"5E85B403-38A6-4EA5-BBE5-409ABF275ADF" /* ofxOscMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DB9CCF33-E9AF-4296-B6C8-F97DF0F23859" /* ofxOscMessage.cpp */; };
+		"660FEDAD-4050-4A2F-8648-4AACCA15BBAD" /* ofxHapPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "66E7775E-9634-4AF5-BC88-1FD34A05E095" /* ofxHapPlayer.cpp */; };
+		"68D3298B-A89C-458F-A4FF-94A2533D1EF2" /* TimeRangeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "1ED51FCD-3BF6-47A3-9869-DB49C2E92C07" /* TimeRangeSet.cpp */; };
+		"6D4BE522-1256-4AB7-A99A-B23E7526AE9E" /* NetworkingUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "4982DA69-5CE3-407E-A453-0C8C4E86D9CF" /* NetworkingUtils.cpp */; };
+		"754C51B2-4A62-4EB8-8CE7-F847CE600FF5" /* libswresample.3.9.100.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "EE91E766-7C51-4CFC-8124-B53A3CE53256" /* libswresample.3.9.100.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"7F554D1A-E5A1-4419-98B8-B1C50073C771" /* OscTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "0C8492CF-7740-4A6E-ABC7-C269AC9857A4" /* OscTypes.cpp */; };
+		"80BB20D2-12FC-4884-BD70-39B319FC7811" /* libsnappy.1.1.9.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "89CC4F24-16F9-471B-B7CF-8EE4FBE9E8D5" /* libsnappy.1.1.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"91D7EA10-7E93-43F1-8368-F003108CC46D" /* libavformat.58.76.100.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "9E737BC5-FA3A-40AF-8BC4-FD423F4B9E04" /* libavformat.58.76.100.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"9406A0D3-DB9D-416F-88BD-E6D51326CCC8" /* libsnappy.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "593834E5-8C02-4229-AF7D-00B48F7A0A3F" /* libsnappy.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"9EBF0A18-C234-415A-9627-C6A553E69ED0" /* OscPrintReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "1F0B1B5B-2CF6-45BE-B914-AEB755DD40C6" /* OscPrintReceivedElements.cpp */; };
+		"A704B028-1442-449B-AFDA-94FDBDC52148" /* libswresample.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "1D8E6E3F-81BE-45C7-84C4-F7E6774DA7BA" /* libswresample.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"A89A24EC-1D89-42BD-9428-211AA000AC0B" /* FlowField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "8FEFA48D-D1BB-4898-BB5B-9C1F31406B2B" /* FlowField.cpp */; };
+		"AC519BB4-A884-44B8-916F-9B228FFEE6C5" /* ofxPostGlitch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2B6BFED8-C72D-4E19-932B-2C14DA1106FD" /* ofxPostGlitch.cpp */; };
+		"B5648641-3CB7-4AAD-B8E1-CB76803A2F86" /* ofxOscReceiver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "2778CFBC-73F7-4C85-9D9E-AE4133492B6B" /* ofxOscReceiver.cpp */; };
+		"BCCE3BE2-7412-4ED4-B91E-38389C8A39C6" /* MovieTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "D714F993-380D-4786-801D-0583352BB371" /* MovieTime.cpp */; };
+		"C53C89AC-6A40-4ADB-B342-926AB7039EF5" /* libavformat.58.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "8D0E1D22-A983-406B-915E-68F235842A61" /* libavformat.58.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"C6C5F7B6-EE2A-4388-BE86-4DA37933DB36" /* AudioParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "12046B4F-C767-4FBD-BA72-40B4253E6123" /* AudioParameters.cpp */; };
+		"C78A635C-F4C7-404F-A078-43E1885886DB" /* IpEndpointName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "1CDBFA49-7517-47E3-9D49-5C9DE55AC3EE" /* IpEndpointName.cpp */; };
+		"C9BCBA86-BBE6-407E-9544-7423A5CD460C" /* libsnappy.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "04D5A2BD-A35B-4B25-A0A7-EAFC9B62446E" /* libsnappy.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"CC0F9C3E-EFA4-4187-9CE0-148BAE33F411" /* AudioResampler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "790E37BC-005C-4260-BF6A-2435344D2A4D" /* AudioResampler.cpp */; };
+		"D40FEEDB-9356-4DA4-B2EA-21B1A358BA90" /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "07A0EBF2-5242-4D71-B1BB-359CDF2BED36" /* RingBuffer.cpp */; };
+		"DD7DA74E-386F-4638-895F-2048182E08A6" /* libavutil.56.70.100.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "7D0F2FB6-EB20-4A43-8515-0CEE63087DE1" /* libavutil.56.70.100.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"E1D22BA4-AB6B-41B8-8123-76C66DAD4EC9" /* libavcodec.58.134.100.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "E7FF014E-15A1-42E1-9764-D4C360657A1B" /* libavcodec.58.134.100.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"E4254830-F698-4ADA-8CFE-E0101B8FC103" /* Demuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "AECDA248-E9D0-4A79-8A38-B8959B093E4A" /* Demuxer.cpp */; };
+		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
+		E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */; };
+		"EB22E606-A0E0-4460-A379-0862C26A3E3A" /* libavcodec.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = "5D960F7C-298A-41E8-A5E7-F14D2616F335" /* libavcodec.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		"EB9B377A-E746-4AE9-B27F-1468F0F2826F" /* AudioDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "BA837EA7-359D-4767-B2BA-EADD6BDE1CB6" /* AudioDecoder.cpp */; };
+		"F3398C69-906F-4B21-B7CD-A35802DC85DF" /* MoviePoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "A97D590C-C8A1-400B-881D-9E3497D5EB71" /* MoviePoint.cpp */; };
+		"F93F00EB-03FB-4479-B3AC-178F91196AB3" /* OscReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "21F50AC3-1FFF-4F29-BBE8-4355DB4A5B36" /* OscReceivedElements.cpp */; };
+		"FCB7A250-C31A-4359-8281-8618E66B4972" /* ofxOscParameterSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "63B09D64-4229-44C5-89D9-A9A3E444516A" /* ofxOscParameterSync.cpp */; };
+		"FD5FC1A9-4A73-4968-8819-754DE8F12DBF" /* PacketCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = "DC9445C5-CD1F-44AD-9E60-2FAC01FCB899" /* PacketCache.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E4A5B60F29BAAAE400C2D356 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				"DD7DA74E-386F-4638-895F-2048182E08A6" /* libavutil.56.70.100.dylib in CopyFiles */,
+				"2B7A7282-7A82-43B0-9A93-37A1D4DA2F2E" /* libswresample.3.dylib in CopyFiles */,
+				"C53C89AC-6A40-4ADB-B342-926AB7039EF5" /* libavformat.58.dylib in CopyFiles */,
+				"91D7EA10-7E93-43F1-8368-F003108CC46D" /* libavformat.58.76.100.dylib in CopyFiles */,
+				"754C51B2-4A62-4EB8-8CE7-F847CE600FF5" /* libswresample.3.9.100.dylib in CopyFiles */,
+				"03663A49-5080-4F0D-9F38-DC4244BF1E9B" /* libavformat.dylib in CopyFiles */,
+				"20498185-7544-4BBF-9D98-B7FF674D7F31" /* libavutil.dylib in CopyFiles */,
+				"2C088477-7676-4AEC-874C-5C3247CBC05E" /* libavutil.56.dylib in CopyFiles */,
+				"EB22E606-A0E0-4460-A379-0862C26A3E3A" /* libavcodec.dylib in CopyFiles */,
+				"A704B028-1442-449B-AFDA-94FDBDC52148" /* libswresample.dylib in CopyFiles */,
+				"E1D22BA4-AB6B-41B8-8123-76C66DAD4EC9" /* libavcodec.58.134.100.dylib in CopyFiles */,
+				"55C4C49C-CA62-4CB4-82A0-2D9EDBD62774" /* libavcodec.58.dylib in CopyFiles */,
+				"9406A0D3-DB9D-416F-88BD-E6D51326CCC8" /* libsnappy.dylib in CopyFiles */,
+				"80BB20D2-12FC-4884-BD70-39B319FC7811" /* libsnappy.1.1.9.dylib in CopyFiles */,
+				"C9BCBA86-BBE6-407E-9544-7423A5CD460C" /* libsnappy.1.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E4C2427710CC5ABF004149E2 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		"02185055-D88B-4FE6-8B77-F3E830B51D89" /* ofxOscSender.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscSender.cpp; path = ../../../addons/ofxOsc/src/ofxOscSender.cpp; sourceTree = SOURCE_ROOT; };
+		"02A657AE-BDD0-4C8E-B307-8ACE6F3BF71A" /* impl.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = impl.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/impl.h"; sourceTree = SOURCE_ROOT; };
+		"04D5A2BD-A35B-4B25-A0A7-EAFC9B62446E" /* libsnappy.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsnappy.1.dylib; path = ../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.dylib; sourceTree = SOURCE_ROOT; };
+		"05126B96-541C-4D65-ABEB-B29A0732A600" /* node_data.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = node_data.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/node_data.h"; sourceTree = SOURCE_ROOT; };
+		"067D77F8-8281-4123-B12F-63A6B0F2400A" /* FlowField.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = FlowField.hpp; path = src/FlowField.hpp; sourceTree = SOURCE_ROOT; };
+		"07A0EBF2-5242-4D71-B1BB-359CDF2BED36" /* RingBuffer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = RingBuffer.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/RingBuffer.cpp; sourceTree = SOURCE_ROOT; };
+		"0C8492CF-7740-4A6E-ABC7-C269AC9857A4" /* OscTypes.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OscTypes.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscTypes.cpp; sourceTree = SOURCE_ROOT; };
+		"0D28720D-3EE0-4561-8835-C7E762144984" /* NetworkingUtils.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = NetworkingUtils.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/NetworkingUtils.h; sourceTree = SOURCE_ROOT; };
+		"0D66D948-E3F3-4C98-A7EE-A1BC2A8DF54F" /* iterator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = iterator.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/iterator.h"; sourceTree = SOURCE_ROOT; };
+		"11C5779C-1F2E-474F-A611-14CA106CEF38" /* Clock.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Clock.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/Clock.h; sourceTree = SOURCE_ROOT; };
+		"12046B4F-C767-4FBD-BA72-40B4253E6123" /* AudioParameters.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioParameters.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/AudioParameters.cpp; sourceTree = SOURCE_ROOT; };
+		"12FCEAD0-8D08-486E-912B-5764C7E819AA" /* UdpSocket.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = UdpSocket.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/UdpSocket.h; sourceTree = SOURCE_ROOT; };
+		"1636BA33-E9D4-40FE-A557-E3BD5582B54D" /* OscPrintReceivedElements.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscPrintReceivedElements.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscPrintReceivedElements.h; sourceTree = SOURCE_ROOT; };
+		"166822A5-3571-4DEE-BB58-7C443BDE0965" /* defines.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = defines.h; path = src/defines.h; sourceTree = SOURCE_ROOT; };
+		"17B8B776-3445-4B7C-A8C0-81A1EA7FA889" /* exceptions.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = exceptions.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/exceptions.h"; sourceTree = SOURCE_ROOT; };
+		191CD6FA2847E21E0085CBB6 /* of.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = of.entitlements; sourceTree = "<group>"; };
+		191EF70929D778A400F35F26 /* openFrameworks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = openFrameworks; path = ../../../libs/openFrameworks; sourceTree = SOURCE_ROOT; };
+		"1BDEEC3D-1602-4776-8756-AD3A4DB23FD6" /* ReaperMarkersFileParser.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ReaperMarkersFileParser.hpp; path = src/ReaperMarkersFileParser.hpp; sourceTree = SOURCE_ROOT; };
+		"1CDBFA49-7517-47E3-9D49-5C9DE55AC3EE" /* IpEndpointName.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = IpEndpointName.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/IpEndpointName.cpp; sourceTree = SOURCE_ROOT; };
+		"1D8E6E3F-81BE-45C7-84C4-F7E6774DA7BA" /* libswresample.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswresample.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.dylib; sourceTree = SOURCE_ROOT; };
+		"1ED51FCD-3BF6-47A3-9869-DB49C2E92C07" /* TimeRangeSet.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = TimeRangeSet.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/TimeRangeSet.cpp; sourceTree = SOURCE_ROOT; };
+		"1F0B1B5B-2CF6-45BE-B914-AEB755DD40C6" /* OscPrintReceivedElements.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OscPrintReceivedElements.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscPrintReceivedElements.cpp; sourceTree = SOURCE_ROOT; };
+		"200C1C12-903D-4813-8256-90A932C614E4" /* null.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = null.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/null.h"; sourceTree = SOURCE_ROOT; };
+		"20626DE5-68DF-481D-9301-92F3E84AE711" /* FlowFieldPoint.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FlowFieldPoint.cpp; path = src/FlowFieldPoint.cpp; sourceTree = SOURCE_ROOT; };
+		"20828407-15F8-4AD6-87C5-BB2C2B482C71" /* node_ref.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = node_ref.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/node_ref.h"; sourceTree = SOURCE_ROOT; };
+		"20A9DC35-1EFC-45BD-8BDC-A2F9CA90C52E" /* ofxOscArg.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscArg.h; path = ../../../addons/ofxOsc/src/ofxOscArg.h; sourceTree = SOURCE_ROOT; };
+		"21F50AC3-1FFF-4F29-BBE8-4355DB4A5B36" /* OscReceivedElements.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OscReceivedElements.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscReceivedElements.cpp; sourceTree = SOURCE_ROOT; };
+		"2311056B-275A-47CD-B37F-72FE98FF51D8" /* ofxYAML.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxYAML.cpp; path = ../../../addons/ofxYAML/src/ofxYAML.cpp; sourceTree = SOURCE_ROOT; };
+		"235DBBF6-29A3-4639-A885-4BF0CF3B0B36" /* OscOutboundPacketStream.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = OscOutboundPacketStream.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscOutboundPacketStream.cpp; sourceTree = SOURCE_ROOT; };
+		"24318F9F-3018-4258-8E8D-266F4106261B" /* impl.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = impl.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/impl.h"; sourceTree = SOURCE_ROOT; };
+		"24779B79-B9C0-42F7-8C25-B3CAE78330DB" /* Common.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Common.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/Common.h; sourceTree = SOURCE_ROOT; };
+		"26A730B7-0D89-433C-B5E5-5D2760EA244B" /* bool_type.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = bool_type.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/bool_type.h"; sourceTree = SOURCE_ROOT; };
+		"272A73F6-D640-4D73-9A57-86FF88792E29" /* hap.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = hap.c; path = ../../../addons/ofxHapPlayer/libs/hap/src/hap.c; sourceTree = SOURCE_ROOT; };
+		"2778CFBC-73F7-4C85-9D9E-AE4133492B6B" /* ofxOscReceiver.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscReceiver.cpp; path = ../../../addons/ofxOsc/src/ofxOscReceiver.cpp; sourceTree = SOURCE_ROOT; };
+		"27941F8D-7A3D-487E-8852-940F2F75FA6C" /* eventhandler.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = eventhandler.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/eventhandler.h"; sourceTree = SOURCE_ROOT; };
+		"2B6BFED8-C72D-4E19-932B-2C14DA1106FD" /* ofxPostGlitch.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxPostGlitch.cpp; path = ../../../addons/ofxPostGlitch/src/ofxPostGlitch.cpp; sourceTree = SOURCE_ROOT; };
+		"2B7B8583-5171-45D8-B833-49143EE81B8E" /* VisualModule.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VisualModule.hpp; path = src/VisualModule.hpp; sourceTree = SOURCE_ROOT; };
+		"33124A0B-B963-4C34-8711-54823BE46C92" /* OscTypes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscTypes.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscTypes.h; sourceTree = SOURCE_ROOT; };
+		"333AC15F-57A3-4170-ACEA-EB9D7C7B7E13" /* ptr.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ptr.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/ptr.h"; sourceTree = SOURCE_ROOT; };
+		"3485B249-91E7-4B71-9EE9-3B993D9924FE" /* ofxYAML.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxYAML.h; path = ../../../addons/ofxYAML/src/ofxYAML.h; sourceTree = SOURCE_ROOT; };
+		"450FD99B-85A0-4BC8-A583-17D3347C7892" /* OscReceivedElements.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscReceivedElements.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscReceivedElements.h; sourceTree = SOURCE_ROOT; };
+		"4837CA73-0D48-49C3-836E-F3E814F375C2" /* emitterstyle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emitterstyle.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/emitterstyle.h"; sourceTree = SOURCE_ROOT; };
+		"4982DA69-5CE3-407E-A453-0C8C4E86D9CF" /* NetworkingUtils.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = NetworkingUtils.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/posix/NetworkingUtils.cpp; sourceTree = SOURCE_ROOT; };
+		"4B25DD0C-5B9E-41B8-A5BE-E2B04D2DC17F" /* ofxPostGlitch.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxPostGlitch.h; path = ../../../addons/ofxPostGlitch/src/ofxPostGlitch.h; sourceTree = SOURCE_ROOT; };
+		"4D8373A5-D4D6-44CD-B352-533C29CE3E6A" /* parse.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = parse.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/parse.h"; sourceTree = SOURCE_ROOT; };
+		"514A7AB2-97F4-4DE8-9744-BFBBF3AF512E" /* MessageMappingOscPacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MessageMappingOscPacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/MessageMappingOscPacketListener.h; sourceTree = SOURCE_ROOT; };
+		"51C7429C-6676-40B1-8687-401ABD2A8FCA" /* Turtle.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Turtle.hpp; path = src/Turtle.hpp; sourceTree = SOURCE_ROOT; };
+		"530BDE61-A727-42BA-8879-E88A9049A024" /* node_iterator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = node_iterator.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/node_iterator.h"; sourceTree = SOURCE_ROOT; };
+		"56D8B503-751E-4FB3-9C00-D3735570A851" /* parser.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = parser.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/parser.h"; sourceTree = SOURCE_ROOT; };
+		"575C089F-32D1-4984-A26F-6C7E2C69604B" /* node.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = node.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/node.h"; sourceTree = SOURCE_ROOT; };
+		"5870623B-145F-429A-A3E5-2E550BA7747E" /* emitterdef.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emitterdef.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/emitterdef.h"; sourceTree = SOURCE_ROOT; };
+		"5898F770-5F30-445A-9825-69CD2CA4C28E" /* LagUD.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = LagUD.hpp; path = src/LagUD.hpp; sourceTree = SOURCE_ROOT; };
+		"593834E5-8C02-4229-AF7D-00B48F7A0A3F" /* libsnappy.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsnappy.dylib; path = ../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.dylib; sourceTree = SOURCE_ROOT; };
+		"5BF19A25-28DC-4125-8606-47A6B9184146" /* libavutil.56.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavutil.56.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.dylib; sourceTree = SOURCE_ROOT; };
+		"5CFC1348-6680-472C-BBC2-3A4D0F6B3974" /* libavutil.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavutil.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.dylib; sourceTree = SOURCE_ROOT; };
+		"5D960F7C-298A-41E8-A5E7-F14D2616F335" /* libavcodec.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavcodec.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.dylib; sourceTree = SOURCE_ROOT; };
+		"5E127D8A-F63D-4732-9309-DE6219F3AF26" /* memory.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = memory.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/memory.h"; sourceTree = SOURCE_ROOT; };
+		"5F514058-732B-43AB-8EEE-2F5FD27F9DE6" /* ofxOscBundle.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscBundle.cpp; path = ../../../addons/ofxOsc/src/ofxOscBundle.cpp; sourceTree = SOURCE_ROOT; };
+		"607D2EE6-CAD2-4F62-BC32-12CDA5AC1316" /* AudioThread.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioThread.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/AudioThread.cpp; sourceTree = SOURCE_ROOT; };
+		"60FC319D-9546-4A72-9115-93BD2B3B6E98" /* graphbuilder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = graphbuilder.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/contrib/graphbuilder.h"; sourceTree = SOURCE_ROOT; };
+		"633E229A-35FC-4473-B153-B7F7CBC37BF8" /* Param.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Param.hpp; path = src/Param.hpp; sourceTree = SOURCE_ROOT; };
+		"63B09D64-4229-44C5-89D9-A9A3E444516A" /* ofxOscParameterSync.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscParameterSync.cpp; path = ../../../addons/ofxOsc/src/ofxOscParameterSync.cpp; sourceTree = SOURCE_ROOT; };
+		"648B31D1-7470-4EE1-8CFF-74D89F77E4F4" /* ofxOscSender.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscSender.h; path = ../../../addons/ofxOsc/src/ofxOscSender.h; sourceTree = SOURCE_ROOT; };
+		"65FF84BB-DE30-49AC-9C72-92AFC2BA9B68" /* TimeRangeSet.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TimeRangeSet.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/TimeRangeSet.h; sourceTree = SOURCE_ROOT; };
+		"66E7775E-9634-4AF5-BC88-1FD34A05E095" /* ofxHapPlayer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxHapPlayer.cpp; path = ../../../addons/ofxHapPlayer/src/ofxHapPlayer.cpp; sourceTree = SOURCE_ROOT; };
+		"6A120F06-FA7F-4F07-8403-383ED90BFED7" /* node.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = node.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/node.h"; sourceTree = SOURCE_ROOT; };
+		"6A1C7A47-7984-4016-9C7E-BC81DBB348F5" /* Demuxer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Demuxer.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/Demuxer.h; sourceTree = SOURCE_ROOT; };
+		"6B43686E-2EDA-4AD9-A316-A68614C8A5CE" /* emitter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emitter.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/emitter.h"; sourceTree = SOURCE_ROOT; };
+		"6DCC232F-7574-4B9F-8861-D01B8E40D4AE" /* hap.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = hap.h; path = ../../../addons/ofxHapPlayer/libs/hap/src/hap.h; sourceTree = SOURCE_ROOT; };
+		"75FFDAA1-E89B-4970-934D-22875F8D4A08" /* anchor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = anchor.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/anchor.h"; sourceTree = SOURCE_ROOT; };
+		"78747FA7-081A-48F1-B8D2-3EA684C5F184" /* ofxOscBundle.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscBundle.h; path = ../../../addons/ofxOsc/src/ofxOscBundle.h; sourceTree = SOURCE_ROOT; };
+		"790E37BC-005C-4260-BF6A-2435344D2A4D" /* AudioResampler.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioResampler.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/AudioResampler.cpp; sourceTree = SOURCE_ROOT; };
+		"7D0F2FB6-EB20-4A43-8515-0CEE63087DE1" /* libavutil.56.70.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavutil.56.70.100.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.70.100.dylib; sourceTree = SOURCE_ROOT; };
+		"7E6B550E-642A-454D-9834-CE28CB8A1CE6" /* PacketCache.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PacketCache.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/PacketCache.h; sourceTree = SOURCE_ROOT; };
+		"83F1F8AA-301C-4209-8A98-6DAF415AF685" /* yaml.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = yaml.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/yaml.h"; sourceTree = SOURCE_ROOT; };
+		"8970FD38-08C6-4B64-9919-845E3156C8E6" /* Mesh.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Mesh.hpp; path = src/Mesh.hpp; sourceTree = SOURCE_ROOT; };
+		"89CC4F24-16F9-471B-B7CF-8EE4FBE9E8D5" /* libsnappy.1.1.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsnappy.1.1.9.dylib; path = ../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.1.9.dylib; sourceTree = SOURCE_ROOT; };
+		"8D0E1D22-A983-406B-915E-68F235842A61" /* libavformat.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavformat.58.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.dylib; sourceTree = SOURCE_ROOT; };
+		"8E511ACF-03BD-4194-B885-951ABB5F76C7" /* ofxOscMessage.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscMessage.h; path = ../../../addons/ofxOsc/src/ofxOscMessage.h; sourceTree = SOURCE_ROOT; };
+		"8FEFA48D-D1BB-4898-BB5B-9C1F31406B2B" /* FlowField.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = FlowField.cpp; path = src/FlowField.cpp; sourceTree = SOURCE_ROOT; };
+		"92F883E6-E548-410B-A371-C6A8D72B272F" /* emittermanip.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emittermanip.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/emittermanip.h"; sourceTree = SOURCE_ROOT; };
+		"951FEDA8-150F-4192-AC54-609BA111F82E" /* ofxOscReceiver.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscReceiver.h; path = ../../../addons/ofxOsc/src/ofxOscReceiver.h; sourceTree = SOURCE_ROOT; };
+		"96A5011D-14B6-4FC0-BDF0-52CC0693C666" /* type.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = type.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/type.h"; sourceTree = SOURCE_ROOT; };
+		"992882DD-991B-44EA-9442-B790DD56DF8C" /* ofxHapPlayer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxHapPlayer.h; path = ../../../addons/ofxHapPlayer/src/ofxHapPlayer.h; sourceTree = SOURCE_ROOT; };
+		"9B3EC3AA-A8F6-4FC3-81E1-527DD04A147D" /* traits.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = traits.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/traits.h"; sourceTree = SOURCE_ROOT; };
+		"9CF7DE40-BAD8-40FB-9D59-B81EB2236076" /* emitfromevents.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emitfromevents.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/emitfromevents.h"; sourceTree = SOURCE_ROOT; };
+		"9E737BC5-FA3A-40AF-8BC4-FD423F4B9E04" /* libavformat.58.76.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavformat.58.76.100.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.76.100.dylib; sourceTree = SOURCE_ROOT; };
+		"9F1169A0-9D4E-4947-AD8F-F5F215FF0B8A" /* libswresample.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswresample.3.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.dylib; sourceTree = SOURCE_ROOT; };
+		"9FB24794-918E-4A89-B906-7D9872FF1B90" /* PointTM.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PointTM.cpp; path = src/PointTM.cpp; sourceTree = SOURCE_ROOT; };
+		"A03C28B4-DEBB-43F5-9956-7DCE403210F5" /* libavformat.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavformat.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.dylib; sourceTree = SOURCE_ROOT; };
+		"A05DB2EC-9439-48AA-A0C8-3CD7EC426B10" /* anchordict.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = anchordict.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/contrib/anchordict.h"; sourceTree = SOURCE_ROOT; };
+		"A2697492-90DB-499D-87E9-745433341CD9" /* Waveform.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Waveform.hpp; path = src/Waveform.hpp; sourceTree = SOURCE_ROOT; };
+		"A3121602-658D-4B3C-964F-19106775A08B" /* PacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/PacketListener.h; sourceTree = SOURCE_ROOT; };
+		"A81C139F-0E27-46B1-8EB2-B57664DF9260" /* PointTM.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = PointTM.hpp; path = src/PointTM.hpp; sourceTree = SOURCE_ROOT; };
+		"A95EB4D2-9383-4B72-9379-47B21A01AF8C" /* VideoModule.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = VideoModule.hpp; path = src/VideoModule.hpp; sourceTree = SOURCE_ROOT; };
+		"A96BC922-73AA-4758-BC99-396345E916F1" /* UdpSocket.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = UdpSocket.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/posix/UdpSocket.cpp; sourceTree = SOURCE_ROOT; };
+		"A97D590C-C8A1-400B-881D-9E3497D5EB71" /* MoviePoint.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MoviePoint.cpp; path = src/MoviePoint.cpp; sourceTree = SOURCE_ROOT; };
+		"AC440BC7-35DC-4C4A-9E77-96932E0ADA91" /* stlemitter.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stlemitter.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/stlemitter.h"; sourceTree = SOURCE_ROOT; };
+		"AECDA248-E9D0-4A79-8A38-B8959B093E4A" /* Demuxer.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Demuxer.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/Demuxer.cpp; sourceTree = SOURCE_ROOT; };
+		"AEEFE9C6-6439-4ABE-9AD1-C7372A817AEE" /* AudioThread.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioThread.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioThread.h; sourceTree = SOURCE_ROOT; };
+		"AFEB3548-9184-4D10-B678-F67693B07C0B" /* Lines.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = Lines.hpp; path = src/Lines.hpp; sourceTree = SOURCE_ROOT; };
+		"B08C9DEE-3E59-4B92-8D4C-61C537CD5FC4" /* ErrorReceiving.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ErrorReceiving.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/ErrorReceiving.h; sourceTree = SOURCE_ROOT; };
+		"B209C64F-2A8E-4BD1-9058-C725263D09BB" /* IpEndpointName.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = IpEndpointName.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/IpEndpointName.h; sourceTree = SOURCE_ROOT; };
+		"B9CBEFE8-F18D-4C61-BDB4-DD8B00F924A8" /* binary.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = binary.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/binary.h"; sourceTree = SOURCE_ROOT; };
+		"BA3663E0-CDD6-46CC-B108-08CC493BFC5C" /* MoviePoint.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MoviePoint.hpp; path = src/MoviePoint.hpp; sourceTree = SOURCE_ROOT; };
+		"BA837EA7-359D-4767-B2BA-EADD6BDE1CB6" /* AudioDecoder.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = AudioDecoder.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/AudioDecoder.cpp; sourceTree = SOURCE_ROOT; };
+		"BD6DDF8F-A15C-47ED-8D7E-DB3BE18B0F35" /* OscPacketListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscPacketListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscPacketListener.h; sourceTree = SOURCE_ROOT; };
+		"CE3D5967-E8DE-40B3-86FE-154F44EDAEED" /* TimerListener.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = TimerListener.h; path = ../../../addons/ofxOsc/libs/oscpack/src/ip/TimerListener.h; sourceTree = SOURCE_ROOT; };
+		"D1B1BF6D-7562-41F3-A08F-D79E9AE93834" /* dll.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = dll.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/dll.h"; sourceTree = SOURCE_ROOT; };
+		"D312C373-3C58-405A-86F4-5941AC328C76" /* ostream_wrapper.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ostream_wrapper.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/ostream_wrapper.h"; sourceTree = SOURCE_ROOT; };
+		"D4BABE0F-2C25-4B9A-881D-373D197ED143" /* Clock.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = Clock.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/Clock.cpp; sourceTree = SOURCE_ROOT; };
+		"D6DB17EB-6F9B-467D-8A6E-B2EA4E2EDD62" /* libavcodec.58.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavcodec.58.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.dylib; sourceTree = SOURCE_ROOT; };
+		"D714F993-380D-4786-801D-0583352BB371" /* MovieTime.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = MovieTime.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/MovieTime.cpp; sourceTree = SOURCE_ROOT; };
+		"D990EB95-AD44-4E08-86F6-CA532057BCD9" /* iterator.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = iterator.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/iterator.h"; sourceTree = SOURCE_ROOT; };
+		"D9EE01C1-D741-441F-81AA-65F08D37D8C3" /* iterator_fwd.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = iterator_fwd.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail/iterator_fwd.h"; sourceTree = SOURCE_ROOT; };
+		"DB9CCF33-E9AF-4296-B6C8-F97DF0F23859" /* ofxOscMessage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofxOscMessage.cpp; path = ../../../addons/ofxOsc/src/ofxOscMessage.cpp; sourceTree = SOURCE_ROOT; };
+		"DC2F2914-3462-4442-8719-B0D7B2C1F575" /* emit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = emit.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/emit.h"; sourceTree = SOURCE_ROOT; };
+		"DC9445C5-CD1F-44AD-9E60-2FAC01FCB899" /* PacketCache.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = PacketCache.cpp; path = ../../../addons/ofxHapPlayer/libs/ofxHap/src/PacketCache.cpp; sourceTree = SOURCE_ROOT; };
+		"DCDB7F59-9E6D-4664-8718-CF299DA15C2D" /* OscHostEndianness.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscHostEndianness.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscHostEndianness.h; sourceTree = SOURCE_ROOT; };
+		"DD680BAD-57F7-47CD-B41D-D518455AFDF5" /* LagUD.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = LagUD.cpp; path = src/LagUD.cpp; sourceTree = SOURCE_ROOT; };
+		"E0DC4E06-7765-45C3-B08F-D24AC02CC078" /* ofxOsc.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOsc.h; path = ../../../addons/ofxOsc/src/ofxOsc.h; sourceTree = SOURCE_ROOT; };
+		"E0F23AAB-5839-4CD8-B3ED-825EBC7F88FB" /* ofxOscParameterSync.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxOscParameterSync.h; path = ../../../addons/ofxOsc/src/ofxOscParameterSync.h; sourceTree = SOURCE_ROOT; };
+		"E21C5B0D-5A68-4F8B-B3C1-F91B50CB5781" /* AudioResampler.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioResampler.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioResampler.h; sourceTree = SOURCE_ROOT; };
+		E4B69B5B0A3A1756003C02F2 /* video-designDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "video-designDebug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = ofApp.cpp; path = src/ofApp.cpp; sourceTree = SOURCE_ROOT; };
+		E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofApp.h; path = src/ofApp.h; sourceTree = SOURCE_ROOT; };
+		E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "openFrameworks-Info.plist"; sourceTree = "<group>"; };
+		E4EB6923138AFD0F00A09F29 /* Project.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
+		"E5376C67-3609-4404-A74A-357182DB2906" /* mark.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = mark.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/mark.h"; sourceTree = SOURCE_ROOT; };
+		"E7FF014E-15A1-42E1-9764-D4C360657A1B" /* libavcodec.58.134.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libavcodec.58.134.100.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.134.100.dylib; sourceTree = SOURCE_ROOT; };
+		"EC978558-0D87-4D45-B8CF-EBB8E4E118AA" /* FlowFieldPoint.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = FlowFieldPoint.hpp; path = src/FlowFieldPoint.hpp; sourceTree = SOURCE_ROOT; };
+		"EDC7EB93-FFB2-4474-9DCE-ED6870EDBE60" /* OscOutboundPacketStream.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscOutboundPacketStream.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscOutboundPacketStream.h; sourceTree = SOURCE_ROOT; };
+		"EE91E766-7C51-4CFC-8124-B53A3CE53256" /* libswresample.3.9.100.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswresample.3.9.100.dylib; path = ../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.9.100.dylib; sourceTree = SOURCE_ROOT; };
+		"EF3EAEDC-129C-4FCA-AF11-AC19AB130E3F" /* RingBuffer.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = RingBuffer.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/RingBuffer.h; sourceTree = SOURCE_ROOT; };
+		"F1D5225E-7F09-4C2B-BDE1-D319D0423A82" /* MovieTime.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = MovieTime.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/MovieTime.h; sourceTree = SOURCE_ROOT; };
+		"F22AC138-7364-475E-879C-92D21E44B7D4" /* noncopyable.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = noncopyable.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/noncopyable.h"; sourceTree = SOURCE_ROOT; };
+		"F4ECCDF5-23B5-4149-96BD-A0823CF19422" /* AudioParameters.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioParameters.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioParameters.h; sourceTree = SOURCE_ROOT; };
+		"F8CB1D8E-0ADC-409F-BDEF-6BFE7248CC51" /* convert.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = convert.h; path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/convert.h"; sourceTree = SOURCE_ROOT; };
+		"F96261A7-F0F3-49F8-8F26-2292B663B0F2" /* AudioDecoder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = AudioDecoder.h; path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap/AudioDecoder.h; sourceTree = SOURCE_ROOT; };
+		"FCAD0C86-BD9A-409F-8B82-01DDC38E8019" /* OscException.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = OscException.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscException.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E4B69B590A3A1756003C02F2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		"03907E49-0722-4C11-93FF-B4EEF7157603" /* ofxPostGlitch */ = {
+			isa = PBXGroup;
+			children = (
+				"288C20AE-77E1-4B74-B9DB-2E622D1338B5" /* src */,
+			);
+			name = ofxPostGlitch;
+			path = ../../../addons/ofxPostGlitch;
+			sourceTree = SOURCE_ROOT;
+		};
+		"05CFDB3E-B311-480E-BA39-13AA178CFD38" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"2311056B-275A-47CD-B37F-72FE98FF51D8" /* ofxYAML.cpp */,
+				"3485B249-91E7-4B71-9EE9-3B993D9924FE" /* ofxYAML.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxYAML/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"07B55B75-C32B-4336-91DE-A799F595EDC9" /* ofxYAML */ = {
+			isa = PBXGroup;
+			children = (
+				"68E99ADE-3BFC-4F29-B75A-15FB4357B973" /* libs */,
+				"05CFDB3E-B311-480E-BA39-13AA178CFD38" /* src */,
+			);
+			name = ofxYAML;
+			path = ../../../addons/ofxYAML;
+			sourceTree = SOURCE_ROOT;
+		};
+		"0B944E0D-6673-48A9-B9BE-5C14B97D3D49" /* osc */ = {
+			isa = PBXGroup;
+			children = (
+				"514A7AB2-97F4-4DE8-9744-BFBBF3AF512E" /* MessageMappingOscPacketListener.h */,
+				"FCAD0C86-BD9A-409F-8B82-01DDC38E8019" /* OscException.h */,
+				"DCDB7F59-9E6D-4664-8718-CF299DA15C2D" /* OscHostEndianness.h */,
+				"235DBBF6-29A3-4639-A885-4BF0CF3B0B36" /* OscOutboundPacketStream.cpp */,
+				"EDC7EB93-FFB2-4474-9DCE-ED6870EDBE60" /* OscOutboundPacketStream.h */,
+				"BD6DDF8F-A15C-47ED-8D7E-DB3BE18B0F35" /* OscPacketListener.h */,
+				"1F0B1B5B-2CF6-45BE-B914-AEB755DD40C6" /* OscPrintReceivedElements.cpp */,
+				"1636BA33-E9D4-40FE-A557-E3BD5582B54D" /* OscPrintReceivedElements.h */,
+				"21F50AC3-1FFF-4F29-BBE8-4355DB4A5B36" /* OscReceivedElements.cpp */,
+				"450FD99B-85A0-4BC8-A583-17D3347C7892" /* OscReceivedElements.h */,
+				"0C8492CF-7740-4A6E-ABC7-C269AC9857A4" /* OscTypes.cpp */,
+				"33124A0B-B963-4C34-8711-54823BE46C92" /* OscTypes.h */,
+			);
+			name = osc;
+			path = ../../../addons/ofxOsc/libs/oscpack/src/osc;
+			sourceTree = SOURCE_ROOT;
+		};
+		"0D1CE1AC-211D-46E0-9A57-13E5CBB90CD4" /* include */ = {
+			isa = PBXGroup;
+			children = (
+				"75FFDAA1-E89B-4970-934D-22875F8D4A08" /* anchor.h */,
+				"B9CBEFE8-F18D-4C61-BDB4-DD8B00F924A8" /* binary.h */,
+				"24B71A75-A332-4377-A7E7-E27A5CCD9349" /* contrib */,
+				"D1B1BF6D-7562-41F3-A08F-D79E9AE93834" /* dll.h */,
+				"9CF7DE40-BAD8-40FB-9D59-B81EB2236076" /* emitfromevents.h */,
+				"6B43686E-2EDA-4AD9-A316-A68614C8A5CE" /* emitter.h */,
+				"5870623B-145F-429A-A3E5-2E550BA7747E" /* emitterdef.h */,
+				"92F883E6-E548-410B-A371-C6A8D72B272F" /* emittermanip.h */,
+				"4837CA73-0D48-49C3-836E-F3E814F375C2" /* emitterstyle.h */,
+				"27941F8D-7A3D-487E-8852-940F2F75FA6C" /* eventhandler.h */,
+				"17B8B776-3445-4B7C-A8C0-81A1EA7FA889" /* exceptions.h */,
+				"E5376C67-3609-4404-A74A-357182DB2906" /* mark.h */,
+				"F913072D-88E6-4BDA-BEF2-72D5EFA5382F" /* node */,
+				"F22AC138-7364-475E-879C-92D21E44B7D4" /* noncopyable.h */,
+				"200C1C12-903D-4813-8256-90A932C614E4" /* null.h */,
+				"D312C373-3C58-405A-86F4-5941AC328C76" /* ostream_wrapper.h */,
+				"56D8B503-751E-4FB3-9C00-D3735570A851" /* parser.h */,
+				"AC440BC7-35DC-4C4A-9E77-96932E0ADA91" /* stlemitter.h */,
+				"9B3EC3AA-A8F6-4FC3-81E1-527DD04A147D" /* traits.h */,
+				"83F1F8AA-301C-4209-8A98-6DAF415AF685" /* yaml.h */,
+			);
+			name = include;
+			path = "../../../addons/ofxYAML/libs/yaml-cpp/include";
+			sourceTree = SOURCE_ROOT;
+		};
+		"0F3FC31E-E95C-4D2C-80EB-DB2F985E0E8A" /* ofxHapPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				"5FC4CD9C-BE0D-41A2-A0CE-C2A0F155A507" /* libs */,
+				"B51E8E0D-E26A-4C80-AC62-188D2FC9236D" /* src */,
+			);
+			name = ofxHapPlayer;
+			sourceTree = SOURCE_ROOT;
+		};
+		"1167939B-BAB5-47A1-A310-AC340202D473" /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				"E9F445D2-306E-4B31-85FF-B6300EBC7F2A" /* osx */,
+			);
+			name = lib;
+			sourceTree = SOURCE_ROOT;
+		};
+		"150F4BC7-FD8D-48F4-BA9A-CD1FC141300A" /* detail */ = {
+			isa = PBXGroup;
+			children = (
+				"26A730B7-0D89-433C-B5E5-5D2760EA244B" /* bool_type.h */,
+				"02A657AE-BDD0-4C8E-B307-8ACE6F3BF71A" /* impl.h */,
+				"0D66D948-E3F3-4C98-A7EE-A1BC2A8DF54F" /* iterator.h */,
+				"D9EE01C1-D741-441F-81AA-65F08D37D8C3" /* iterator_fwd.h */,
+				"5E127D8A-F63D-4732-9309-DE6219F3AF26" /* memory.h */,
+				"6A120F06-FA7F-4F07-8403-383ED90BFED7" /* node.h */,
+				"05126B96-541C-4D65-ABEB-B29A0732A600" /* node_data.h */,
+				"530BDE61-A727-42BA-8879-E88A9049A024" /* node_iterator.h */,
+				"20828407-15F8-4AD6-87C5-BB2C2B482C71" /* node_ref.h */,
+			);
+			name = detail;
+			path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node/detail";
+			sourceTree = SOURCE_ROOT;
+		};
+		"17D4A5DA-931C-4860-8FDB-A31A43083A4B" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"E0DC4E06-7765-45C3-B08F-D24AC02CC078" /* ofxOsc.h */,
+				"20A9DC35-1EFC-45BD-8BDC-A2F9CA90C52E" /* ofxOscArg.h */,
+				"5F514058-732B-43AB-8EEE-2F5FD27F9DE6" /* ofxOscBundle.cpp */,
+				"78747FA7-081A-48F1-B8D2-3EA684C5F184" /* ofxOscBundle.h */,
+				"DB9CCF33-E9AF-4296-B6C8-F97DF0F23859" /* ofxOscMessage.cpp */,
+				"8E511ACF-03BD-4194-B885-951ABB5F76C7" /* ofxOscMessage.h */,
+				"63B09D64-4229-44C5-89D9-A9A3E444516A" /* ofxOscParameterSync.cpp */,
+				"E0F23AAB-5839-4CD8-B3ED-825EBC7F88FB" /* ofxOscParameterSync.h */,
+				"2778CFBC-73F7-4C85-9D9E-AE4133492B6B" /* ofxOscReceiver.cpp */,
+				"951FEDA8-150F-4192-AC54-609BA111F82E" /* ofxOscReceiver.h */,
+				"02185055-D88B-4FE6-8B77-F3E830B51D89" /* ofxOscSender.cpp */,
+				"648B31D1-7470-4EE1-8CFF-74D89F77E4F4" /* ofxOscSender.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxOsc/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"192EF3D2-5275-431E-9FDF-436E3D1E1D03" /* snappy */ = {
+			isa = PBXGroup;
+			children = (
+				"80DC6FCB-2313-48E7-A6A2-46454897D2D7" /* lib */,
+			);
+			name = snappy;
+			sourceTree = SOURCE_ROOT;
+		};
+		"22EF5866-FF08-44F3-A30D-F043DDC31900" /* hap */ = {
+			isa = PBXGroup;
+			children = (
+				"62023C1C-C3DE-413E-B103-442ADE814A29" /* src */,
+			);
+			name = hap;
+			path = ../../../addons/ofxHapPlayer/libs/hap;
+			sourceTree = SOURCE_ROOT;
+		};
+		"24B71A75-A332-4377-A7E7-E27A5CCD9349" /* contrib */ = {
+			isa = PBXGroup;
+			children = (
+				"A05DB2EC-9439-48AA-A0C8-3CD7EC426B10" /* anchordict.h */,
+				"60FC319D-9546-4A72-9115-93BD2B3B6E98" /* graphbuilder.h */,
+			);
+			name = contrib;
+			path = "../../../addons/ofxYAML/libs/yaml-cpp/include/contrib";
+			sourceTree = SOURCE_ROOT;
+		};
+		"288C20AE-77E1-4B74-B9DB-2E622D1338B5" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"2B6BFED8-C72D-4E19-932B-2C14DA1106FD" /* ofxPostGlitch.cpp */,
+				"4B25DD0C-5B9E-41B8-A5BE-E2B04D2DC17F" /* ofxPostGlitch.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxPostGlitch/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"2D2B5676-3AED-4DF2-A4AE-4984514653D4" /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				"BA2DD1B9-71C1-4FCB-8315-FA44B673E9FF" /* oscpack */,
+			);
+			name = libs;
+			path = ../../../addons/ofxOsc/libs;
+			sourceTree = SOURCE_ROOT;
+		};
+		"384A33C5-3943-40D8-874D-D4C2ABAB94DA" /* posix */ = {
+			isa = PBXGroup;
+			children = (
+				"4982DA69-5CE3-407E-A453-0C8C4E86D9CF" /* NetworkingUtils.cpp */,
+				"A96BC922-73AA-4758-BC99-396345E916F1" /* UdpSocket.cpp */,
+			);
+			name = posix;
+			path = ../../../addons/ofxOsc/libs/oscpack/src/ip/posix;
+			sourceTree = SOURCE_ROOT;
+		};
+		"39BB4368-FA40-40CF-871C-675A138675DA" /* ip */ = {
+			isa = PBXGroup;
+			children = (
+				"1CDBFA49-7517-47E3-9D49-5C9DE55AC3EE" /* IpEndpointName.cpp */,
+				"B209C64F-2A8E-4BD1-9058-C725263D09BB" /* IpEndpointName.h */,
+				"0D28720D-3EE0-4561-8835-C7E762144984" /* NetworkingUtils.h */,
+				"A3121602-658D-4B3C-964F-19106775A08B" /* PacketListener.h */,
+				"CE3D5967-E8DE-40B3-86FE-154F44EDAEED" /* TimerListener.h */,
+				"12FCEAD0-8D08-486E-912B-5764C7E819AA" /* UdpSocket.h */,
+				"384A33C5-3943-40D8-874D-D4C2ABAB94DA" /* posix */,
+			);
+			name = ip;
+			path = ../../../addons/ofxOsc/libs/oscpack/src/ip;
+			sourceTree = SOURCE_ROOT;
+		};
+		"3EF1DA7D-DF8E-40DD-B6D5-03BB3F169596" /* ofxHap */ = {
+			isa = PBXGroup;
+			children = (
+				"F96261A7-F0F3-49F8-8F26-2292B663B0F2" /* AudioDecoder.h */,
+				"F4ECCDF5-23B5-4149-96BD-A0823CF19422" /* AudioParameters.h */,
+				"E21C5B0D-5A68-4F8B-B3C1-F91B50CB5781" /* AudioResampler.h */,
+				"AEEFE9C6-6439-4ABE-9AD1-C7372A817AEE" /* AudioThread.h */,
+				"11C5779C-1F2E-474F-A611-14CA106CEF38" /* Clock.h */,
+				"24779B79-B9C0-42F7-8C25-B3CAE78330DB" /* Common.h */,
+				"6A1C7A47-7984-4016-9C7E-BC81DBB348F5" /* Demuxer.h */,
+				"B08C9DEE-3E59-4B92-8D4C-61C537CD5FC4" /* ErrorReceiving.h */,
+				"F1D5225E-7F09-4C2B-BDE1-D319D0423A82" /* MovieTime.h */,
+				"7E6B550E-642A-454D-9834-CE28CB8A1CE6" /* PacketCache.h */,
+				"EF3EAEDC-129C-4FCA-AF11-AC19AB130E3F" /* RingBuffer.h */,
+				"65FF84BB-DE30-49AC-9C72-92AFC2BA9B68" /* TimeRangeSet.h */,
+			);
+			name = ofxHap;
+			path = ../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap;
+			sourceTree = SOURCE_ROOT;
+		};
+		"4CE47B76-797D-4158-AFC1-D86FF147897E" /* yaml-cpp */ = {
+			isa = PBXGroup;
+			children = (
+				"0D1CE1AC-211D-46E0-9A57-13E5CBB90CD4" /* include */,
+			);
+			name = "yaml-cpp";
+			path = "../../../addons/ofxYAML/libs/yaml-cpp";
+			sourceTree = SOURCE_ROOT;
+		};
+		"5FC4CD9C-BE0D-41A2-A0CE-C2A0F155A507" /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				"9A6A7F00-6981-450F-9507-398005F2A033" /* ffmpeg */,
+				"192EF3D2-5275-431E-9FDF-436E3D1E1D03" /* snappy */,
+				"22EF5866-FF08-44F3-A30D-F043DDC31900" /* hap */,
+				"B1AED2FD-C537-4A83-938E-3E3AB25042CA" /* ofxHap */,
+			);
+			name = libs;
+			sourceTree = SOURCE_ROOT;
+		};
+		"62023C1C-C3DE-413E-B103-442ADE814A29" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"272A73F6-D640-4D73-9A57-86FF88792E29" /* hap.c */,
+				"6DCC232F-7574-4B9F-8861-D01B8E40D4AE" /* hap.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxHapPlayer/libs/hap/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"68E99ADE-3BFC-4F29-B75A-15FB4357B973" /* libs */ = {
+			isa = PBXGroup;
+			children = (
+				"4CE47B76-797D-4158-AFC1-D86FF147897E" /* yaml-cpp */,
+			);
+			name = libs;
+			path = ../../../addons/ofxYAML/libs;
+			sourceTree = SOURCE_ROOT;
+		};
+		"741F6586-091B-4545-B360-CD76C2A291A2" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"39BB4368-FA40-40CF-871C-675A138675DA" /* ip */,
+				"0B944E0D-6673-48A9-B9BE-5C14B97D3D49" /* osc */,
+			);
+			name = src;
+			path = ../../../addons/ofxOsc/libs/oscpack/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"80DC6FCB-2313-48E7-A6A2-46454897D2D7" /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				"9826EB56-4043-49DE-924D-350DD6A60BDE" /* osx */,
+			);
+			name = lib;
+			sourceTree = SOURCE_ROOT;
+		};
+		"978E29B5-CEB3-4D73-8DBB-158F84EE6EF8" /* ofxOsc */ = {
+			isa = PBXGroup;
+			children = (
+				"2D2B5676-3AED-4DF2-A4AE-4984514653D4" /* libs */,
+				"17D4A5DA-931C-4860-8FDB-A31A43083A4B" /* src */,
+			);
+			name = ofxOsc;
+			path = ../../../addons/ofxOsc;
+			sourceTree = SOURCE_ROOT;
+		};
+		"9826EB56-4043-49DE-924D-350DD6A60BDE" /* osx */ = {
+			isa = PBXGroup;
+			children = (
+				"593834E5-8C02-4229-AF7D-00B48F7A0A3F" /* libsnappy.dylib */,
+				"89CC4F24-16F9-471B-B7CF-8EE4FBE9E8D5" /* libsnappy.1.1.9.dylib */,
+				"04D5A2BD-A35B-4B25-A0A7-EAFC9B62446E" /* libsnappy.1.dylib */,
+			);
+			name = osx;
+			sourceTree = SOURCE_ROOT;
+		};
+		"9A6A7F00-6981-450F-9507-398005F2A033" /* ffmpeg */ = {
+			isa = PBXGroup;
+			children = (
+				"1167939B-BAB5-47A1-A310-AC340202D473" /* lib */,
+			);
+			name = ffmpeg;
+			sourceTree = SOURCE_ROOT;
+		};
+		"A79EB86F-956B-4F1E-97CB-5D736103A65B" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"BA837EA7-359D-4767-B2BA-EADD6BDE1CB6" /* AudioDecoder.cpp */,
+				"12046B4F-C767-4FBD-BA72-40B4253E6123" /* AudioParameters.cpp */,
+				"790E37BC-005C-4260-BF6A-2435344D2A4D" /* AudioResampler.cpp */,
+				"607D2EE6-CAD2-4F62-BC32-12CDA5AC1316" /* AudioThread.cpp */,
+				"D4BABE0F-2C25-4B9A-881D-373D197ED143" /* Clock.cpp */,
+				"AECDA248-E9D0-4A79-8A38-B8959B093E4A" /* Demuxer.cpp */,
+				"D714F993-380D-4786-801D-0583352BB371" /* MovieTime.cpp */,
+				"DC9445C5-CD1F-44AD-9E60-2FAC01FCB899" /* PacketCache.cpp */,
+				"07A0EBF2-5242-4D71-B1BB-359CDF2BED36" /* RingBuffer.cpp */,
+				"1ED51FCD-3BF6-47A3-9869-DB49C2E92C07" /* TimeRangeSet.cpp */,
+			);
+			name = src;
+			path = ../../../addons/ofxHapPlayer/libs/ofxHap/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"B1AED2FD-C537-4A83-938E-3E3AB25042CA" /* ofxHap */ = {
+			isa = PBXGroup;
+			children = (
+				"C12A5AC8-538A-4451-B44A-211F7AEAFE81" /* include */,
+				"A79EB86F-956B-4F1E-97CB-5D736103A65B" /* src */,
+			);
+			name = ofxHap;
+			path = ../../../addons/ofxHapPlayer/libs/ofxHap;
+			sourceTree = SOURCE_ROOT;
+		};
+		"B51E8E0D-E26A-4C80-AC62-188D2FC9236D" /* src */ = {
+			isa = PBXGroup;
+			children = (
+				"66E7775E-9634-4AF5-BC88-1FD34A05E095" /* ofxHapPlayer.cpp */,
+				"992882DD-991B-44EA-9442-B790DD56DF8C" /* ofxHapPlayer.h */,
+			);
+			name = src;
+			path = ../../../addons/ofxHapPlayer/src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"BA2DD1B9-71C1-4FCB-8315-FA44B673E9FF" /* oscpack */ = {
+			isa = PBXGroup;
+			children = (
+				"741F6586-091B-4545-B360-CD76C2A291A2" /* src */,
+			);
+			name = oscpack;
+			path = ../../../addons/ofxOsc/libs/oscpack;
+			sourceTree = SOURCE_ROOT;
+		};
+		BB4B014C10F69532006C3DED /* addons */ = {
+			isa = PBXGroup;
+			children = (
+				"0F3FC31E-E95C-4D2C-80EB-DB2F985E0E8A" /* ofxHapPlayer */,
+				"978E29B5-CEB3-4D73-8DBB-158F84EE6EF8" /* ofxOsc */,
+				"03907E49-0722-4C11-93FF-B4EEF7157603" /* ofxPostGlitch */,
+				"07B55B75-C32B-4336-91DE-A799F595EDC9" /* ofxYAML */,
+			);
+			name = addons;
+			path = ../../../addons;
+			sourceTree = "<group>";
+		};
+		"C12A5AC8-538A-4451-B44A-211F7AEAFE81" /* include */ = {
+			isa = PBXGroup;
+			children = (
+				"3EF1DA7D-DF8E-40DD-B6D5-03BB3F169596" /* ofxHap */,
+			);
+			name = include;
+			path = ../../../addons/ofxHapPlayer/libs/ofxHap/include;
+			sourceTree = SOURCE_ROOT;
+		};
+		E4B69B4A0A3A1720003C02F2 = {
+			isa = PBXGroup;
+			children = (
+				191CD6FA2847E21E0085CBB6 /* of.entitlements */,
+				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
+				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
+				E4B69E1C0A3A1BDC003C02F2 /* src */,
+				191EF70929D778A400F35F26 /* openFrameworks */,
+				BB4B014C10F69532006C3DED /* addons */,
+				E4B69B5B0A3A1756003C02F2 /* video-designDebug.app */,
+			);
+			sourceTree = "<group>";
+		};
+		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
+				E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */,
+				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
+				"8FEFA48D-D1BB-4898-BB5B-9C1F31406B2B" /* FlowField.cpp */,
+				"067D77F8-8281-4123-B12F-63A6B0F2400A" /* FlowField.hpp */,
+				"20626DE5-68DF-481D-9301-92F3E84AE711" /* FlowFieldPoint.cpp */,
+				"EC978558-0D87-4D45-B8CF-EBB8E4E118AA" /* FlowFieldPoint.hpp */,
+				"DD680BAD-57F7-47CD-B41D-D518455AFDF5" /* LagUD.cpp */,
+				"5898F770-5F30-445A-9825-69CD2CA4C28E" /* LagUD.hpp */,
+				"AFEB3548-9184-4D10-B678-F67693B07C0B" /* Lines.hpp */,
+				"8970FD38-08C6-4B64-9919-845E3156C8E6" /* Mesh.hpp */,
+				"A97D590C-C8A1-400B-881D-9E3497D5EB71" /* MoviePoint.cpp */,
+				"BA3663E0-CDD6-46CC-B108-08CC493BFC5C" /* MoviePoint.hpp */,
+				"633E229A-35FC-4473-B153-B7F7CBC37BF8" /* Param.hpp */,
+				"9FB24794-918E-4A89-B906-7D9872FF1B90" /* PointTM.cpp */,
+				"A81C139F-0E27-46B1-8EB2-B57664DF9260" /* PointTM.hpp */,
+				"1BDEEC3D-1602-4776-8756-AD3A4DB23FD6" /* ReaperMarkersFileParser.hpp */,
+				"51C7429C-6676-40B1-8687-401ABD2A8FCA" /* Turtle.hpp */,
+				"A95EB4D2-9383-4B72-9379-47B21A01AF8C" /* VideoModule.hpp */,
+				"2B7B8583-5171-45D8-B833-49143EE81B8E" /* VisualModule.hpp */,
+				"A2697492-90DB-499D-87E9-745433341CD9" /* Waveform.hpp */,
+				"166822A5-3571-4DEE-BB58-7C443BDE0965" /* defines.h */,
+			);
+			path = src;
+			sourceTree = SOURCE_ROOT;
+		};
+		"E9F445D2-306E-4B31-85FF-B6300EBC7F2A" /* osx */ = {
+			isa = PBXGroup;
+			children = (
+				"7D0F2FB6-EB20-4A43-8515-0CEE63087DE1" /* libavutil.56.70.100.dylib */,
+				"9F1169A0-9D4E-4947-AD8F-F5F215FF0B8A" /* libswresample.3.dylib */,
+				"8D0E1D22-A983-406B-915E-68F235842A61" /* libavformat.58.dylib */,
+				"9E737BC5-FA3A-40AF-8BC4-FD423F4B9E04" /* libavformat.58.76.100.dylib */,
+				"EE91E766-7C51-4CFC-8124-B53A3CE53256" /* libswresample.3.9.100.dylib */,
+				"A03C28B4-DEBB-43F5-9956-7DCE403210F5" /* libavformat.dylib */,
+				"5CFC1348-6680-472C-BBC2-3A4D0F6B3974" /* libavutil.dylib */,
+				"5BF19A25-28DC-4125-8606-47A6B9184146" /* libavutil.56.dylib */,
+				"5D960F7C-298A-41E8-A5E7-F14D2616F335" /* libavcodec.dylib */,
+				"1D8E6E3F-81BE-45C7-84C4-F7E6774DA7BA" /* libswresample.dylib */,
+				"E7FF014E-15A1-42E1-9764-D4C360657A1B" /* libavcodec.58.134.100.dylib */,
+				"D6DB17EB-6F9B-467D-8A6E-B2EA4E2EDD62" /* libavcodec.58.dylib */,
+			);
+			name = osx;
+			sourceTree = SOURCE_ROOT;
+		};
+		"F913072D-88E6-4BDA-BEF2-72D5EFA5382F" /* node */ = {
+			isa = PBXGroup;
+			children = (
+				"F8CB1D8E-0ADC-409F-BDEF-6BFE7248CC51" /* convert.h */,
+				"150F4BC7-FD8D-48F4-BA9A-CD1FC141300A" /* detail */,
+				"DC2F2914-3462-4442-8719-B0D7B2C1F575" /* emit.h */,
+				"24318F9F-3018-4258-8E8D-266F4106261B" /* impl.h */,
+				"D990EB95-AD44-4E08-86F6-CA532057BCD9" /* iterator.h */,
+				"575C089F-32D1-4984-A26F-6C7E2C69604B" /* node.h */,
+				"4D8373A5-D4D6-44CD-B352-533C29CE3E6A" /* parse.h */,
+				"333AC15F-57A3-4170-ACEA-EB9D7C7B7E13" /* ptr.h */,
+				"96A5011D-14B6-4FC0-BDF0-52CC0693C666" /* type.h */,
+			);
+			name = node;
+			path = "../../../addons/ofxYAML/libs/yaml-cpp/include/node";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E4B69B5A0A3A1756003C02F2 /* video-design */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "video-design" */;
+			buildPhases = (
+				E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */,
+				E4B69B580A3A1756003C02F2 /* Sources */,
+				E4B69B590A3A1756003C02F2 /* Frameworks */,
+				E4C2427710CC5ABF004149E2 /* CopyFiles */,
+				E4A5B60F29BAAAE400C2D356 /* CopyFiles */,
+				19B789C429E5AB4A0082E9B8 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "video-design";
+			productName = myOFApp;
+			productReference = E4B69B5B0A3A1756003C02F2 /* video-designDebug.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E4B69B4C0A3A1720003C02F2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+			};
+			buildConfigurationList = E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "video-design" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E4B69B4A0A3A1720003C02F2;
+			productRefGroup = E4B69B4A0A3A1720003C02F2;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E4B69B5A0A3A1756003C02F2 /* video-design */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		19B789C429E5AB4A0082E9B8 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$OF_PATH/scripts/osx/xcode_project.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E42962A92163ECCD00A6A9E2 /* Run Script — Compile OF */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script — Compile OF";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "echo \"💾 Compiling Openframeworks\"\nxcodebuild -project \"$OF_PATH/libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj\" -target openFrameworks -configuration \"${CONFIGURATION}\"  CLANG_CXX_LANGUAGE_STANDARD=$CLANG_CXX_LANGUAGE_STANDARD MACOSX_DEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET GCC_PREPROCESSOR_DEFINITIONS=$USER_PREPROCESSOR_DEFINITIONS\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E4B69B580A3A1756003C02F2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
+				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
+				"A89A24EC-1D89-42BD-9428-211AA000AC0B" /* FlowField.cpp in Sources */,
+				"417FB572-723B-4D81-B333-62F460B226FF" /* FlowFieldPoint.cpp in Sources */,
+				"14772C64-5D82-44F6-A764-D13DB2944971" /* LagUD.cpp in Sources */,
+				"F3398C69-906F-4B21-B7CD-A35802DC85DF" /* MoviePoint.cpp in Sources */,
+				"48AEAC73-5040-4EB1-9A2A-D1CF66E3B0F7" /* PointTM.cpp in Sources */,
+				"12D79C16-44FB-4F81-A976-84768756A61F" /* hap.c in Sources */,
+				"EB9B377A-E746-4AE9-B27F-1468F0F2826F" /* AudioDecoder.cpp in Sources */,
+				"C6C5F7B6-EE2A-4388-BE86-4DA37933DB36" /* AudioParameters.cpp in Sources */,
+				"CC0F9C3E-EFA4-4187-9CE0-148BAE33F411" /* AudioResampler.cpp in Sources */,
+				"02D8FBE6-413D-44B6-BB18-1E3B2E1DBF16" /* AudioThread.cpp in Sources */,
+				"2EA06F8F-2FA5-4DD8-85C5-E4B13F2579C8" /* Clock.cpp in Sources */,
+				"E4254830-F698-4ADA-8CFE-E0101B8FC103" /* Demuxer.cpp in Sources */,
+				"BCCE3BE2-7412-4ED4-B91E-38389C8A39C6" /* MovieTime.cpp in Sources */,
+				"FD5FC1A9-4A73-4968-8819-754DE8F12DBF" /* PacketCache.cpp in Sources */,
+				"D40FEEDB-9356-4DA4-B2EA-21B1A358BA90" /* RingBuffer.cpp in Sources */,
+				"68D3298B-A89C-458F-A4FF-94A2533D1EF2" /* TimeRangeSet.cpp in Sources */,
+				"660FEDAD-4050-4A2F-8648-4AACCA15BBAD" /* ofxHapPlayer.cpp in Sources */,
+				"C78A635C-F4C7-404F-A078-43E1885886DB" /* IpEndpointName.cpp in Sources */,
+				"6D4BE522-1256-4AB7-A99A-B23E7526AE9E" /* NetworkingUtils.cpp in Sources */,
+				"1C4F9749-7774-4B71-AA82-FA1BFA5DE50B" /* UdpSocket.cpp in Sources */,
+				"57CB70C3-5F9C-41D7-91C9-7BB82A7AD1EC" /* OscOutboundPacketStream.cpp in Sources */,
+				"9EBF0A18-C234-415A-9627-C6A553E69ED0" /* OscPrintReceivedElements.cpp in Sources */,
+				"F93F00EB-03FB-4479-B3AC-178F91196AB3" /* OscReceivedElements.cpp in Sources */,
+				"7F554D1A-E5A1-4419-98B8-B1C50073C771" /* OscTypes.cpp in Sources */,
+				"406576E2-A8DD-427F-9093-6D2A98780262" /* ofxOscBundle.cpp in Sources */,
+				"5E85B403-38A6-4EA5-BBE5-409ABF275ADF" /* ofxOscMessage.cpp in Sources */,
+				"FCB7A250-C31A-4359-8281-8618E66B4972" /* ofxOscParameterSync.cpp in Sources */,
+				"B5648641-3CB7-4AAD-B8E1-CB76803A2F86" /* ofxOscReceiver.cpp in Sources */,
+				"2E691A9C-E03F-4061-8694-FE85A3500FD8" /* ofxOscSender.cpp in Sources */,
+				"AC519BB4-A884-44B8-916F-9B228FFEE6C5" /* ofxPostGlitch.cpp in Sources */,
+				"470A62E9-AC55-4FE2-87A4-70E799CFCC1C" /* ofxYAML.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		E4B69B4E0A3A1720003C02F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = of.entitlements;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+				);
+				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
+			};
+			name = Debug;
+		};
+		E4B69B4F0A3A1720003C02F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = of.entitlements;
+				COPY_PHASE_STRIP = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_UNROLL_LOOPS = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+				);
+				OTHER_CPLUSPLUSFLAGS = "-D__MACOSX_CORE__";
+			};
+			name = Release;
+		};
+		E4B69B600A3A1757003C02F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GCC_DYNAMIC_NO_PIC = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+					src,
+					../../../addons/ofxHapPlayer/libs,
+					../../../addons/ofxHapPlayer/libs/ffmpeg,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/include,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs/Win32,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs/x64,
+					../../../addons/ofxHapPlayer/libs/hap,
+					../../../addons/ofxHapPlayer/libs/hap/src,
+					../../../addons/ofxHapPlayer/libs/ofxHap,
+					../../../addons/ofxHapPlayer/libs/ofxHap/include,
+					../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap,
+					../../../addons/ofxHapPlayer/libs/ofxHap/src,
+					../../../addons/ofxHapPlayer/libs/snappy,
+					../../../addons/ofxHapPlayer/libs/snappy/include,
+					../../../addons/ofxHapPlayer/libs/snappy/lib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32/Debug,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32/Release,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64/Debug,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64/Release,
+					../../../addons/ofxHapPlayer/libs/snappy/license,
+					../../../addons/ofxHapPlayer/src,
+					../../../addons/ofxOsc/libs,
+					../../../addons/ofxOsc/libs/oscpack,
+					../../../addons/ofxOsc/libs/oscpack/src,
+					../../../addons/ofxOsc/libs/oscpack/src/ip,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/posix,
+					../../../addons/ofxOsc/libs/oscpack/src/osc,
+					../../../addons/ofxOsc/src,
+					../../../addons/ofxPostGlitch/src,
+					../../../addons/ofxYAML/src,
+					"../../../addons/ofxYAML/libs/yaml-cpp/include",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					"$(OF_CORE_FRAMEWORKS)",
+					"$(LIB_OF_DEBUG)",
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.70.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.76.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.9.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.134.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.1.9.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.dylib,
+					"-rpath",
+					"@loader_path/../../../../../../../addons/ofxHapPlayer/libs",
+					"../../../addons/ofxYAML/libs/yaml-cpp/lib/osx/x64/libyaml-cpp.a",
+					"../../../addons/ofxYAML/libs/yaml-cpp/lib/osx/x86/libyaml-cpp.a",
+				);
+			};
+			name = Debug;
+		};
+		E4B69B610A3A1757003C02F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E4EB6923138AFD0F00A09F29 /* Project.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				HEADER_SEARCH_PATHS = (
+					"$(OF_CORE_HEADERS)",
+					src,
+					src,
+					../../../addons/ofxHapPlayer/libs,
+					../../../addons/ofxHapPlayer/libs/ffmpeg,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/include,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs/Win32,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/vs/x64,
+					../../../addons/ofxHapPlayer/libs/hap,
+					../../../addons/ofxHapPlayer/libs/hap/src,
+					../../../addons/ofxHapPlayer/libs/ofxHap,
+					../../../addons/ofxHapPlayer/libs/ofxHap/include,
+					../../../addons/ofxHapPlayer/libs/ofxHap/include/ofxHap,
+					../../../addons/ofxHapPlayer/libs/ofxHap/src,
+					../../../addons/ofxHapPlayer/libs/snappy,
+					../../../addons/ofxHapPlayer/libs/snappy/include,
+					../../../addons/ofxHapPlayer/libs/snappy/lib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32/Debug,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/Win32/Release,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64/Debug,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/vs/x64/Release,
+					../../../addons/ofxHapPlayer/libs/snappy/license,
+					../../../addons/ofxHapPlayer/src,
+					../../../addons/ofxOsc/libs,
+					../../../addons/ofxOsc/libs/oscpack,
+					../../../addons/ofxOsc/libs/oscpack/src,
+					../../../addons/ofxOsc/libs/oscpack/src/ip,
+					../../../addons/ofxOsc/libs/oscpack/src/ip/posix,
+					../../../addons/ofxOsc/libs/oscpack/src/osc,
+					../../../addons/ofxOsc/src,
+					../../../addons/ofxPostGlitch/src,
+					../../../addons/ofxYAML/src,
+					"../../../addons/ofxYAML/libs/yaml-cpp/include",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"$(OF_CORE_LIBS)",
+					"$(OF_CORE_FRAMEWORKS)",
+					"$(LIB_OF)",
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.70.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.58.76.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.3.9.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavformat.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavutil.56.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libswresample.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.134.100.dylib,
+					../../../addons/ofxHapPlayer/libs/ffmpeg/lib/osx/libavcodec.58.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.1.9.dylib,
+					../../../addons/ofxHapPlayer/libs/snappy/lib/osx/libsnappy.1.dylib,
+					"-rpath",
+					"@loader_path/../../../../../../../addons/ofxHapPlayer/libs",
+					"../../../addons/ofxYAML/libs/yaml-cpp/lib/osx/x64/libyaml-cpp.a",
+					"../../../addons/ofxYAML/libs/yaml-cpp/lib/osx/x86/libyaml-cpp.a",
+				);
+				baseConfigurationReference = E4EB6923138AFD0F00A09F29;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E4B69B4D0A3A1720003C02F2 /* Build configuration list for PBXProject "video-design" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E4B69B4E0A3A1720003C02F2 /* Debug */,
+				E4B69B4F0A3A1720003C02F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E4B69B5F0A3A1757003C02F2 /* Build configuration list for PBXNativeTarget "video-design" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E4B69B600A3A1757003C02F2 /* Debug */,
+				E4B69B610A3A1757003C02F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E4B69B4C0A3A1720003C02F2 /* Project object */;
+}

@@ -47,7 +47,7 @@ videos:
   - # module index: 4
     name: "leaf"
     prob: 2
-    sub-videos: ["original","canny"]
+    sub-videos: ["original","canny-all","canny-few","marching-squares"]
     show-hap-prob: 0.4
     use-ff-prob: 0.18
     boxes-prob: 0.2
@@ -57,7 +57,7 @@ videos:
   - # module index: 5
     name: "tree"
     prob: 2
-    sub-videos: ["original","max-area"]
+    sub-videos: ["original","canny","colored"]
     show-hap-prob: 0.4
     use-ff-prob: 0.18
     boxes-prob: 0.2
@@ -67,7 +67,7 @@ videos:
   - # module index: 6
     name: "westrock"
     prob: 2
-    sub-videos: ["tiled"]
+    sub-videos: ["tiled-3-min"]
     show-hap-prob: 0.4
     use-ff-prob: 0.18
     boxes-prob: 0.2

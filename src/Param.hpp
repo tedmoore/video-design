@@ -14,7 +14,7 @@
 class Param {
 public:
     string name = "";
-    void virtual load(ofxYAML::Node &y){
+    void virtual load(nlohmann::json &y){
         reportError("load");
     }
     
@@ -26,9 +26,9 @@ public:
         reportError("newRandom");
     }
     
-    ofxYAML::Node virtual save(){
+    nlohmann::json virtual save(){
         reportError("save");
-        ofxYAML::Node dict;
+        nlohmann::json dict;
         return dict;
     }
     
@@ -51,14 +51,14 @@ public:
         cout << value;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<bool>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<bool>();
     }
     
     void newRandom(){
@@ -88,14 +88,14 @@ public:
         value = val;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<float>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<float>();
     }
     
     void newRandom(){
@@ -123,14 +123,14 @@ public:
         value = val;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<int>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<int>();
     }
     
     void newRandom(){
@@ -160,14 +160,14 @@ public:
         value = val;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<int>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<int>();
     }
     
     void newRandom(){
@@ -193,14 +193,14 @@ public:
         value = val;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<int>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<int>();
     }
     
     void newRandom(){
@@ -226,14 +226,14 @@ public:
         value = val;
     }
     
-    ofxYAML::Node save(){
-        ofxYAML::Node dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(ofxYAML::Node &y){
-        value = y["value"].as<int>();
+    void load(nlohmann::json &y){
+        value = y["value"].get<int>();
     }
     
     void newRandom(){

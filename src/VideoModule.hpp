@@ -66,8 +66,11 @@ public:
             hap.setLoopState(OF_LOOP_NORMAL);
             hap.play();
             hap.setVolume(0);
+            
+            cout << dir + "/mini.mp4" << endl;
 
             mini_vid.load(dir + "/mini.mp4");
+            cout << "done loading" << endl;
             mini_vid.setVolume(0);
             mini_vid.setLoopState(OF_LOOP_NORMAL);
             mini_vid.play();
@@ -87,8 +90,6 @@ public:
     ofTexture texture;
     ofVec3f points[4];
     ofPixels mini_pix;
-    
-    int cluster_freq;
     
     float** mags;
     int n_mag;
@@ -145,9 +146,9 @@ public:
         return videos[currentSubVideoIndex.value];
     }
     
-    void setup(std::string path, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofxYAML& config, int videoIndex){
+    void setup(std::string& name, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, nlohmann::json& config){
         
-        ofDirectory topDir("videos/" + path);
+        ofDirectory topDir("videos/" + name);
         vector<ofFile> subDirs = topDir.getFiles();
         videos.resize(subDirs.size());
         
@@ -173,9 +174,9 @@ public:
         
         // speed
         speed.name = "speed";
-        speed.min = config["videos"][videoIndex]["speed-min"].as<float>();
-        speed.max = config["videos"][videoIndex]["speed-max"].as<float>();
-        speed.power = config["videos"][videoIndex]["speed-pow"].as<float>();
+        speed.min = config["speed-min"].get<float>();
+        speed.max = config["speed-max"].get<float>();
+        speed.power = config["speed-pow"].get<float>();
         speed.newRandom();
         params.push_back(&speed);
         
@@ -185,13 +186,13 @@ public:
         params.push_back(&speedDir);
         
         // showHap
-        bShowHap.name = "showHap";
-        bShowHap.trueProb = config["videos"][videoIndex]["show-hap-prob"].as<float>(); // 0.2
+        bShowHap.name = "bShowHap";
+        bShowHap.trueProb = config["bShowHap-prob"].get<float>(); // 0.2
         params.push_back(&bShowHap);
         
         // use_ff
         bUseFF.name = "bUseFF";
-        bUseFF.trueProb = config["videos"][videoIndex]["use-ff-prob"].as<float>(); // 0.28
+        bUseFF.trueProb = config["use-ff-prob"].get<float>(); // 0.28
         params.push_back(&bUseFF);
         
         // reactive_speed;
@@ -200,6 +201,7 @@ public:
         
         // bTile;
         bTile.name = "bTile";
+        bTile.trueProb = config["bTile-prob"].get<float>();
         params.push_back(&bTile);
         
         // bDontUnfoldTiles
@@ -243,11 +245,12 @@ public:
         
         // bZShiftBoxes
         bZShiftBoxes.name = "bZShiftBoxes";
+        bZShiftBoxes.trueProb = config["bZShiftBoxes-prob"].get<float>();
         params.push_back(&bZShiftBoxes);
         
         // rectType
         rectType.name = "rectType";
-        rectType.setup({0,0,0,0,1,1,1,1,2},0);
+        rectType.setup(config["rectType-weights"].get<vector<int>>(),0);
         params.push_back(&rectType);
         
         // nrtPlayHead
@@ -268,10 +271,6 @@ public:
         
         ff = ff_;
         
-        ofDirectory dir(path);
-        
-        cluster_freq = config["target-framerate"].as<int>() * ofRandom(15,25);
-        
         type = HAP;
         
         moviePoints.resize(VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT);
@@ -283,6 +282,16 @@ public:
         
         light.setPointLight();
         light.setAmbientColor(0);
+        
+        processConfigFile(config);
+    }
+    
+    void processConfigFile(nlohmann::json& dict){
+        for(Param* p : params){
+            if(dict.contains(p->name)){
+                p->setValue(dict[p->name].get<float>());
+            }
+        }
     }
 
     void update(bool isNRT, std::unordered_map<std::string, float>* common_features, bool verbose){
@@ -517,8 +526,8 @@ public:
         
     }
     
-    ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    nlohmann::json saveState(){
+        nlohmann::json dict;
         
         for(Param* p : params){
             if(p->name != ""){
@@ -528,7 +537,9 @@ public:
 
         dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
         dict["unfold_tiles_order"] = (int)unfold_tiles_order;
-        dict["lightPosition"] = lightPosition;
+        
+        // TODO: because `lightPosition` is a ofVec3
+//        dict["lightPosition"] = lightPosition;
         
         for(int i = 0; i < N_CLUSTERS; i++){
             dict["center_color_indices" + ofToString(i)] = videos[currentSubVideoIndex.value]->center_color_indices[i];
@@ -537,21 +548,23 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
 
         for(Param* p : params){
             if(dict[p->name]){
-                ofxYAML::Node child = dict[p->name];
+                nlohmann::json child = dict[p->name];
                 p->load(child);
             }
         }
         
-        n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].as<int>();
-        unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].as<int>();
-        lightPosition = dict["lightPosition"].as<ofVec3f>();
+        n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].get<int>();
+        unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].get<int>();
+        
+        // TODO:
+//        lightPosition = dict["lightPosition"].get<ofVec3f>();
         
         for(int i = 0; i < N_CLUSTERS; i++){
-            videos[currentSubVideoIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].as<int>();
+            videos[currentSubVideoIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].get<int>();
         }
         
         for(int i = 0; i < N_MOVIEPOINTS; i ++){
@@ -596,7 +609,6 @@ public:
         
         for(Param* p : params){
             if(label == p->name){
-                cout << "VideoModule::receiveOSC setting " << label << " to " << val <<endl;
                 p->setValue(val);
             }
         }

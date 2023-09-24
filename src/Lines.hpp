@@ -49,8 +49,8 @@ public:
         is_borrow_colors = ofRandom(1.f) < 0.5;
     }
     
-    ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    nlohmann::json saveState(){
+        nlohmann::json dict;
         
         dict["dir"] = (int)dir;
         dict["inv"] = inv;
@@ -59,11 +59,11 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
-        dir = (lines_direction)dict["dir"].as<int>();
-        inv = dict["inv"].as<bool>();
-        is_borrow_colors = dict["is_borrow_colors"].as<bool>();
+        dir = (lines_direction)dict["dir"].get<int>();
+        inv = dict["inv"].get<bool>();
+        is_borrow_colors = dict["is_borrow_colors"].get<bool>();
         
     }
 

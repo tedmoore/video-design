@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include "ofMain.h"
 #include "VisualModule.hpp"
-#include "ofxYAML.h"
 
 class Turtle : public VisualModule {
 public:
@@ -28,14 +27,14 @@ public:
         return "Turtle";
     }
     
-    void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
+    void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, nlohmann::json config){
         
         type = TURTLE;
-        for(int i = 0; i < config["modules"]["turtle"]["divisors"].size(); i++){
-            divisors.push_back(config["modules"]["turtle"]["divisors"][i].as<int>());
+        for(int i = 0; i < config["divisors"].size(); i++){
+            divisors.push_back(config["divisors"][i].get<int>());
         }
         
-        max_frames = config["modules"]["turtle"]["max-frames"].as<int>();
+        max_frames = config["max-frames"].get<int>();
         
         newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull,0);
     }
@@ -103,16 +102,16 @@ public:
         path.push_back(ofVec3f(ofRandom(width),ofRandom(height),0));
     }
     
-    ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    nlohmann::json saveState(){
+        nlohmann::json dict;
         dict["divisor_i"] = divisor_i;
         dict["stepSize"] = stepSize;
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
-        divisor_i = dict["divisor_i"].as<int>();
-        stepSize = dict["stepSize"].as<float>();
+    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+        divisor_i = dict["divisor_i"].get<int>();
+        stepSize = dict["stepSize"].get<float>();
         restartPath(width,height);
     }
 };

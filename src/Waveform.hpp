@@ -10,8 +10,7 @@
 
 #include <stdio.h>
 #include "ofMain.h"
-#include <VisualModule.hpp>
-#include "ofxYAML.h"
+#include "VisualModule.hpp"
 #include <format>
 
 class Waveform: public VisualModule {
@@ -20,7 +19,7 @@ public:
     enum rectsDirection { HEIGHT_WIDTH = 0, WIDTH_HEIGHT , ANGLE_L , ANGLE_R };
     enum rectsShape { SQUARE = 0, CIRCLE , TWO_TRIANGLES };
     
-    waveformType wfType = GRID;
+    ParamEnumWeighted wfType;
     rectsDirection rectsDir = ANGLE_L;
     rectsShape rects_shape = SQUARE;
     
@@ -49,14 +48,16 @@ public:
         return "Waveform";
     }
     
-    void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, ofxYAML& config){
-        lissajous_line_width = config["modules"]["waveform"]["lissajous-line-width"].as<float>();
-        waveform_line_width = config["modules"]["waveform"]["waveform-line-width"].as<float>();
+    void setup(int width, int height, float** waveforms_, int n_waveforms_, int length_, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, nlohmann::json config){
+        lissajous_line_width = config["lissajous-line-width"].get<float>();
+        waveform_line_width = config["waveform-line-width"].get<float>();
         n_waveforms = n_waveforms_;
         length = length_;
         waveforms = waveforms_;
-        type = WAVEFORM;
         h = height;
+        
+        wfType.setup(config["waveform-type-weights"].get<vector<int>>(),config["waveform-type-default"].get<int>());
+        wfType.setValue(1);
         
         xoff = new int[n_waveforms];
         yoff = new int[n_waveforms];
@@ -80,10 +81,10 @@ public:
         
         if(verbose){
             cout << "Waveform::display\n";
-            cout << "\twfType:   " << wfType << endl;
+            cout << "\twfType:   " << wfType.value << endl;
         };
             
-        switch(wfType){
+        switch(wfType.value){
             case LISSAJOUS:
             {
                 ofSetColor(255);
@@ -318,7 +319,7 @@ public:
 
     void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
 
-        wfType = (waveformType)ofRandom(4);
+        wfType.newRandom();
         rectsDir = (rectsDirection)ofRandom(5);
         rects_shape = (rectsShape)ofRandom(3);
         trianglesDir = ofRandom(1.f) < 0.5;
@@ -336,12 +337,12 @@ public:
         }
     }
     
-    ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    nlohmann::json saveState(){
+        nlohmann::json dict;
         
         
         
-        dict["wfType"] = (int)wfType;
+        dict["wfType"] = wfType.value;
         dict["rectsDir"] = (int)rectsDir;
         dict["rects_shape"] = (int)rects_shape;
         dict["trianglesDir"] = trianglesDir;
@@ -361,23 +362,23 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
 
-        wfType = (waveformType)dict["wfType"].as<int>();
-        rectsDir = (rectsDirection)dict["rectsDir"].as<int>();
-        rects_shape = (rectsShape)dict["rects_shape"].as<int>();
-        trianglesDir = dict["trianglesDir"].as<bool>();
-        scale_size = dict["scale_size"].as<bool>();
+        wfType.value = dict["wfType"].get<int>();
+        rectsDir = (rectsDirection)dict["rectsDir"].get<int>();
+        rects_shape = (rectsShape)dict["rects_shape"].get<int>();
+        trianglesDir = dict["trianglesDir"].get<bool>();
+        scale_size = dict["scale_size"].get<bool>();
         
         for (int i = 0; i < n_waveforms; i++) {
             if (i > 0) {
-                xoff[i] = dict["xoff-" + ofToString(i)].as<int>();
-                yoff[i] = dict["yoff-" + ofToString(i)].as<int>();
-                zoff[i] = dict["zoff-" + ofToString(i)].as<int>();
-                show[i] = dict["show-" + ofToString(i)].as<bool>();
+                xoff[i] = dict["xoff-" + ofToString(i)].get<int>();
+                yoff[i] = dict["yoff-" + ofToString(i)].get<int>();
+                zoff[i] = dict["zoff-" + ofToString(i)].get<int>();
+                show[i] = dict["show-" + ofToString(i)].get<bool>();
             }
             
-            hmul[i] = dict["hmul-" + ofToString(i)].as<float>();
+            hmul[i] = dict["hmul-" + ofToString(i)].get<float>();
         }
     }
 
@@ -387,7 +388,7 @@ public:
         if(label == "setMaxNWaveforms"){
               maxNWaveforms = int(val);
         } else if (label == "setWaveformType"){
-            wfType = (waveformType)val;
+            wfType.setValue(val);
         } else if (label == "resetLissajousXY"){
               xoff[1] = 0;
               yoff[1] = height/2;

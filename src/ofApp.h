@@ -10,7 +10,7 @@
 #include "Turtle.hpp"
 #include "Lines.hpp"
 #include "ofxPostGlitch.h"
-#include "ofxYAML.h"
+#include "thirdparty/nlohmann/json.hpp"
 
 class ofApp : public ofBaseApp{
     
@@ -31,7 +31,6 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-    void newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex);
     void displayIncomingData(int width, int height);
     void onsetOccured(int width, int height, unsigned long long frame_num);
     void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
@@ -43,65 +42,64 @@ public:
     void runNrtRender(int width,int height);
     void drawBounds();
     void loadConfigFile(string path){
-        config.load(path);
         
-        verbose = config["verbose"].as<bool>();
+        std::ifstream i(ofToDataPath("config.json"));
+        i >> config;
+        
+        verbose = config["verbose"].get<bool>();
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            active_module_indices[i] = config["initial-active-modules"][i].as<int>();
+            active_module_indices[i] = config["initial-active-modules"][i].get<int>();
         }
         
-        onsetSwitchProb = config["onset-switch-prob"].as<float>();
+        onsetSwitchProb = config["onset-switch-prob"].get<float>();
         
-        feedback_prob = config["feedback-prob"].as<float>();
-        feedback_max = config["feedback-max"].as<int>();
+        feedback_prob = config["feedback-prob"].get<float>();
+        feedback_max = config["feedback-max"].get<int>();
         
-        ofSetFrameRate(config["target-framerate"].as<int>());
+        ofSetFrameRate(config["target-framerate"].get<int>());
         
-        postGlitchChangeProb = config["post-glitch"]["change-prob"].as<float>();
+        use_sc_onsets = config["use-sc-onsets"].get<bool>();
         
-        use_sc_onsets = config["use-sc-onsets"].as<bool>();
+        postGlitchChangeProb = config["post-glitch"]["change-prob"].get<float>();
         
-        postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].as<float>();
-        postGlitchProbs[1] = config["post-glitch"]["glow-prob"].as<float>();
-        postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].as<float>();
-        postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].as<float>();
-        postGlitchProbs[4] = config["post-glitch"]["twist-prob"].as<float>();
-        postGlitchProbs[5] = config["post-glitch"]["outline-prob"].as<float>();
-        postGlitchProbs[6] = config["post-glitch"]["noise-prob"].as<float>();
-        postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].as<float>();
-        postGlitchProbs[8] = config["post-glitch"]["swell-prob"].as<float>();
-        postGlitchProbs[9] = config["post-glitch"]["invert-prob"].as<float>();
-        postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].as<float>();
-        postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].as<float>();
-        postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].as<float>();
-        postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].as<float>();
-        postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].as<float>();
-        postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].as<float>();
-        postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].as<float>();
+        postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].get<float>();
+        postGlitchProbs[1] = config["post-glitch"]["glow-prob"].get<float>();
+        postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].get<float>();
+        postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].get<float>();
+        postGlitchProbs[4] = config["post-glitch"]["twist-prob"].get<float>();
+        postGlitchProbs[5] = config["post-glitch"]["outline-prob"].get<float>();
+        postGlitchProbs[6] = config["post-glitch"]["noise-prob"].get<float>();
+        postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].get<float>();
+        postGlitchProbs[8] = config["post-glitch"]["swell-prob"].get<float>();
+        postGlitchProbs[9] = config["post-glitch"]["invert-prob"].get<float>();
+        postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].get<float>();
+        postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].get<float>();
+        postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].get<float>();
+        postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].get<float>();
+        postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].get<float>();
+        postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].get<float>();
+        postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].get<float>();
         
         for(int i = 0; i < config["blend-mode-probs"].size(); i++){
-            int n = config["blend-mode-probs"][i].as<int>();
+            int n = config["blend-mode-probs"][i].get<int>();
             for(int j = 0; j < n; j++){
                 blendModePool.push_back(i);
             }
         }
         
         for(int i = 0; i < n_modules; i++){
-            modules[i]->processConfigFile(config);
+            modules[i]->processConfigFile(config["modules"][i]);
         }
-        
-        for(int i = 0; i < N_STATE_SAVES; i++){
-            if(config["state-save-" + ofToString(i)]){
-                ofxYAML state;
-                state.load(config["state-save-" + ofToString(i)].as<string>());
-                saves[i] = state;
-            }
-        }
-        
-        for(int i = 0; i < N_STATE_SAVES; i++){
-            cout << saves[i];
-        }
+  
+        // TODO
+//        for(int i = 0; i < N_STATE_SAVES; i++){
+//            if(config["state-save-" + ofToString(i)]){
+//                nlohmann::json state;
+//                state.load(config["state-save-" + ofToString(i)].get<string>());
+//                saves[i] = state;
+//            }
+//        }
     }
     
     int addVCOptions(int counter, int num){
@@ -165,7 +163,7 @@ public:
     float postGlitchProbs[GLITCH_NUM];
     float postGlitchChangeProb = 0.5;
     
-    ofxYAML config;
+    nlohmann::json config;
     
     ofBlendMode blendMode = OF_BLENDMODE_DISABLED;
     
@@ -179,10 +177,10 @@ public:
     
     bool use_sc_onsets = true;
     
-    ofxYAML saves[10];
+    nlohmann::json saves[10];
     
-    ofxYAML save(){
-        ofxYAML dict;
+    nlohmann::json save(){
+        nlohmann::json dict;
         
         for(int i = 0; i < n_modules; i++){
             dict["vc-save-" + ofToString(i)] = modules[i]->saveState();
@@ -200,31 +198,34 @@ public:
         return dict;
     }
     
-    void load(ofxYAML &dict, int width, int height){
+    void load(nlohmann::json &dict, int width, int height){
         
         for(int i = 0; i < n_modules; i++){
             
-            // ====================================================
-            // this line actually is important because i think
-            // it is casting YAML::Node that is in the dict into an
-            // ofxYAML::Node, which is the type expected by loadState()
-            // below. just passing dict["vc-save-" + ofToString(i)]
-            // directly into load state doesn't work.
-            ofxYAML::Node child = dict["vc-save-" + ofToString(i)];
-            // ====================================================
+            nlohmann::json child = dict["vc-save-" + ofToString(i)];
             
             modules[i]->loadState(child,width,height,vec_history,vector_len,vec_history_length,vec_history_full);
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-            active_module_indices[i] = dict["active_vc" + ofToString(i)].as<int>();
+            active_module_indices[i] = dict["active_vc" + ofToString(i)].get<int>();
         }
         
-        ofxYAML::Node child = dict["postGlitch"];
+        nlohmann::json child = dict["postGlitch"];
         postGlitch.loadState(child);
         
-        feedback_amt = dict["feedback_amt"].as<int>();
-        blendMode = (ofBlendMode)dict["blendMode"].as<int>();
-        debug = dict["debug"].as<bool>();
+        feedback_amt = dict["feedback_amt"].get<int>();
+        blendMode = (ofBlendMode)dict["blendMode"].get<int>();
+        debug = dict["debug"].get<bool>();
     }
+    
+    int getVectorHistoryLength(){
+        for(VisualModule* vm : modules){
+            if(vm->type == MESH){
+                return ((Mesh*)vm)->nPoints;
+            }
+        }
+        return 0;
+    }
+
 };

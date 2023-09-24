@@ -7,8 +7,10 @@ void ofApp::setup(){
     
     // the config file is loaded here just so that we know whether
     // or not this is a nrt render
-    config.load("config.yaml");
-    nrtRender = config["nrt-render"].as<bool>();
+    std::ifstream i(ofToDataPath("config.json"));
+    i >> config;
+    
+    nrtRender = config["nrt-render"].get<bool>();
         
     int width = 0;
     int height = 0;
@@ -82,64 +84,53 @@ void ofApp::setup(){
     initialPoints[3].set(0,height,-1);
     
     // setup flow field
-    ff.setup(config["flow-field-resolution"].as<int>(), xmin, xmax, ymin, ymax, zmin, zmax);
+    ff.setup(config["flow-field-resolution"].get<int>(), xmin, xmax, ymin, ymax, zmin, zmax);
     
     // ============ setup modules ===============
     
     vc_i_options.clear();
     
-    modules.resize(config["modules"].size() + config["videos"].size());
+    modules.resize(config["modules"].size());
     
     // 0: waveform
-    Waveform* wf = new Waveform;
-    wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,config);
-    modules[vc_counter] = wf;
-    vc_counter = addVCOptions(vc_counter,config["modules"]["waveform"]["prob"].as<int>());
-
-    cout << "waveform loaded vc_i_options.size(): " << vc_i_options.size() << endl;
     
-    // 1: mesh
-    Mesh* mesh = new Mesh;
-    mesh->setup(config["modules"]["mesh"]["n-points"].as<int>(), &ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,config);
-    modules[vc_counter] = mesh;
-    vc_counter = addVCOptions(vc_counter,config["modules"]["mesh"]["prob"].as<int>());
-    
-    cout << "mesh loaded vc_i_options.size(): " << vc_i_options.size() << endl;
-    
-    // 2: mag lines
-    Lines* lines0 = new Lines;
-    lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
-    modules[vc_counter] = lines0;
-    vc_counter = addVCOptions(vc_counter,config["modules"]["mag-lines"]["prob"].as<int>());
-    
-    cout << "maglines loaded vc_i_options.size(): " << vc_i_options.size() << endl;
-    
-    // 3: turtle
-    Turtle* turtle0 = new Turtle;
-    turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,config);
-    modules[vc_counter] = turtle0;
-    vc_counter = addVCOptions(vc_counter,config["modules"]["turtle"]["prob"].as<int>());
-    
-    cout << "turtle loaded vc_i_options.size(): " << vc_i_options.size() << endl;
-    
-    // load videos
-    cout << "\n\nconfig['videos'].size(): " << config["videos"].size() << endl;
-    for(int i = 0; i < config["videos"].size(); i++){
-        string name = config["videos"][i]["name"].as<string>();
-        int prob = config["videos"][i]["prob"].as<int>();
-        cout << "\tabout to load video " << i << ": " << name << "\n";
-        cout << "\t\tvc_counter = " << vc_counter << "\n";
-        newHapMovie(name,vc_counter,initialPoints,width,height,config,i);
-        vc_counter = addVCOptions(vc_counter,prob);
-        cout << "\tvideo " << i << " loaded: " << name << "\t(prob=" << prob << ")\n";
-        cout << "\t\tvc_counter = " << vc_counter << "\n\n";
+    for(nlohmann::json j : config["modules"]){
+        if(j["module-type"] == "waveform"){
+            Waveform* wf = new Waveform;
+            wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,j);
+            modules[vc_counter] = wf;
+            vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
+        } else if (j["module-type"] == "mesh"){
+            Mesh* mesh = new Mesh;
+            mesh->setup(&ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize,j);
+            modules[vc_counter] = mesh;
+            vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
+        } else if (j["module-type"] == "mag-lines"){
+            Lines* lines0 = new Lines;
+            lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+            modules[vc_counter] = lines0;
+            vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
+        } else if (j["module-type"] == "turtle"){
+            Turtle* turtle0 = new Turtle;
+            turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,j);
+            modules[vc_counter] = turtle0;
+            vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
+        } else if (j["module-type"] == "video"){
+            string name = j["name"].get<string>();
+            VideoModule* vc = new VideoModule;
+            vc->setup(name,initialPoints[0],initialPoints[1],initialPoints[2],initialPoints[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,j);
+            vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
+            modules[vc_counter] = vc;
+            vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
+        }
     }
     
     // set how many modules there are total
     n_modules = vc_counter;
     
     // ============ setup vecHistory
-    vec_history_length = mesh->nPoints;
+    vec_history_length = getVectorHistoryLength();
+    
     vec_history = new float*[vec_history_length];
     for(int i = 0; i < vec_history_length; i++){
         vec_history[i] = new float[vector_len];
@@ -151,29 +142,28 @@ void ofApp::setup(){
     // ======================= OSC ================
     osc_receiver.setup(11000);
     
-    loadConfigFile("config.yaml");
+    loadConfigFile("config.json");
     
     // =========================== INITIALIZATION =====================
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-        active_module_indices[i] = config["initial-active-modules"][i].as<int>();
-        cout << "initial active module " << i << ": " << active_module_indices[i] << endl;
+        active_module_indices[i] = config["initial-active-modules"][i].get<int>();
     }
     
-    if(config["initial-onset"].as<bool>()){
+    if(config["initial-onset"].get<bool>()){
         onsetOccured(width, height, 0);
     }
     
-    // =========== NRT RENDERING
+    // =========== NRT RENDERING =====================
     if(nrtRender){
         runNrtRender(width,height);
     }
 }
 
 void ofApp::runNrtRender(int width, int height){
-    string csv_folder = config["csv-folder"].as<string>();
+    string csv_folder = config["csv-folder"].get<string>();
     
     //int max_frames = 600; // 600 frames = 20 seconds
-    int max_frames = config["max-frames"].as<int>();
+    int max_frames = config["max-frames"].get<int>() == -1 ? INT_MAX : config["max-frames"].get<int>();
     
     ifstream descriptors_file;
     descriptors_file.open(csv_folder + "/descriptors.csv");
@@ -188,7 +178,7 @@ void ofApp::runNrtRender(int width, int height){
     bool usingReaperMarkers = ofFile(reaperMarkerPath).exists();
     ReaperMarkersFileParser rmfp;
 
-    if(usingReaperMarkers) rmfp.setup(reaperMarkerPath,config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
+    if(usingReaperMarkers) rmfp.setup(reaperMarkerPath,config["audio-sample-rate"].get<int>(),config["target-framerate"].get<int>());
 
     // stuff for rendering
     
@@ -308,13 +298,16 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
         } else if(tokens[index] == "loadState"){
             load(saves[ofToInt(tokens[++index])],width,height);
         } else if(tokens[index] == "loadStateFromDisk"){
-            ofFile file(ofToDataPath(tokens[++index] + ".yaml"));
+            ofFile file(ofToDataPath(tokens[++index] + ".json"));
             
             if(file.exists()){
-                ofxYAML dict;
-                dict.load(file.path());
-                cout << dict << endl;
+                
+                nlohmann::json dict;
+                std::ifstream i(ofToDataPath(file.path()));
+                i >> dict;
+                
                 load(dict,width,height);
+                
             }else{
                 cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
             }
@@ -373,15 +366,6 @@ void ofApp::incrementVecHistoryCounter(){
     
     // increment and modulous
     vec_history_counter = (vec_history_counter + 1) % vec_history_length;
-}
-
-void ofApp::newHapMovie(std::string path, int index, ofVec3f* initPts, int width, int height, ofxYAML& config, int videoIndex){
-    VideoModule* vc = new VideoModule;
-    cout << "\t\tofApp::newHapMovie loading " << path << endl;
-    vc->setup(path,initPts[0],initPts[1],initPts[2],initPts[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,config, videoIndex);
-    vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
-    cout << "\t\tadding " << path << "\t at index " << index << endl;
-    modules[index] = vc;
 }
 
 void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long frame_num){
@@ -450,8 +434,6 @@ void ofApp::update(){
     while(osc_receiver.hasWaitingMessages()){
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
-        
-        cout << oscMsg << endl;
         
         string address = oscMsg.getAddress();
         
@@ -537,7 +519,6 @@ void ofApp::update(){
 void ofApp::prUpdate(bool isNRT){
         
     for(int i = 0; i < n_modules; i++){
-        cout << "updating active module in index " << i << endl;
         modules[i]->update(isNRT,&common_features,verbose);
     }
 }
@@ -592,7 +573,7 @@ void ofApp::draw(){
     renderFrame(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     main_fbo.draw(0,0,ofGetWidth(),ofGetHeight());
     
-    if(config["draw-bounds"].as<bool>()){ drawBounds(); };
+    if(config["draw-bounds"].get<bool>()){ drawBounds(); };
 }
 
 void ofApp::drawBounds(){
@@ -708,7 +689,7 @@ void ofApp::keyPressed(int key){
         debug = !debug;
     }   
     
-    if (key == 'c') loadConfigFile("config.yaml");
+    if (key == 'c') loadConfigFile("config.json");
     
     if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
     if (key == 'p'){
@@ -724,7 +705,7 @@ void ofApp::keyPressed(int key){
     for(int i = 0; i < 10; i++){
         if(key == saveKeys[i]){
             saves[i] = save();
-            std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".yaml"));
+            std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".json"));
             fout << saves[i];
             break;
         }

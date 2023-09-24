@@ -11,10 +11,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <unordered_map>
-#include "ofxYAML.h"
 //#include "ofMain.h"
 
-enum VIS_TYPE { NONE , HAP , WAVEFORM, MESH , LINES , TURTLE };
+enum VIS_TYPE { NONE = 0, HAP , WAVEFORM, MESH , LINES , TURTLE };
 
 class VisualModule {
 public:
@@ -34,16 +33,16 @@ public:
     
     virtual void update(bool isNRT, std::unordered_map<std::string, float>* common_features, bool verbose){}
     
-    virtual void processConfigFile(ofxYAML& config){}
+    virtual void processConfigFile(nlohmann::json &dict){}
     
     virtual void printStatus(){}
     
-    virtual ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    virtual nlohmann::json saveState(){
+        nlohmann::json dict;
         return dict;
     }
     
-    virtual void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
+    virtual void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){}
     
     //bool alwaysUpdate = false;
     VIS_TYPE type = NONE;

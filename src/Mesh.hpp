@@ -16,7 +16,6 @@
 #include "ofMain.h"
 #include "VisualModule.hpp"
 #include "Waveform.hpp"
-#include "ofxYAML.h"
 
 class Mesh: public VisualModule {
 public:
@@ -48,17 +47,17 @@ public:
         return "Mesh";
     }
     
-    void processConfigFile(ofxYAML& config){
-        line_width = config["modules"]["mesh"]["line-width"].as<float>();
-        point_size = config["modules"]["mesh"]["point-size"].as<float>();
-        flow_field_influence = config["modules"]["mesh"]["flow-field-influence"].as<float>();
-        speed = config["modules"]["mesh"]["speed"].as<float>();
-        minSpeed = config["modules"]["mesh"]["min-speed"].as<float>();
-        jitter_mul = config["modules"]["mesh"]["jitter-mul"].as<float>();
-        dist_thresh_mul = config["modules"]["mesh"]["dist-thresh-mul"].as<float>();
+    void processConfigFile(nlohmann::json config){
+        line_width = config["line-width"].get<float>();
+        point_size = config["point-size"].get<float>();
+        flow_field_influence = config["flow-field-influence"].get<float>();
+        speed = config["speed"].get<float>();
+        minSpeed = config["min-speed"].get<float>();
+        jitter_mul = config["jitter-mul"].get<float>();
+        dist_thresh_mul = config["dist-thresh-mul"].get<float>();
     }
 
-    void setup(int nPoints_, FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, ofxYAML& config) {
+    void setup(FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, nlohmann::json config) {
 
         processConfigFile(config);
         
@@ -73,7 +72,7 @@ public:
         type = MESH;
         
         ff = ff_;
-        nPoints = nPoints_;
+        nPoints = config["n-points"];
         points = new VideoDesignPoint[nPoints];
 
         
@@ -131,8 +130,8 @@ public:
         waveformEffectDim = ofRandom(3);
     }
     
-    ofxYAML::Node saveState(){
-        ofxYAML::Node dict;
+    nlohmann::json saveState(){
+        nlohmann::json dict;
         
         dict["useFF"] = useFF;
         dict["waveformEffectDim"] = waveformEffectDim;
@@ -140,10 +139,10 @@ public:
         return dict;
     }
     
-    void loadState(ofxYAML::Node &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
-        useFF = dict["useFF"].as<bool>();
-        waveformEffectDim = dict["waveformEffectDim"].as<int>();
+        useFF = dict["useFF"].get<bool>();
+        waveformEffectDim = dict["waveformEffectDim"].get<int>();
         
         newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
     }

@@ -1,4 +1,3 @@
 ofxHapPlayer
 ofxOsc
 ofxPostGlitch
-ofxYAML

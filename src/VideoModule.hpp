@@ -38,6 +38,10 @@ public:
     vector<ofFile> bitexact_pngs;
     string src_path;
     
+    int getTotalFrames(){
+        return pngs.size();
+    }
+    
     void setup(string dir, bool isNRT){
         
         src_path = dir;
@@ -54,6 +58,8 @@ public:
             bitexact_pngs_dir.listDir();
             bitexact_pngs_dir.sort();
             bitexact_pngs = bitexact_pngs_dir.getFiles();
+            
+            assert(bitexact_pngs.size() == pngs.size());
             
         } else { // is real-time
             hap.load(dir + "/hap.mov");
@@ -101,8 +107,6 @@ public:
     bool bUseFFMaster = true;
     
     int zDir = -1;
-    
-    unsigned long total_frames = 0;
     
     vector<Param*> params;
     
@@ -154,9 +158,14 @@ public:
         }
         
         if(isNRT){
-            // is nrt
+            
+            for (int i = 1; i < videos.size(); i++){
+                assert(videos[0]->getTotalFrames() == videos[i]->getTotalFrames());
+            }
+            
             mini_img.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_IMAGE_COLOR);
             mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_PIXELS_RGBA);
+            
         } else {
             // is real-time
             mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, videos[0]->mini_vid.getPixelFormat());
@@ -243,7 +252,7 @@ public:
         
         // nrtPlayHead
         nrtPlayHead.name = "nrtPlayHead";
-        nrtPlayHead.setup(0.f,total_frames,1.f,0.f);
+        nrtPlayHead.setup(0.f,videos[0]->getTotalFrames(),1.f,0.f);
         params.push_back(&nrtPlayHead);
         
         // currentIndex
@@ -284,6 +293,7 @@ public:
         
         if(isNRT){
             nrtPlayHead.value += getSpeed();
+            int total_frames = videos[0]->getTotalFrames();
             while(nrtPlayHead.value < 0) nrtPlayHead.value += total_frames;
             while(nrtPlayHead.value >= total_frames) nrtPlayHead.value -= total_frames;
         } else {
@@ -292,6 +302,7 @@ public:
                 videos[i]->hap.setSpeed(getSpeed());
             }
         }
+        
     }
     
     void displayHap(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT){
@@ -594,9 +605,9 @@ public:
             speed.value = abs(val);
             speedDir.value = (val > 0) + ((val < 0) * -1);
             bReactiveSpeed.value = false;
-        } else if(label == "position"){
+        } else if(label == "position"){ // normalized position
             //            nrt_playHead
-            nrtPlayHead.value = val * (total_frames-1);
+            nrtPlayHead.value = val * (videos[0]->getTotalFrames()-1);
             //            mini_video
             videos[currentSubVideoIndex.value]->mini_vid.setPosition(val);
             //            hap

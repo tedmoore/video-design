@@ -9,7 +9,7 @@ s.waitForBoot({
 	var frame_rate = 30;
 	var start_sec = 0;
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = false;
+	var outfile, render_data = true, loop = false;
 	var nVecChans = 106;
 
 	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
@@ -18,7 +18,8 @@ s.waitForBoot({
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/sounds/a-movement-itself?.aiff");
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_reverb-feedback.wav");
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
-	var audio_buf = nil;
+	// var audio_buf = nil;
+	var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/nand/reaper/230822-splice/_bounces/230917_111322/230917_111322_nand_tape.wav");
 
 	if(render_data){
 		outpath.mkdir;
@@ -31,8 +32,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 1, nMels = 40;
-		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:1);
-		var sig = SoundIn.ar([2,3]);
+		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
+		// var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 
 		var fft = FFT(LocalBuf(2048),sig_mono);
@@ -89,8 +90,10 @@ s.waitForBoot({
 
 	if(render_data){
 		audio_buf.duration.wait;
-		outfile.close;
-		"done rendering data".postln;
+		s.quit({
+			outfile.close;
+			"done rendering data".postln;
+		});
 	};
 });
 )

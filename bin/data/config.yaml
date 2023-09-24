@@ -1,11 +1,11 @@
 # if doing a non-real-time render
-nrt-render: false
+nrt-render: true
 draw-bounds: false
-csv-folder: /Applications/of_v0.11.2_osx_release/apps/myApps/modular_video_02/supercollider/data-renders/221121_173756
+csv-folder: /Users/ted/dev/of_v0.12.0_osx_release/apps/myApps/video-design/supercollider/data-renders/230923_181817
 max-frames: 99999
 use-sc-onsets: true
 initial-active-modules: [0,1,3,4] # only 4!
-initial-onset: false
+initial-onset: true
 verbose: false
 
 audio-sample-rate: 44100
@@ -15,7 +15,7 @@ blend-mode-probs: [1,1,0,0,0,0] # add, alpha, screen, disable, multiply, subtrac
 feedback-prob: 0.25
 feedback-max: 254
 flow-field-resolution: 20 # this was originally 20
-onset-switch-prob: 0.9
+onset-switch-prob: 1.0
 
 show-flow-prob: 0.99 # 0.16
 

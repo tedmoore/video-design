@@ -184,8 +184,11 @@ void ofApp::runNrtRender(int width, int height){
     ifstream mags_file;
     mags_file.open(csv_folder + "/mags.csv");
     
+    string reaperMarkerPath = csv_folder + "/reaper-markers.txt";
+    bool usingReaperMarkers = ofFile(reaperMarkerPath).exists();
     ReaperMarkersFileParser rmfp;
-    rmfp.setup(csv_folder + "/reaper-markers.txt",config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
+
+    if(usingReaperMarkers) rmfp.setup(reaperMarkerPath,config["audio-sample-rate"].as<int>(),config["target-framerate"].as<int>());
 
     // stuff for rendering
     
@@ -211,6 +214,7 @@ void ofApp::runNrtRender(int width, int height){
         
         cout << "frame num: " << frame_num << endl;
         
+        if(verbose) cout << "reading descriptors..." << endl;
         // descriptors
         line.clear();
         getline(descriptors_file,line);
@@ -223,12 +227,16 @@ void ofApp::runNrtRender(int width, int height){
         }
 //            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
 
+        if(verbose) cout << "set vals from csv..." << endl;
         setValsFromCSV(width,height,csv_line_fl,frame_num);
         
-        string rm = rmfp.currentFrame(frame_num);
-        cout << "from rmfp: " << rm << endl;
-        processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
+        if(usingReaperMarkers){
+            string rm = rmfp.currentFrame(frame_num);
+            cout << "from rmfp: " << rm << endl;
+            processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
+        }
         
+        if(verbose) cout << "reading waveforms..." << endl;
         // waveforms
         line.clear();
         getline(waveform0_file,line);
@@ -247,7 +255,8 @@ void ofApp::runNrtRender(int width, int height){
         for(int i = 0; i < csv_line.size(); i++){
             waveforms[1][i] = ofToFloat(csv_line[i]);
         }
-                    
+                 
+        if(verbose) cout << "reading mags..." << endl;
         // mags
         line.clear();
         getline(mags_file,line);
@@ -259,11 +268,14 @@ void ofApp::runNrtRender(int width, int height){
         }
         
         // ============     ================
+        if(verbose) cout << "prUpdate..." << endl;
         prUpdate(true);
         
         // ============ DRAW ====================
+        if(verbose) cout << "rendering frame..." << endl;
         renderFrame(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
 
+        if(verbose) cout << "save to disk..." << endl;
         // save to disk
         main_fbo.readToPixels(pix);
         ofSaveImage(pix, new_dir_path+"/"+ofToString(frame_num,6,'0')+".tiff",OF_IMAGE_QUALITY_BEST);
@@ -525,6 +537,7 @@ void ofApp::update(){
 void ofApp::prUpdate(bool isNRT){
         
     for(int i = 0; i < n_modules; i++){
+        cout << "updating active module in index " << i << endl;
         modules[i]->update(isNRT,&common_features,verbose);
     }
 }

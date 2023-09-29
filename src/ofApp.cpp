@@ -97,7 +97,7 @@ void ofApp::setup(){
     for(nlohmann::json j : config["modules"]){
         if(j["module-type"] == "waveform"){
             Waveform* wf = new Waveform;
-            wf->setup(width,height,waveforms, vec_history, vector_len, vec_history_length, vec_history_full,j);
+            wf->setup(width,height,waveforms, vec_history, DESCRIPTORS_VECTOR_LENGTH, vec_history_length, vec_history_full,j);
             modules[vc_counter] = wf;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "mesh"){
@@ -107,19 +107,19 @@ void ofApp::setup(){
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "mag-lines"){
             Lines* lines0 = new Lines;
-            lines0->setup(magnitudes[0],0,MAGNITUDES_LEN,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+            lines0->setup(magnitudes[0],0,MAGNITUDES_LEN,false,width,height,vec_history, DESCRIPTORS_VECTOR_LENGTH, vec_history_length, vec_history_full);
             modules[vc_counter] = lines0;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "turtle"){
             Turtle* turtle0 = new Turtle;
-            turtle0->setup(width,height,vec_history,vector_len,vec_history_length,vec_history_full,j);
+            turtle0->setup(width,height,vec_history,DESCRIPTORS_VECTOR_LENGTH,vec_history_length,vec_history_full,j);
             modules[vc_counter] = turtle0;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "video"){
             string name = j["name"].get<string>();
             VideoModule* vc = new VideoModule;
             vc->setup(name,initialPoints[0],initialPoints[1],initialPoints[2],initialPoints[3],magnitudes,N_MAGNITUDES,MAGNITUDES_LEN,nrtRender,&ff,j);
-            vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
+            vc->newParams(width, height, vec_history, DESCRIPTORS_VECTOR_LENGTH, vec_history_length, vec_history_full,0);
             modules[vc_counter] = vc;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         }
@@ -133,8 +133,8 @@ void ofApp::setup(){
     
     vec_history = new float*[vec_history_length];
     for(int i = 0; i < vec_history_length; i++){
-        vec_history[i] = new float[vector_len];
-        for(int j = 0; j < vector_len; j++){
+        vec_history[i] = new float[DESCRIPTORS_VECTOR_LENGTH];
+        for(int j = 0; j < DESCRIPTORS_VECTOR_LENGTH; j++){
             vec_history[i][j] = 0;
         }
     }
@@ -145,9 +145,6 @@ void ofApp::setup(){
     loadConfigFile("config.json");
     
     // =========================== INITIALIZATION =====================
-    for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
-        active_module_indices[i] = config["initial-active-modules"][i].get<int>();
-    }
     
     if(config["initial-onset"].get<bool>()){
         onsetOccured(width, height, 0);
@@ -210,7 +207,7 @@ void ofApp::runNrtRender(int width, int height){
         getline(descriptors_file,line);
         csv_line.clear();
         csv_line = ofSplitString(line,",");
-        assert(csv_line.size() == DESCRIPTORS_VECTOR_LENGTH);
+        assert(csv_line.size() == (DESCRIPTORS_VECTOR_LENGTH + 1));
         vector<float> csv_line_fl(csv_line.size());
         for(int i = 0; i < csv_line.size(); i++){
             csv_line_fl[i] = ofToFloat(csv_line[i]);
@@ -383,7 +380,7 @@ void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long f
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
         active_module_indices[i] = ai[i];
         if(active_module_indices[i] >= 0 && modules[active_module_indices[i]]->newParamsProb > ofRandom(1.f)){
-            modules[active_module_indices[i]]->newParams(width,height,vec_history, vector_len, vec_history_length, vec_history_full,frame_num);
+            modules[active_module_indices[i]]->newParams(width,height,vec_history, DESCRIPTORS_VECTOR_LENGTH, vec_history_length, vec_history_full,frame_num);
         }
     }
 }
@@ -395,7 +392,7 @@ void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
     vector<int> chosen_i;
     int ai[MAX_ACTIVE_MODULES];
     for(int i = 0; i < MAX_ACTIVE_MODULES; i++){ // go through the max number that we'll display
-        if(ofRandom(1.f) < onsetSwitchProb){
+        if(moduleIndexUnlocked[i] and (ofRandom(1.f) < onsetSwitchProb)){
             bool found = false;
             while(!found){
                 // options array is the big pool of options (has duplicates based on probs)
@@ -491,7 +488,7 @@ void ofApp::update(){
             }
 //            cout << "\n";
         } else if (address == "/vector") {
-            for(int i = 0; i < vector_len; i++){
+            for(int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++){
                 float val = oscMsg.getArgAsFloat(i);
 //                cout << val << " ";
                 vector_data[i] = val;
@@ -643,8 +640,9 @@ void ofApp::displayIncomingData(int width, int height){
     bar_skip = bar_width + 2; // gap of 1
     ofFill();
     ofSetLineWidth(0);
-    for(int i = 0; i < vector_len; i++){
+    for(int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++){
         int bar_height = vector_data[i] * vec_height;
+        // TODO: i think the colors are wrong
         if(i > 65){
             ofSetColor(255);
         } else if (i > 53){
@@ -706,7 +704,7 @@ void ofApp::keyPressed(int key){
     if (key == 'p'){
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             if(active_module_indices[i] >= 0){
-                modules[active_module_indices[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, vector_len, vec_history_length, vec_history_full,ofGetFrameNum());
+                modules[active_module_indices[i]]->newParams(ofGetWidth(),ofGetHeight(),vec_history, DESCRIPTORS_VECTOR_LENGTH, vec_history_length, vec_history_full,ofGetFrameNum());
             }
         }
     }

@@ -15,6 +15,6 @@
 
 #define N_WAVEFORMS 2
 #define WAVEFORM_LEN 1920
-#define DESCRIPTORS_VECTOR_LENGTH 107
+#define DESCRIPTORS_VECTOR_LENGTH 106
 
 #endif /* defines_h */

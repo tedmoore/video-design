@@ -53,6 +53,10 @@ public:
             active_module_indices[i] = config["initial-active-modules"][i].get<int>();
         }
         
+        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+            moduleIndexUnlocked[i] = config["module-indexes-unlocked"].get<vector<int>>()[i];
+        }
+                
         onsetSwitchProb = config["onset-switch-prob"].get<float>();
         
         feedback_prob = config["feedback-prob"].get<float>();
@@ -116,6 +120,7 @@ public:
     int n_modules = 0;
     vector<VisualModule*> modules;
     vector<int> vc_i_options;
+    bool moduleIndexUnlocked[MAX_ACTIVE_MODULES];
     
     int* active_module_indices;
     FlowField ff;
@@ -127,8 +132,8 @@ public:
     float** magnitudes;
     
     // vector data
-    int vector_len = 106;
-    float vector_data[106]; // 106 not including the onsets at the end
+                             
+    float vector_data[DESCRIPTORS_VECTOR_LENGTH-1]; // 106 not including the onsets at the end
     std::unordered_map<std::string, float> common_features;
     float** vec_history;
     int vec_history_length;
@@ -201,7 +206,7 @@ public:
             
             nlohmann::json child = dict["vc-save-" + ofToString(i)];
             
-            modules[i]->loadState(child,width,height,vec_history,vector_len,vec_history_length,vec_history_full);
+            modules[i]->loadState(child,width,height,vec_history,DESCRIPTORS_VECTOR_LENGTH,vec_history_length,vec_history_full);
         }
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){

@@ -51,16 +51,16 @@ void ofApp::setup(){
     common_features["zeroCrossing"] = 0;
     
     // wavforms
-    waveforms = (float**) malloc(sizeof(float*) * n_waveforms);
-    for(int i = 0; i < n_waveforms; i++){
-        waveforms[i] = (float*) malloc(sizeof(float) * waveform_len);
+    waveforms = (float**) malloc(sizeof(float*) * N_WAVEFORMS);
+    for(int i = 0; i < N_WAVEFORMS; i++){
+        waveforms[i] = (float*) malloc(sizeof(float) * WAVEFORM_LEN);
     }
     // mags
-    magnitudes = new float*[n_magnitudes];
-    // magnitudes = (float**) malloc(sizeof(float*) * n_magnitudes);
-    for(int i = 0; i < n_magnitudes; i++){
-        //magnitudes[i] = (float*) malloc(sizeof(float) * magnitude_len);
-        magnitudes[i] = new float[magnitude_len];
+    magnitudes = new float*[N_MAGNITUDES];
+    // magnitudes = (float**) malloc(sizeof(float*) * N_MAGNITUDES);
+    for(int i = 0; i < N_MAGNITUDES; i++){
+        //magnitudes[i] = (float*) malloc(sizeof(float) * MAGNITUDES_LEN);
+        magnitudes[i] = new float[MAGNITUDES_LEN];
     }
 
     // ================== VISUAL CONTENTS ==========================
@@ -97,7 +97,7 @@ void ofApp::setup(){
     for(nlohmann::json j : config["modules"]){
         if(j["module-type"] == "waveform"){
             Waveform* wf = new Waveform;
-            wf->setup(width,height,waveforms,n_waveforms,waveform_len, vec_history, vector_len, vec_history_length, vec_history_full,j);
+            wf->setup(width,height,waveforms, vec_history, vector_len, vec_history_length, vec_history_full,j);
             modules[vc_counter] = wf;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "mesh"){
@@ -107,7 +107,7 @@ void ofApp::setup(){
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "mag-lines"){
             Lines* lines0 = new Lines;
-            lines0->setup(magnitudes[0],0,magnitude_len,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
+            lines0->setup(magnitudes[0],0,MAGNITUDES_LEN,false,width,height,vec_history, vector_len, vec_history_length, vec_history_full);
             modules[vc_counter] = lines0;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
         } else if (j["module-type"] == "turtle"){
@@ -118,7 +118,7 @@ void ofApp::setup(){
         } else if (j["module-type"] == "video"){
             string name = j["name"].get<string>();
             VideoModule* vc = new VideoModule;
-            vc->setup(name,initialPoints[0],initialPoints[1],initialPoints[2],initialPoints[3],magnitudes,n_magnitudes,magnitude_len,nrtRender,&ff,j);
+            vc->setup(name,initialPoints[0],initialPoints[1],initialPoints[2],initialPoints[3],magnitudes,N_MAGNITUDES,MAGNITUDES_LEN,nrtRender,&ff,j);
             vc->newParams(width, height, vec_history, vector_len, vec_history_length, vec_history_full,0);
             modules[vc_counter] = vc;
             vc_counter = addVCOptions(vc_counter,j["prob"].get<int>());
@@ -210,14 +210,22 @@ void ofApp::runNrtRender(int width, int height){
         getline(descriptors_file,line);
         csv_line.clear();
         csv_line = ofSplitString(line,",");
-//            cout << "\tdescriptors line size (strings): " << csv_line.size() << endl;
+        assert(csv_line.size() == DESCRIPTORS_VECTOR_LENGTH);
         vector<float> csv_line_fl(csv_line.size());
         for(int i = 0; i < csv_line.size(); i++){
             csv_line_fl[i] = ofToFloat(csv_line[i]);
         }
-//            cout << "\tdescriptors line size (floats) : " << csv_line_fl.size() << endl;
-
-        if(verbose) cout << "set vals from csv..." << endl;
+        
+        if(verbose){
+            cout << "set vals from csv..." << endl;
+            for(int i = 0; i < csv_line_fl.size(); i++){
+                cout << csv_line_fl[i] << "\t";
+            }
+            cout << endl;
+            cout << "number of floats: " << csv_line_fl.size() << endl;
+            cout << "number of zeros:  " << std::count(csv_line_fl.begin(),csv_line_fl.end(),0) << endl;;
+        }
+        
         setValsFromCSV(width,height,csv_line_fl,frame_num);
         
         if(usingReaperMarkers){
@@ -233,6 +241,7 @@ void ofApp::runNrtRender(int width, int height){
         csv_line.clear();
         csv_line = ofSplitString(line,",");
 //            cout << "\twaveform0 line size (strings): " << csv_line.size() << endl;
+        assert(csv_line.size() == WAVEFORM_LEN);
         for(int i = 0; i < csv_line.size(); i++){
             waveforms[0][i] = ofToFloat(csv_line[i]);
         }
@@ -242,6 +251,7 @@ void ofApp::runNrtRender(int width, int height){
         csv_line.clear();
         csv_line = ofSplitString(line,",");
 //            cout << "\twaveform1 line size (strings): " << csv_line.size() << endl;
+        assert(csv_line.size() == WAVEFORM_LEN);
         for(int i = 0; i < csv_line.size(); i++){
             waveforms[1][i] = ofToFloat(csv_line[i]);
         }
@@ -253,6 +263,7 @@ void ofApp::runNrtRender(int width, int height){
         csv_line.clear();
         csv_line = ofSplitString(line,",");
 //            cout << "\tmags line size (strings): " << csv_line.size() << endl;
+        assert(csv_line.size() == MAGNITUDES_LEN);
         for(int i = 0; i < csv_line.size(); i++){
             magnitudes[0][i] = ofToFloat(csv_line[i]);
         }
@@ -468,13 +479,13 @@ void ofApp::update(){
         } else if (address == "/waveform") {
             int index = oscMsg.getArgAsInt(0);
 //            cout << "received waveform: " << index << endl;
-            for(int i = 0; i < waveform_len; i++){
+            for(int i = 0; i < WAVEFORM_LEN; i++){
                 waveforms[index][i] = oscMsg.getArgAsFloat(i+1);
             }
         } else if (address == "/mags") {
             int index = oscMsg.getArgAsInt(0);
 //            cout << "mag index: " << index << "\n";
-            for(int i = 0; i < magnitude_len; i++){
+            for(int i = 0; i < MAGNITUDES_LEN; i++){
                 magnitudes[index][i] = oscMsg.getArgAsFloat(i+1);
 //                cout << magnitudes[index][i] << " ";
             }
@@ -615,9 +626,9 @@ void ofApp::displayIncomingData(int width, int height){
     int bar_skip = bar_width + 1;
     ofFill();
     ofSetLineWidth(0);
-    for(int i = 0; i < n_magnitudes; i++){
+    for(int i = 0; i < N_MAGNITUDES; i++){
         ofSetColor(255,200 - (i * 100));
-        for(int x = 0; x < magnitude_len; x++){
+        for(int x = 0; x < MAGNITUDES_LEN; x++){
             int bar_height = magnitudes[i][x] * mag_height;
             ofDrawRectangle(xoff + (x * bar_skip), ystart - bar_height,bar_width,bar_height);
         }
@@ -661,7 +672,7 @@ void ofApp::displayIncomingData(int width, int height){
     int middle = (wf_height/2) + 20;
     ofNoFill();
     ofSetLineWidth(1);
-    for(int i = 0; i < n_waveforms; i++){
+    for(int i = 0; i < N_WAVEFORMS; i++){
         switch(i){
             case 0:
                 ofSetColor(255, 50, 255);
@@ -674,8 +685,8 @@ void ofApp::displayIncomingData(int width, int height){
                 break;
         }
         ofBeginShape();
-        for(int x = 0; x < waveform_len; x++){
-            int xpt = ofMap(x,0,waveform_len-1,xoff,xend);
+        for(int x = 0; x < WAVEFORM_LEN; x++){
+            int xpt = ofMap(x,0,WAVEFORM_LEN-1,xoff,xend);
             float ypt = middle + (waveforms[i][x] * -0.5 * wf_height);
             ofVertex(xpt,ypt);
         }

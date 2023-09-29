@@ -47,6 +47,7 @@ public:
         i >> config;
         
         verbose = config["verbose"].get<bool>();
+        debug = config["debug"].get<bool>();
         
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             active_module_indices[i] = config["initial-active-modules"][i].get<int>();
@@ -120,13 +121,9 @@ public:
     FlowField ff;
     
     // waveform data
-    int n_waveforms = 2;
-    int waveform_len = 1920;
     float** waveforms;
     
     // mags
-    int n_magnitudes = 1;
-    int magnitude_len = 513;
     float** magnitudes;
     
     // vector data

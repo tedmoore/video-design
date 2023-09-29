@@ -231,9 +231,9 @@ public:
                 for (int i = 0; i < nPoints; i++) {
 
                     // first index of waveform is the x pos of this point
-                    int wfAI = int(abs(points[i].x())) % wf->length;
+                    int wfAI = int(abs(points[i].x())) % WAVEFORM_LEN;
                     // second index of waveform is one past
-                    int wfBI = (wfAI + 1) % wf->length;
+                    int wfBI = (wfAI + 1) % WAVEFORM_LEN;
                     // get the values at those points
                     float wfa = wf->waveforms[0][wfAI];
                     float wfb = wf->waveforms[0][wfBI];

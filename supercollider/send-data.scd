@@ -9,7 +9,7 @@ s.waitForBoot({
 	var frame_rate = 30;
 	var start_sec = 0;
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = false, loop = false;
+	var outfile, render_data = true, loop = false;
 	var nVecChans = 106;
 
 	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
@@ -57,7 +57,7 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		Out.ar(0,sig * -20.dbamp);
+		// Out.ar(0,sig * -20.dbamp);
 		nil;
 	}.play;
 
@@ -73,10 +73,6 @@ s.waitForBoot({
 		arg msg;
 		var vec = msg[3..];
 		var message;
-
-		// vec.postln;
-		// vec.size.postln;
-		vec.collect{arg v; (v == 0).asInteger}.sum.postln;
 
 		if(render_data){
 			// "vec size: %".format(vec.size).postln;

@@ -538,7 +538,7 @@ public:
         dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
         dict["unfold_tiles_order"] = (int)unfold_tiles_order;
         
-        // TODO: because `lightPosition` is a ofVec3
+        // TODO: because `lightPosition` is a ofVec3 and the nlohmann json package doesn't know what to do with this class
 //        dict["lightPosition"] = lightPosition;
         
         for(int i = 0; i < N_CLUSTERS; i++){

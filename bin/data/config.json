@@ -1,5 +1,5 @@
 {
-    "nrt-render": false,
+    "nrt-render": true,
     "draw-bounds": false,
     "debug": false,
     "csv-folder": "/Users/ted/dev/of_v0.12.0_osx_release/apps/myApps/video-design/supercollider/data-renders/230924_214230",

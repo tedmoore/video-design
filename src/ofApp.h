@@ -179,7 +179,8 @@ public:
     
     bool use_sc_onsets = true;
     
-    nlohmann::json saves[10];
+    nlohmann::json saves[N_STATE_SAVES];
+    const char saveKeys[N_STATE_SAVES] = {'0','1','2','3','4','5','6','7','8','9'};
     
     nlohmann::json save(){
         nlohmann::json dict;

@@ -413,10 +413,7 @@ void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
     setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
 
     // blend mode
-    if(ofRandom(1.f) < onsetSwitchProb){
-        int blendMode_i = int(ofRandom(blendModePool.size()));
-        blendMode = blendModes[blendModePool[blendMode_i]];
-    }
+    if(ofRandom(1.f) < onsetSwitchProb) blendMode = blendModes[blendModePool[int(ofRandom(blendModePool.size()))]];
     
     feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
     
@@ -513,7 +510,7 @@ void ofApp::update(){
             common_features["sensoryDissonance"] = vector_data[12];
             common_features["zeroCrossing"] = vector_data[13];
             
-            onset_occured = use_sc_onsets && (oscMsg.getArgAsFloat(106) > 0.5);
+            onset_occured = use_sc_onsets && (oscMsg.getArgAsFloat(DESCRIPTORS_VECTOR_LENGTH) > 0.5);
         }
     }
     
@@ -708,8 +705,6 @@ void ofApp::keyPressed(int key){
             }
         }
     }
-    
-    char saveKeys[10] = {'0','1','2','3','4','5','6','7','8','9'};
     
     for(int i = 0; i < 10; i++){
         if(key == saveKeys[i]){

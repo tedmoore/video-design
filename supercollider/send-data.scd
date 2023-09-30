@@ -110,5 +110,3 @@ s.waitForBoot({
 
 
 m.getn(5,{arg v; v.postln});*/
-
-Platform.userExtensionDir

@@ -76,7 +76,7 @@
             "name": "tree",
             "prob": 1,
             "sub-videos": ["original","canny","colored"],
-            "bShowHap-prob": 0.4,
+            "bShowHap-prob": 0.0,
             "rectType-weights": [0,1],
             "bZShiftBoxes-prob": 0.0,
             "use-ff-prob": 0.0,

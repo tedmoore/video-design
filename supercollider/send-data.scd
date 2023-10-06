@@ -9,7 +9,7 @@ s.waitForBoot({
 	var frame_rate = 30;
 	var start_sec = 0;
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = true, loop = false;
+	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
 
 	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
@@ -32,8 +32,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 1, nMels = 40;
-		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
-		// var sig = SoundIn.ar([2,3]);
+		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
+		var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 
 		var fft = FFT(LocalBuf(2048),sig_mono);

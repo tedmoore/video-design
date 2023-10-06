@@ -14,6 +14,8 @@
 class Param {
 public:
     string name = "";
+    bool randomizable = true;
+    
     void virtual load(nlohmann::json &y){
         reportError("load");
     }
@@ -62,7 +64,7 @@ public:
     }
     
     void newRandom(){
-        value = ofRandom(1.f) < trueProb;
+        if(randomizable) value = ofRandom(1.f) < trueProb;
     }
     
     void setValue(float val){
@@ -99,7 +101,7 @@ public:
     }
     
     void newRandom(){
-        value = ofMap(pow(ofRandom(1.f),power),0.f,1.f,min,max);
+        if(randomizable) value = ofMap(pow(ofRandom(1.f),power),0.f,1.f,min,max);
     }
     
     void setValue(float val){
@@ -134,7 +136,7 @@ public:
     }
     
     void newRandom(){
-        value = ofRandom(min,max);
+        if(randomizable) value = ofRandom(min,max);
     }
     
     void setValue(float val){
@@ -171,7 +173,7 @@ public:
     }
     
     void newRandom(){
-        value = listOptions[ofRandom(listOptions.size())];
+        if(randomizable) value = listOptions[ofRandom(listOptions.size())];
     }
     
     void setValue(float val){
@@ -204,7 +206,7 @@ public:
     }
     
     void newRandom(){
-        value = (int)ofRandom(nEntries);
+        if(randomizable) value = (int)ofRandom(nEntries);
     }
     
     void setValue(float val){
@@ -237,7 +239,7 @@ public:
     }
     
     void newRandom(){
-        value = options[ofRandom(options.size())];
+        if(randomizable) value = options[ofRandom(options.size())];
     }
     
     void setValue(float val){

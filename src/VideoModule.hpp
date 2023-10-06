@@ -148,14 +148,18 @@ public:
     
     void setup(std::string& name, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, nlohmann::json& config){
         
-        ofDirectory topDir("videos/" + name);
-        vector<ofFile> subDirs = topDir.getFiles();
+        vector<string> subDirs = config["sub-videos"].get<vector<string>>();
         videos.resize(subDirs.size());
         
         for(int i = 0; i < subDirs.size(); i++){
             Video* v = new Video();
             videos[i] = v;
-            videos[i]->setup(subDirs[i].getAbsolutePath(),isNRT);
+            ofDirectory subDirPath("videos/" + name + "/" + subDirs[i]);
+            if(!subDirPath.exists()){
+                cout << subDirPath.getAbsolutePath() << " doesn't exist";
+                assert(false);
+            }
+            videos[i]->setup(subDirPath.getAbsolutePath(),isNRT);
         }
         
         if(isNRT){
@@ -182,6 +186,7 @@ public:
         
         // speed_dir
         speedDir.name = "speedDir";
+        speedDir.randomizable = config["position-randomizable"].get<bool>();
         speedDir.setup({-1,1},1);
         params.push_back(&speedDir);
         
@@ -255,6 +260,7 @@ public:
         
         // nrtPlayHead
         nrtPlayHead.name = "nrtPlayHead";
+        nrtPlayHead.randomizable = config["position-randomizable"].get<bool>();
         nrtPlayHead.setup(0.f,videos[0]->getTotalFrames(),1.f,0.f);
         params.push_back(&nrtPlayHead);
         

@@ -1,0 +1,24 @@
+input                 : /Volumes/2023 Aug (Ted Moore)/nand/for-video-design/westrock/tiled-3-min/frames
+output                : /Volumes/2023 Aug (Ted Moore)/nand/for-video-design/westrock/tiled-3-min-canny-all
+n_frames              : -1         (default)
+start_frame           : 3483      
+gaussian_kernel       : 0          (default)
+color_kernel          : 0          (default)
+canny_min             : 0         
+canny_max             : 1         
+output_width          : 3840       (default)
+output_height         : 2160       (default)
+marching_squares_level: 0.8        (default)
+farneback_scale       : 1.0        (default)
+mag_thresh            : 0.0        (default)
+max_area              : 1          (default)
+min_area              : 0          (default)
+approx_poly_epsilon   : 0.0        (default)
+canny                 : True      
+marching_squares      : False      (default)
+original              : False      (default)
+flow_mask             : False      (default)
+sharpen               : False      (default)
+canny_edges           : False      (default)
+hull_thresh           : 0.99999    (default)
+dont_write_first      : True      

@@ -7,7 +7,7 @@ void ofApp::setup(){
     
     // the config file is loaded here just so that we know whether
     // or not this is a nrt render
-    std::ifstream i(ofToDataPath("config.json"));
+    std::ifstream i(ofToDataPath(CONFIG_PATH));
     i >> config;
     
     nrtRender = config["nrt-render"].get<bool>();
@@ -142,7 +142,7 @@ void ofApp::setup(){
     // ======================= OSC ================
     osc_receiver.setup(11000);
     
-    loadConfigFile("config.json");
+    loadConfigFile(CONFIG_PATH);
     
     // =========================== INITIALIZATION =====================
     
@@ -695,7 +695,9 @@ void ofApp::keyPressed(int key){
         debug = !debug;
     }   
     
-    if (key == 'c') loadConfigFile("config.json");
+    if (key == 'c') loadConfigFile(CONFIG_PATH);
+    
+    if (key == 's') use_sc_onsets = !use_sc_onsets;
     
     if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
     if (key == 'p'){

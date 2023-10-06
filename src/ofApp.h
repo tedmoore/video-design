@@ -43,7 +43,7 @@ public:
     void drawBounds();
     void loadConfigFile(string path){
         
-        std::ifstream i(ofToDataPath("config.json"));
+        std::ifstream i(path);
         i >> config;
         
         verbose = config["verbose"].get<bool>();

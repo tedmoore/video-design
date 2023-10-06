@@ -5,8 +5,8 @@
     "csv-folder": "/Users/ted/dev/of_v0.12.0_osx_release/apps/myApps/video-design/supercollider/data-renders/230930_123034",
     "max-frames": -1,
     "use-sc-onsets": true,
-    "initial-active-modules": [0,4,3,1],
-    "module-indexes-unlocked": [true,false,true,true],
+    "initial-active-modules": [0,1,3,4],
+    "module-indexes-unlocked": [true,true,true,false],
     "initial-onset": true,
     "verbose": false,
 
@@ -17,14 +17,14 @@
     "blend-mode-probs": [1,1,0,0,0,0],
     
     "feedback-prob": 0.25,
-    "feedback-max": 254,
+    "feedback-max": 255,
     "flow-field-resolution": 20,
     "onset-switch-prob": 1.0,
     "modules": [
        {
             "index": 0,
             "module-type":"waveform",
-            "prob": 3,
+            "prob": 0,
             "waveform-type-default": 2,
             "waveform-type-weights": [0,1,2,2,3,3,3,3],
             "lissajous-line-width": 1.0,
@@ -48,7 +48,7 @@
         {
             "index": 2,
             "module-type":"mag-lines",
-            "prob": 2
+            "prob": 0
         },
         {
             "index": 3,
@@ -69,9 +69,9 @@
             "use-ff-prob": 0.0,
             "boxes-prob": 0.2,
             "bTile-prob": 0.0,
-            "speed-min": 0.8,
-            "speed-max": 3.0,
-            "speed-pow": 2.0
+            "speed-min": 1.0,
+            "speed-max": 1.0,
+            "speed-pow": 1.0
         },
         {
             "index": 5,

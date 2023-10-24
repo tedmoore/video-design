@@ -32,7 +32,7 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     void displayIncomingData(int width, int height);
-    void onsetOccured(int width, int height, unsigned long long frame_num);
+    void onsetOccurred(int width, int height, unsigned long long frame_num);
     void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
     void setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num);
     void incrementVecHistoryCounter();

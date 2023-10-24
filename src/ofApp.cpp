@@ -147,7 +147,7 @@ void ofApp::setup(){
     // =========================== INITIALIZATION =====================
     
     if(config["initial-onset"].get<bool>()){
-        onsetOccured(width, height, 0);
+        onsetOccurred(width, height, 0);
     }
     
     // =========== NRT RENDERING =====================
@@ -296,7 +296,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
     while(index < tokens.size()){
         
         if(tokens[index] == "o"){
-            onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
+            onsetOccurred(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
         } else if(tokens[index] == "sai"){
             int ai[MAX_ACTIVE_MODULES];
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
@@ -354,7 +354,7 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, unsig
     float onset_val = csv_data[csv_data.size() - 1];
     if(onset_val > 0.5 && use_sc_onsets){
         onset_occured = true;
-        onsetOccured(width,height,frame_num); // onsets
+        onsetOccurred(width,height,frame_num); // onsets
     }
     
 //    cout << "\tonset val: " << onset_val << " \tonset occured: " << onset_occured << endl;
@@ -385,7 +385,7 @@ void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long f
     }
 }
 
-void ofApp::onsetOccured(int width, int height,unsigned long long frame_num){
+void ofApp::onsetOccurred(int width, int height,unsigned long long frame_num){
 
     // new active vc i
     
@@ -515,7 +515,7 @@ void ofApp::update(){
     }
     
     if(onset_occured){
-        onsetOccured(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
+        onsetOccurred(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
     }
     
     prUpdate(false);
@@ -699,7 +699,7 @@ void ofApp::keyPressed(int key){
     
     if (key == 's') use_sc_onsets = !use_sc_onsets;
     
-    if (key == 'o') onsetOccured(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
+    if (key == 'o') onsetOccurred(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
     if (key == 'p'){
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             if(active_module_indices[i] >= 0){

@@ -1,7 +1,6 @@
 ## Dependencies:
 
 [ofxHapPlayer](https://github.com/bangnoise/ofxHapPlayer)
-ofxYAML
 [ofxPostGlitch (my fork)](https://github.com/tedmoore/ofxPostGlitch)
 
 ## After building...

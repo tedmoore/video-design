@@ -4,17 +4,17 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    
+        
     // the config file is loaded here just so that we know whether
     // or not this is a nrt render
     std::ifstream i(ofToDataPath(CONFIG_PATH));
     i >> config;
     
     nrtRender = config["nrt-render"].get<bool>();
-        
+    
     int width = 0;
     int height = 0;
-    
+
     if(nrtRender){
         width = 3840; // 4k
         height = 2160;// 4k
@@ -143,17 +143,17 @@ void ofApp::setup(){
     osc_receiver.setup(11000);
     
     loadConfigFile(CONFIG_PATH);
-    
-    // =========================== INITIALIZATION =====================
-    
-    if(config["initial-onset"].get<bool>()){
-        onsetOccurred(width, height, 0);
-    }
-    
+        
     // =========== NRT RENDERING =====================
     if(nrtRender){
         runNrtRender(width,height);
     }
+    
+    // =========================== INITIALIZATION =====================
+    if(config["initial-onset"].get<bool>()){
+        onset(width, height, 0, nrtRender);
+    }
+
 }
 
 void ofApp::runNrtRender(int width, int height){
@@ -162,13 +162,13 @@ void ofApp::runNrtRender(int width, int height){
     //int max_frames = 600; // 600 frames = 20 seconds
     int max_frames = config["max-frames"].get<int>() == -1 ? INT_MAX : config["max-frames"].get<int>();
     
-    ifstream descriptors_file;
+    std::ifstream descriptors_file;
     descriptors_file.open(csv_folder + "/descriptors.csv");
-    ifstream waveform0_file;
+    std::ifstream waveform0_file;
     waveform0_file.open(csv_folder + "/waveform-0.csv");
-    ifstream waveform1_file;
+    std::ifstream waveform1_file;
     waveform1_file.open(csv_folder + "/waveform-1.csv");
-    ifstream mags_file;
+    std::ifstream mags_file;
     mags_file.open(csv_folder + "/mags.csv");
     
     string reaperMarkerPath = csv_folder + "/reaper-markers.txt";
@@ -184,11 +184,20 @@ void ofApp::runNrtRender(int width, int height){
     if(result.bSuccess) {
       new_dir_path = result.getPath();
     } else {
-        ofExit();
+        exit();
     }
     
     ofDirectory new_dir(new_dir_path);
     new_dir.create();
+    
+    // TODO: make this path OS agnostic
+    randomSeedLog.open(new_dir_path + "/_" + ofGetTimestampString() + "-random-seed-log.csv");
+    assert(randomSeedLog.is_open());
+    randomSeedLog << "Frame,Minute:Second.Frame,Seed" << endl;
+    
+    if(config["initial-onset"].get<bool>()){
+        onset(width, height, 0, nrtRender);
+    }
     
     ofPixels pix;
     
@@ -223,12 +232,12 @@ void ofApp::runNrtRender(int width, int height){
             cout << "number of zeros:  " << std::count(csv_line_fl.begin(),csv_line_fl.end(),0) << endl;;
         }
         
-        setValsFromCSV(width,height,csv_line_fl,frame_num);
+        setValsFromCSV(width,height,csv_line_fl,frame_num,true);
         
         if(usingReaperMarkers){
             string rm = rmfp.currentFrame(frame_num);
             cout << "from rmfp: " << rm << endl;
-            processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight(),frame_num);
+            processReaperMarker(rm,main_fbo.getWidth(), main_fbo.getHeight(),frame_num,true);
         }
         
         if(verbose) cout << "reading waveforms..." << endl;
@@ -286,17 +295,17 @@ void ofApp::runNrtRender(int width, int height){
     waveform1_file.close();
     mags_file.close();
     
-    ofExit();
+    exit();
 }
 
-void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned long long frame_num){
+void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned long long frame_num, bool isNRT){
     vector<string> tokens = ofSplitString(cmd," ");
     int index = 0;
     
     while(index < tokens.size()){
         
         if(tokens[index] == "o"){
-            onsetOccurred(main_fbo.getWidth(),main_fbo.getHeight(),frame_num);
+            onset(main_fbo.getWidth(),main_fbo.getHeight(),frame_num, isNRT);
         } else if(tokens[index] == "sai"){
             int ai[MAX_ACTIVE_MODULES];
             for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
@@ -319,6 +328,8 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
             }else{
                 cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
             }
+        } else if(tokens[index] == "onsetSeed"){
+            onsetFromSeed(ofToInt(tokens[++index]),width,height,frame_num,isNRT);
         } else if(tokens[index] == "sp"){ // set parameter
             int moduleIndex = ofToInt(tokens[++index]);
             string label = tokens[++index];
@@ -330,7 +341,7 @@ void ofApp::processReaperMarker(string& cmd, int width, int height, unsigned lon
     }
 }
 
-void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num){
+void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num, bool isNRT){
     
     common_features["specCentroid"] = vector_data[0];
     common_features["specSpread"] = vector_data[1];
@@ -349,15 +360,11 @@ void ofApp::setValsFromCSV(int width, int height, vector<float>& csv_data, unsig
     
     onset_occured = false;
     
-//    cout << "csv_data.size(): " << csv_data.size() << endl;
-    
     float onset_val = csv_data[csv_data.size() - 1];
     if(onset_val > 0.5 && use_sc_onsets){
         onset_occured = true;
-        onsetOccurred(width,height,frame_num); // onsets
+        onset(width,height,frame_num,isNRT); // onsets
     }
-    
-//    cout << "\tonset val: " << onset_val << " \tonset occured: " << onset_occured << endl;
     
     for (int i = 0; i < csv_data.size() - 1; i++){
         float val = csv_data[i];
@@ -385,7 +392,12 @@ void ofApp::setActiveIndices(int* ai,int width, int height, unsigned long long f
     }
 }
 
-void ofApp::onsetOccurred(int width, int height,unsigned long long frame_num){
+void ofApp::onsetActions(int width, int height, unsigned long long frame_num, bool isNRT){
+    
+    // Write the `currentRandomSeed` to the file, indicating the frame number so that it can be referenced later
+    if(isNRT){
+        randomSeedLog << frame_num << "," << getTimeFromFrameNum(frame_num) << "," << currentRandomSeed << endl;
+    }
 
     // new active vc i
     
@@ -445,7 +457,7 @@ void ofApp::update(){
         // from Reaper:
         if(address == "/lastmarker/name"){
             string cmd = oscMsg.getArgAsString(0);
-            processReaperMarker(cmd,ofGetWidth(),ofGetHeight(),ofGetFrameNum());
+            processReaperMarker(cmd,ofGetWidth(),ofGetHeight(),ofGetFrameNum(),false);
             
             // from SuperCollider:
         } else if(address == "/setActiveIndices"){
@@ -454,6 +466,11 @@ void ofApp::update(){
                 ai[i] = oscMsg.getArgAsInt(i);
             }
             setActiveIndices(ai,main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
+        } else if(address == "/onset"){
+            onset(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
+        } else if(address == "/onsetSeed"){
+            unsigned long seed = oscMsg.getArgAsInt(0);
+            onsetFromSeed(seed,main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
         } else if (address == "/setOnsetSwitchProb"){
             onsetSwitchProb = oscMsg.getArgAsFloat(0);
         } else if (address == "/setNewParamsProb"){
@@ -515,7 +532,7 @@ void ofApp::update(){
     }
     
     if(onset_occured){
-        onsetOccurred(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum());
+        onset(main_fbo.getWidth(),main_fbo.getHeight(),ofGetFrameNum(),false);
     }
     
     prUpdate(false);
@@ -699,7 +716,7 @@ void ofApp::keyPressed(int key){
     
     if (key == 's') use_sc_onsets = !use_sc_onsets;
     
-    if (key == 'o') onsetOccurred(ofGetWidth(),ofGetHeight(),ofGetFrameNum());
+    if (key == 'o') onset(ofGetWidth(),ofGetHeight(),ofGetFrameNum(),false);
     if (key == 'p'){
         for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
             if(active_module_indices[i] >= 0){

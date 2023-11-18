@@ -32,15 +32,45 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     void displayIncomingData(int width, int height);
-    void onsetOccurred(int width, int height, unsigned long long frame_num);
+    void onsetActions(int width, int height, unsigned long long frame_num, bool isNRT);
     void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
-    void setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num);
+    void setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num, bool isNRT);
     void incrementVecHistoryCounter();
-    void processReaperMarker(string& cmd,int width, int height, unsigned long long frame_num);
+    void processReaperMarker(string& cmd, int width, int height, unsigned long long frame_num, bool isNRT);
     void setActiveIndices(int* ai,int width, int height, unsigned long long frame_num);
     void prUpdate(bool isNRT);
     void runNrtRender(int width,int height);
     void drawBounds();
+    
+    void exit(){
+        randomSeedLog.close();
+        ofExit();
+    }
+    
+    /* The `onset` method is what should be called if there is no specific seed
+     that needs to be set. It will randomly generate a seed, use that seed to
+     call `onsetFromSeed`, which then will set the seed with ofSetRandomSeed, and then
+     call `onsetActions` to have the proper onset actions unfold*/
+    void onset(int width, int height, unsigned long long frame_num, bool isNRT){
+        onsetFromSeed((unsigned long)ofRandom(INT_MAX),width,height,frame_num,isNRT);
+    }
+        
+    void onsetFromSeed(unsigned long seed, int width, int height, unsigned long long frame_num, bool isNRT){
+        currentRandomSeed = seed;
+        ofSetRandomSeed(currentRandomSeed);
+        onsetActions(width, height, frame_num, isNRT);
+    }
+    
+    string getTimeFromFrameNum(unsigned long long frame_num){
+        float sec = frame_num / (float)config["target-framerate"].get<int>();
+        int min = int(sec / 60);
+        sec = sec - (min * 60);
+        int sec_whole = int(sec);
+//        int sec_frac = int(round((sec - sec_whole) * 1000));
+        int sub_second_frame = frame_num % config["target-framerate"].get<int>();
+        return ofToString(min) + ":" + ofToString(sec_whole,2,'0') + "." + ofToString(sub_second_frame,2,'0');
+    }
+    
     void loadConfigFile(string path){
         
         std::ifstream i(path);
@@ -131,8 +161,9 @@ public:
     // mags
     float** magnitudes;
     
+    std::ofstream randomSeedLog;
+    
     // vector data
-                             
     float vector_data[DESCRIPTORS_VECTOR_LENGTH-1]; // 106 not including the onsets at the end
     std::unordered_map<std::string, float> common_features;
     float** vec_history;
@@ -159,6 +190,8 @@ public:
     float onsetSwitchProb = 1.f;
   
     bool nrtRender = false;
+    
+    unsigned long currentRandomSeed = 0;
     
     ofFbo main_fbo;
     ofxPostGlitch postGlitch;

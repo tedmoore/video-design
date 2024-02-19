@@ -11,3 +11,4 @@ obj
 *.csv
 *.reapeaks
 .DS_Store
+bin/data/videos

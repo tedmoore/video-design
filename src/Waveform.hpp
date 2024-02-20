@@ -13,16 +13,18 @@
 #include "VisualModule.hpp"
 #include <format>
 
+#define N_BITS 16
+
 class Waveform : public VisualModule
 {
 public:
     enum waveformType
     {
         NORM = 0,
-        LISSAJOUS,
-        IKEDA,
-        GRID,
-        BITS
+        LISSAJOUS, // 1
+        IKEDA, // 2
+        GRID, // 3
+        BITS // 4
     };
     enum rectsDirection
     {
@@ -42,6 +44,7 @@ public:
     rectsDirection rectsDir = ANGLE_L;
     rectsShape rects_shape = SQUARE;
 
+    // TODO: make this a vector of vectors
     float **waveforms;
 
     int h;
@@ -174,6 +177,37 @@ public:
             case ANGLE_R:
                 traverseAngleR(width, height, rects_shape, verbose);
                 break;
+            }
+        }
+        break;
+        case BITS:
+        {
+            // TODO have a boolean Param for whether to draw the bits ((L to R) (T to B)) or ((T to B) (L to R))
+            int w = width / 200;
+            int sampleCounter = 0;
+            int16_t integer;
+            bool keepGoing = true;
+
+            ofSetColor(255);
+            ofSetLineWidth(0);
+
+            int y = 0;
+            while (y < height and keepGoing)
+            {
+                int x = 0;
+                while (x < width and keepGoing)
+                {
+                    integer = static_cast<int16_t>(waveforms[0][sampleCounter++] * 32767);
+
+                    for (int i = 0; i < N_BITS; i++)
+                        if (integer & (1 << i))
+                            ofDrawRectangle(x, y + (i * w), w, w);
+
+                    keepGoing = sampleCounter < WAVEFORM_LEN;
+
+                    x += w;
+                }
+                y += w * N_BITS;
             }
         }
         break;
@@ -371,6 +405,7 @@ public:
     {
 
         wfType.newRandom();
+
         rectsDir = (rectsDirection)ofRandom(5);
         rects_shape = (rectsShape)ofRandom(3);
         trianglesDir = ofRandom(1.f) < 0.5;

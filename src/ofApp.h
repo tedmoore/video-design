@@ -52,10 +52,12 @@ public:
      call `onsetFromSeed`, which then will set the seed with ofSetRandomSeed, and then
      call `onsetActions` to have the proper onset actions unfold*/
     void onset(int width, int height, unsigned long long frame_num, bool isNRT){
+        if(verbose) cout << "onset" << endl;
         onsetFromSeed((unsigned long)ofRandom(INT_MAX),width,height,frame_num,isNRT);
     }
         
     void onsetFromSeed(unsigned long seed, int width, int height, unsigned long long frame_num, bool isNRT){
+        if(verbose) cout << "onsetFromSeed" << endl;
         currentRandomSeed = seed;
         ofSetRandomSeed(currentRandomSeed);
         onsetActions(width, height, frame_num, isNRT);

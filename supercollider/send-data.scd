@@ -9,7 +9,7 @@ s.waitForBoot({
 	var frame_rate = 30;
 	var start_sec = 0;
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = true, loop = false;
+	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
 
 	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
@@ -20,7 +20,7 @@ s.waitForBoot({
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
 	// var audio_buf = nil;
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/nand/reaper/230822-splice/_bounces/231015_201209/231015_201209_nand_tape.wav");
-	var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/angled/reaper/231209-angled-mvt-1/_bounces/231217_190222/231217_190222-angled-by-Ted Moore-mvt-1-tape-main.wav");
+	var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/angled/reaper/02-sharp/_bounces/240109-angled-mvt-2.wav");
 
 	outpath.postln;
 
@@ -60,7 +60,7 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		// Out.ar(0,sig * -20.dbamp);
+		Out.ar(0,sig * -20.dbamp);
 		nil;
 	}.play;
 
@@ -79,12 +79,12 @@ s.waitForBoot({
 		WaveformToOSC(s,analysis_bus,i,~oF,i,phase_tracking:true,outfile:if(render_data){outpath+/+"waveform-%.csv".format(i)}{nil},callback:{
 			arg samps;
 			// samps.size.postln;
-			defer{~msViews[i].value_(samps.linlin(-1,1,0,1))};
+			// defer{~msViews[i].value_(samps.linlin(-1,1,0,1))};
 		});
 	};
 
 	~waveformDisplay.layout = VLayout(*~msViews);
-	~waveformDisplay.front;
+	// ~waveformDisplay.front;
 
 	MagsToOSC(s,analysis_bus,2,~oF,0,outfile:if(render_data){outpath+/+"mags.csv"}{nil});
 

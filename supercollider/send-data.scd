@@ -9,7 +9,7 @@ s.waitForBoot({
 	var frame_rate = 30;
 	var start_sec = 0;
 	var outpath = folder+/+Date.localtime.stamp;
-	var outfile, render_data = false, loop = true;
+	var outfile, render_data = true, loop = false;
 	var nVecChans = 106;
 
 	// var audio_buf = Buffer.read(s,"/Volumes/2110 Seagate 8TB/Project Files/saccades/reaper/_bounces/230103_160733/230103_160733_saccades-tape-mvt-1.wav");
@@ -20,7 +20,8 @@ s.waitForBoot({
 	// var audio_buf = Buffer.read(s,"/Users/macprocomputer/Documents/_CREATING/_PROJECT_FILES/three-videos/reaper/_bounces/230214_235123_ring-mod-drone.wav");
 	// var audio_buf = nil;
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/nand/reaper/230822-splice/_bounces/231015_201209/231015_201209_nand_tape.wav");
-	var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/angled/reaper/02-sharp/_bounces/240109-angled-mvt-2.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/01-PROJECT-FILES/angled/reaper/02-sharp/_bounces/240109-angled-mvt-2.wav");
+	var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/reaper/01/_bounces/240317_183202/240317_183202-mvt-1-tape.wav");
 
 	outpath.postln;
 

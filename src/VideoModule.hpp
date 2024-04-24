@@ -470,6 +470,7 @@ public:
                 ofFill();
                 ofSetColor(col,local_alpha);
                 
+                
                 ofSetRectMode(OF_RECTMODE_CENTER);
                 float box_depth = ofMap(col.getBrightness(),0,255,rec_w * 1.5, rec_w * 0.1);
                 drawRect(rec_w/2,rec_h/2,box_depth/-2,rec_w,rec_h,box_depth,local_mag, j);

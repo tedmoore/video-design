@@ -16,7 +16,7 @@ public:
     string name = "";
     bool randomizable = true;
     
-    void virtual load(nlohmann::json &y){
+    void virtual load(ofJson &y){
         reportError("load");
     }
     
@@ -28,9 +28,9 @@ public:
         reportError("newRandom");
     }
     
-    nlohmann::json virtual save(){
+    ofJson virtual save(){
         reportError("save");
-        nlohmann::json dict;
+        ofJson dict;
         return dict;
     }
     
@@ -53,13 +53,13 @@ public:
         cout << value;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<bool>();
     }
     
@@ -90,13 +90,13 @@ public:
         value = val;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<float>();
     }
     
@@ -125,13 +125,13 @@ public:
         value = val;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<int>();
     }
     
@@ -162,13 +162,13 @@ public:
         value = val;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<int>();
     }
     
@@ -195,13 +195,13 @@ public:
         value = val;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<int>();
     }
     
@@ -228,13 +228,13 @@ public:
         value = val;
     }
     
-    nlohmann::json save(){
-        nlohmann::json dict;
+    ofJson save(){
+        ofJson dict;
         dict["value"] = value;
         return dict;
     }
     
-    void load(nlohmann::json &y){
+    void load(ofJson &y){
         value = y["value"].get<int>();
     }
     

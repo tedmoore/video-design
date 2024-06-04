@@ -16,7 +16,7 @@
     - active index 1 (int)
     - active index 2 (int)
     - active index 3 (int)
-    - (the number of arguments provided needs to be equal to the software's `MAX_ACTIVE_MODULES`)
+    - (the number of arguments provided needs to be equal to the software's `active_module_indices.size()`)
 * **loadState**
     - index (int) of which of the 10 memory-saved states to load
 * **loadStateFromDisk**

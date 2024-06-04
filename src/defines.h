@@ -8,9 +8,6 @@
 #ifndef defines_h
 #define defines_h
 
-#define CONFIG_PATH "/Users/ted/dev/of_v20240206_osx_release/apps/myApps/video-design/bin/data/config-westrock-solo.json"
-
-#define MAX_ACTIVE_MODULES 4
 #define N_STATE_SAVES 10
 #define N_MAGNITUDES 1
 #define MAGNITUDES_LEN 1025

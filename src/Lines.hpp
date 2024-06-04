@@ -21,19 +21,24 @@ public:
     bool inv;
     float* vec;
     float w, h;
-    float vec_len;
     int alphaThresh = 10;
     bool can_borrow_colors = false;
     bool is_borrow_colors = false;
     lines_direction dir = HORZ;
     ofColor borrowed_colors[N_CLUSTERS];
+
+    void receiveOSC(int width, int height, std::string label, float val){}
+    void screenResize(int w, int h){}
+    void update(bool isNRT, std::unordered_map<std::string, float> *common_features, bool verbose){}
+    void processConfigFile(ofJson &dict){}
+    void printStatus(){}
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory){}
     
-    void setup(float* vec_, int offset_, int vec_len_, bool can_borrow_colors_, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void setup(float* vec_, int offset_, bool can_borrow_colors_, int width, int height, VectorHistory &vecHistory){
         can_borrow_colors = can_borrow_colors_;
         vec = vec_;
-        vec_len = float(vec_len_);
         
-        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull,0);
+        newParams(width,height,vecHistory,0);
         
         type = LINES;
         
@@ -43,14 +48,14 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
+    void newParams(int width, int height, VectorHistory &vecHistory, unsigned long long frame_num){
         chooseDir();
         chooseInv();
         is_borrow_colors = ofRandom(1.f) < 0.5;
     }
     
-    nlohmann::json saveState(){
-        nlohmann::json dict;
+    ofJson saveState(){
+        ofJson dict;
         
         dict["dir"] = (int)dir;
         dict["inv"] = inv;
@@ -59,7 +64,7 @@ public:
         return dict;
     }
     
-    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
         dir = (lines_direction)dict["dir"].get<int>();
         inv = dict["inv"].get<bool>();
@@ -98,12 +103,11 @@ public:
         ofSetLineWidth(0);
         ofFill();
         
-        w = width / vec_len;// vec_len is a float
-        h = height / vec_len;
+        w = width / (float)DESCRIPTORS_VECTOR_LENGTH;
+        h = height / (float)DESCRIPTORS_VECTOR_LENGTH;
         
         if(verbose){
             cout << "Lines\n";
-            cout << "\tvec_len:         " << vec_len << endl;
             cout << "\tdir:             " << dir << endl;
             cout << "\tinv:             " << inv << endl;
             cout << "\treceived width:  " << width << endl;
@@ -114,7 +118,7 @@ public:
         
         ofSetRectMode(OF_RECTMODE_CORNER);
         
-        for (int i = 0; i < vec_len; i++) {
+        for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++) {
             float alpha = pow(vec[i], 0.75) * 255.f * (vec[i] > 0);
             if (alpha > alphaThresh) {
                 if(is_borrow_colors && can_borrow_colors){

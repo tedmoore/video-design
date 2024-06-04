@@ -22,12 +22,20 @@ public:
     float stepSize = 30;
     int max_frames = 20;
     int frame_counter = 0;
-    
+
+    void interact(VisualModule *other){}
+    void receiveOSC(int width, int height, std::string label, float val){}
+    void screenResize(int w, int h){}
+    void update(bool isNRT, std::unordered_map<std::string, float> *common_features, bool verbose){}
+    void processConfigFile(ofJson &dict){}
+    void printStatus(){}
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory){}
+
     string getName(){
         return "Turtle";
     }
     
-    void setup(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, nlohmann::json config){
+    void setup(int width, int height, VectorHistory &vecHistory, ofJson &config){
         
         type = TURTLE;
         for(int i = 0; i < config["divisors"].size(); i++){
@@ -36,7 +44,7 @@ public:
         
         max_frames = config["max-frames"].get<int>();
         
-        newParams(width,height,vecHistory,vector_length,history_length,vecHistoryFull,0);
+        newParams(width,height,vecHistory,0);
     }
     
     bool onScreen(ofVec3f pt, int width, int height){
@@ -89,7 +97,7 @@ public:
     }
     
     
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num){
+    void newParams(int width, int height, VectorHistory &vecHistory, unsigned long long frame_num){
         divisor_i = int(ofRandom(divisors.size()));
         stepSize = ofRandom(70) + 30;
         restartPath(width,height);
@@ -102,14 +110,14 @@ public:
         path.push_back(ofVec3f(ofRandom(width),ofRandom(height),0));
     }
     
-    nlohmann::json saveState(){
-        nlohmann::json dict;
+    ofJson saveState(){
+        ofJson dict;
         dict["divisor_i"] = divisor_i;
         dict["stepSize"] = stepSize;
         return dict;
     }
     
-    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         divisor_i = dict["divisor_i"].get<int>();
         stepSize = dict["stepSize"].get<float>();
         restartPath(width,height);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.h"
+#include "VectorHistory.h"
 #include "ofMain.h"
 #include "ofxOsc.h"
 #include "VisualModule.hpp"
@@ -10,19 +11,19 @@
 #include "Turtle.hpp"
 #include "Lines.hpp"
 #include "ofxPostGlitch.h"
-#include "thirdparty/nlohmann/json.hpp"
+#include "ForceOnsetFrames.h"
 
-class ofApp : public ofBaseApp{
-    
+class ofApp : public ofBaseApp
+{
+
 public:
-    
     void setup();
     void update();
     void draw();
-    
+
     void keyPressed(int key);
     void keyReleased(int key);
-    void mouseMoved(int x, int y );
+    void mouseMoved(int x, int y);
     void mouseDragged(int x, int y, int button);
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
@@ -34,72 +35,102 @@ public:
     void displayIncomingData(int width, int height);
     void onsetActions(int width, int height, unsigned long long frame_num, bool isNRT);
     void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
-    void setValsFromCSV(int width, int height, vector<float>& csv_data, unsigned long long frame_num, bool isNRT);
-    void incrementVecHistoryCounter();
-    void processReaperMarker(string& cmd, int width, int height, unsigned long long frame_num, bool isNRT);
-    void setActiveIndices(int* ai,int width, int height, unsigned long long frame_num);
+    void setValsFromCSV(int width, int height, vector<float> &csv_data, unsigned long long frame_num, bool isNRT);
+    void processReaperMarker(string &cmd, int width, int height, unsigned long long frame_num, bool isNRT);
+    void setActiveIndices(int *ai, int width, int height, unsigned long long frame_num);
     void prUpdate(bool isNRT);
-    void runNrtRender(int width,int height);
+    void runNrtRender(int width, int height);
     void drawBounds();
-    
-    void exit(){
+
+    ofApp(string config_path_)
+    {
+        config_path = config_path_;
+        cout << "Loading config file at: " << config_path << endl;
+        loadConfigFile(config_path);
+    }
+
+    void exit()
+    {
         randomSeedLog.close();
         ofExit();
     }
-    
+
     /* The `onset` method is what should be called if there is no specific seed
      that needs to be set. It will randomly generate a seed, use that seed to
      call `onsetFromSeed`, which then will set the seed with ofSetRandomSeed, and then
      call `onsetActions` to have the proper onset actions unfold*/
-    void onset(int width, int height, unsigned long long frame_num, bool isNRT){
-        if(verbose) cout << "onset" << endl;
-        onsetFromSeed((unsigned long)ofRandom(INT_MAX),width,height,frame_num,isNRT);
+    void onset(int width, int height, unsigned long long frame_num, bool isNRT)
+    {
+        if (verbose)
+            cout << "onset" << endl;
+        onsetFromSeed((unsigned long)ofRandom(INT_MAX), width, height, frame_num, isNRT);
     }
-        
-    void onsetFromSeed(unsigned long seed, int width, int height, unsigned long long frame_num, bool isNRT){
-        if(verbose) cout << "onsetFromSeed" << endl;
+
+    void onsetFromSeed(unsigned long seed, int width, int height, unsigned long long frame_num, bool isNRT)
+    {
+        if (verbose)
+            cout << "onsetFromSeed" << endl;
         currentRandomSeed = seed;
         ofSetRandomSeed(currentRandomSeed);
         onsetActions(width, height, frame_num, isNRT);
     }
-    
-    string getTimeFromFrameNum(unsigned long long frame_num){
+
+    string getTimeFromFrameNum(unsigned long long frame_num)
+    {
         float sec = frame_num / (float)config["target-framerate"].get<int>();
         int min = int(sec / 60);
         sec = sec - (min * 60);
         int sec_whole = int(sec);
-//        int sec_frac = int(round((sec - sec_whole) * 1000));
+        //        int sec_frac = int(round((sec - sec_whole) * 1000));
         int sub_second_frame = frame_num % config["target-framerate"].get<int>();
-        return ofToString(min) + ":" + ofToString(sec_whole,2,'0') + "." + ofToString(sub_second_frame,2,'0');
+        return ofToString(min) + ":" + ofToString(sec_whole, 2, '0') + "." + ofToString(sub_second_frame, 2, '0');
     }
-    
-    void loadConfigFile(string path){
-        
-        std::ifstream i(path);
-        i >> config;
-        
+
+    void loadConfigFile(string path)
+    {
+        cout << "Loading config file at: " << ofToDataPath(path) << endl;
+
+        ofFile file(path);
+        if (!file.exists())
+        {
+            cout << "Config file not found at: " << path << endl;
+            ofExit();
+        }
+
+        config = ofLoadJson(path);
+
+        cout << "File loaded" << endl;
+
+        force_onset_frames.setup(config["force-onset-frames"].get<bool>(), config["force-onset-min-frames"].get<int>(), config["force-onset-max-frames"].get<int>());
+
         verbose = config["verbose"].get<bool>();
         debug = config["debug"].get<bool>();
-        
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+
+        active_module_indices.resize(config["max-active-modules"].get<int>());
+
+        for (int i = 0; i < active_module_indices.size(); i++)
+        {
             active_module_indices[i] = config["initial-active-modules"][i].get<int>();
+            assert(active_module_indices[i] < n_modules);
         }
-        
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+
+        moduleIndexUnlocked.resize(active_module_indices.size());
+        for (int i = 0; i < active_module_indices.size(); i++)
+        {
             moduleIndexUnlocked[i] = config["module-indexes-unlocked"].get<vector<int>>()[i];
         }
-                
+
         onsetSwitchProb = config["onset-switch-prob"].get<float>();
-        
+
         feedback_prob = config["feedback-prob"].get<float>();
         feedback_max = config["feedback-max"].get<int>();
-        
+
         ofSetFrameRate(config["target-framerate"].get<int>());
-        
+
         use_sc_onsets = config["use-sc-onsets"].get<bool>();
-        
+
         postGlitchChangeProb = config["post-glitch"]["change-prob"].get<float>();
-        
+
         postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].get<float>();
         postGlitchProbs[1] = config["post-glitch"]["glow-prob"].get<float>();
         postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].get<float>();
@@ -117,61 +148,66 @@ public:
         postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].get<float>();
         postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].get<float>();
         postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].get<float>();
-        
-        for(int i = 0; i < config["blend-mode-probs"].size(); i++){
+
+        blendModePool.clear();
+        for (int i = 0; i < config["blend-mode-probs"].size(); i++)
+        {
             int n = config["blend-mode-probs"][i].get<int>();
-            for(int j = 0; j < n; j++){
+            for (int j = 0; j < n; j++)
+            {
                 blendModePool.push_back(i);
             }
         }
-        
-        for(int i = 0; i < n_modules; i++){
+
+        for (int i = 0; i < n_modules; i++)
+        {
             modules[i]->processConfigFile(config["modules"][i]);
         }
-  
+
         // TODO
-//        for(int i = 0; i < N_STATE_SAVES; i++){
-//            if(config["state-save-" + ofToString(i)]){
-//                nlohmann::json state;
-//                state.load(config["state-save-" + ofToString(i)].get<string>());
-//                saves[i] = state;
-//            }
-//        }
+        //        for(int i = 0; i < N_STATE_SAVES; i++){
+        //            if(config["state-save-" + ofToString(i)]){
+        //                ofJson state;
+        //                state.load(config["state-save-" + ofToString(i)].get<string>());
+        //                saves[i] = state;
+        //            }
+        //        }
     }
-    
-    int addVCOptions(int counter, int num){
-        for(int i = 0; i < num; i++){
+
+    int addVCOptions(int counter, int num)
+    {
+        for (int i = 0; i < num; i++)
+        {
             vc_i_options.push_back(counter);
         };
-        
+
         return counter + 1;
     }
-    
+
     bool verbose = false;
-    
+
     int n_modules = 0;
-    vector<VisualModule*> modules;
+    vector<VisualModule *> modules;
     vector<int> vc_i_options;
-    bool moduleIndexUnlocked[MAX_ACTIVE_MODULES];
-    
-    int* active_module_indices;
+    vector<bool> moduleIndexUnlocked;
+
+    vector<int> active_module_indices;
     FlowField ff;
-    
+
     // waveform data
-    float** waveforms;
-    
+    float **waveforms;
+
     // mags
-    float** magnitudes;
-    
+    float **magnitudes;
+
     std::ofstream randomSeedLog;
-    
+
     // vector data
-    float vector_data[DESCRIPTORS_VECTOR_LENGTH-1]; // 106 not including the onsets at the end
+    float vector_data[DESCRIPTORS_VECTOR_LENGTH - 1]; // 106 not including the onsets at the end
     std::unordered_map<std::string, float> common_features;
-    float** vec_history;
-    int vec_history_length;
-    bool vec_history_full = false;
-    int vec_history_counter = 0;
+
+    VectorHistory vec_history;
+    ForceOnsetFrames force_onset_frames;
 
     float xsize;
     float ysize;
@@ -183,87 +219,96 @@ public:
     float ymax;
     float zmin;
     float zmax;
-    
+
     // OSC
     ofxOscReceiver osc_receiver;
-    
+
     bool debug = false;
     bool onset_occured = false;
     float onsetSwitchProb = 1.f;
-  
+
     bool nrtRender = false;
-    
+
     unsigned long currentRandomSeed = 0;
-    
+
     ofFbo main_fbo;
     ofxPostGlitch postGlitch;
     float postGlitchProbs[GLITCH_NUM];
     float postGlitchChangeProb = 0.5;
-    
-    nlohmann::json config;
-    
+
+    string config_path;
+    ofJson config;
+
     ofBlendMode blendMode = OF_BLENDMODE_DISABLED;
-    
-    ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD,OF_BLENDMODE_ALPHA,OF_BLENDMODE_SCREEN,OF_BLENDMODE_DISABLED,OF_BLENDMODE_MULTIPLY,OF_BLENDMODE_SUBTRACT};
-    
+
+    ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD, OF_BLENDMODE_ALPHA, OF_BLENDMODE_SCREEN, OF_BLENDMODE_DISABLED, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SUBTRACT};
+
     vector<int> blendModePool;
-    
+
     int feedback_amt = 0;
     float feedback_prob = 0.f;
     int feedback_max = 255;
-    
+
     bool use_sc_onsets = true;
-    
-    nlohmann::json saves[N_STATE_SAVES];
-    const char saveKeys[N_STATE_SAVES] = {'0','1','2','3','4','5','6','7','8','9'};
-    
-    nlohmann::json save(){
-        nlohmann::json dict;
-        
-        for(int i = 0; i < n_modules; i++){
+
+    ofJson saves[N_STATE_SAVES];
+    const char saveKeys[N_STATE_SAVES] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+
+    ofJson save()
+    {
+        ofJson dict;
+
+        for (int i = 0; i < n_modules; i++)
+        {
             dict["vc-save-" + ofToString(i)] = modules[i]->saveState();
         }
-        
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+
+        for (int i = 0; i < active_module_indices.size(); i++)
+        {
             dict["active_vc" + ofToString(i)] = active_module_indices[i];
         }
-        
+
         dict["postGlitch"] = postGlitch.saveState();
         dict["feedback_amt"] = feedback_amt;
         dict["blendMode"] = (int)blendMode;
         dict["debug"] = debug;
-        
+
         return dict;
     }
-    
-    void load(nlohmann::json &dict, int width, int height){
-        
-        for(int i = 0; i < n_modules; i++){
-            
-            nlohmann::json child = dict["vc-save-" + ofToString(i)];
-            
-            modules[i]->loadState(child,width,height,vec_history,DESCRIPTORS_VECTOR_LENGTH,vec_history_length,vec_history_full);
+
+    void load(ofJson &dict, int width, int height)
+    {
+
+        for (int i = 0; i < n_modules; i++)
+        {
+
+            ofJson child = dict["vc-save-" + ofToString(i)];
+
+            modules[i]->loadState(child, width, height, vec_history);
         }
-        
-        for(int i = 0; i < MAX_ACTIVE_MODULES; i++){
+
+        for (int i = 0; i < active_module_indices.size(); i++)
+        {
             active_module_indices[i] = dict["active_vc" + ofToString(i)].get<int>();
         }
-        
-        nlohmann::json child = dict["postGlitch"];
+
+        ofJson child = dict["postGlitch"];
         postGlitch.loadState(child);
-        
+
         feedback_amt = dict["feedback_amt"].get<int>();
         blendMode = (ofBlendMode)dict["blendMode"].get<int>();
         debug = dict["debug"].get<bool>();
     }
-    
-    int getVectorHistoryLength(){
-        for(VisualModule* vm : modules){
-            if(vm->type == MESH){
-                return ((Mesh*)vm)->nPoints;
+
+    int getVectorHistoryLength()
+    {
+        for (VisualModule *vm : modules)
+        {
+            if (vm->type == MESH)
+            {
+                return ((Mesh *)vm)->nPoints;
             }
         }
         return 0;
     }
-
 };

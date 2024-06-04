@@ -1,14 +1,22 @@
 {
-    "nrt-render": false,
+    "nrt-render": true,
+    "output-folder":"/Volumes/2023 Aug (Ted Moore)/arco/mvt1/video-design-renders",
     "draw-bounds": false,
     "debug": false,
     "csv-folder": "/Users/ted/dev/of_v20240206_osx_release/apps/myApps/video-design/supercollider/data-renders/240424_151335-arco-mvt-1",
     "max-frames": -1,
     "use-sc-onsets": true,
-    "initial-active-modules": [6,0,3,2],
+    "max-active-modules": 2,
+    "initial-active-modules": [1,0],
     "module-indexes-unlocked": [true,true,true,true],
     "initial-onset": true,
     "verbose": true,
+    "width":3840,
+    "height":2160,
+
+    "force-onset-frames":true,
+    "force-onset-min-frames": 300,
+    "force-onset-max-frames": 600,
 
     "audio-sample-rate": 44100,
     "target-framerate": 30,
@@ -20,6 +28,7 @@
     "feedback-max": 255,
     "flow-field-resolution": 20,
     "onset-switch-prob": 1.0,
+
     "modules": [
        {
             "index": 0,
@@ -27,53 +36,27 @@
             "prob": 2,
             "waveform-type-default": 2,
             "_comment-waveform-type-weights": "NORM = 0, LISSAJOUS = 1, IKEDA = 2, GRID = 3, BITS = 4",
-            "waveform-type-weights": [0,1,2,3,4],
+            "waveform-type-weights": [2,3],
             "lissajous-line-width": 1.0,
             "waveform-line-width": 1.0,
-            "ikeda-prob": 0.2,
             "max-waveforms": 2
         },
         {
             "index": 1,
-            "module-type":"mesh",
-            "prob": 2,
-            "line-width": 1.0,
-            "point-size": 3.0,
-            "flow-field-influence": 0.16,
-            "n-points": 500,
-            "speed": 0.012,
-            "min-speed": 0.0005,
-            "jitter-mul": 0.003,
-            "dist-thresh-mul": 0.015
-        },
-        {
-            "index": 2,
-            "module-type":"mag-lines",
-            "prob": 2
-        },
-        {
-            "index": 3,
-            "module-type": "turtle",
-            "divisors": [3,4,6],
-            "prob": 2,
-            "max-frames": 20
-        },
-        {
-            "index": 4,
             "module-type": "video",
-            "name": "sunrise",
+            "folder": "/Volumes/2023 Aug (Ted Moore)/arco/sunrise-for-video-design",
             "prob": 2,  
             "sub-videos": ["original"],
             "bShowHap-prob": 0.5,
             "position-randomizable": true,
             "rectType-weights": [0,1],
-            "bZShiftBoxes-prob": 0.0,
-            "use-ff-prob": 0.0,
+            "bZShiftBoxes-prob": 0.5,
+            "use-ff-prob": 0.5,
             "boxes-prob": 0.2,
-            "bTile-prob": 0.0,
-            "speed-min": 1.0,
-            "speed-max": 1.0,
-            "speed-pow": 1.0
+            "bTile-prob": 0.5,
+            "speed-min": 0.8,
+            "speed-max": 10.0,
+            "speed-pow": 2.0
         }
     ],
     "post-glitch": {
@@ -82,11 +65,11 @@
         "glow-prob": 0.2,
         "shaker-prob": 0.01,
         "cutslider-prob": 0.01,
-        "twist-prob": 0.0,
+        "twist-prob": 0.01,
         "outline-prob": 0.03,
         "noise-prob": 0.05,
         "slitscan-prob": 0.01,
-        "swell-prob": 0.0,
+        "swell-prob": 0.01,
         "invert-prob": 0.06,
         "highcontrast-prob": 0.016,
         "blueraise-prob": 0.008,

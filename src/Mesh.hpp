@@ -47,7 +47,12 @@ public:
         return "Mesh";
     }
     
-    void processConfigFile(nlohmann::json config){
+    void screenResize(int w, int h){}
+    void update(bool isNRT, std::unordered_map<std::string, float> *common_features, bool verbose){}
+    void printStatus(){}
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory){}
+
+    void processConfigFile(ofJson &config){
         line_width = config["line-width"].get<float>();
         point_size = config["point-size"].get<float>();
         flow_field_influence = config["flow-field-influence"].get<float>();
@@ -55,9 +60,11 @@ public:
         minSpeed = config["min-speed"].get<float>();
         jitter_mul = config["jitter-mul"].get<float>();
         dist_thresh_mul = config["dist-thresh-mul"].get<float>();
+        flow_field_influence = config["flow-field-influence"].get<float>();
+        useFF = config["useFF"].get<bool>();
     }
 
-    void setup(FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, nlohmann::json config) {
+    void setup(FlowField* ff_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, float xsize_, float ysize_, ofJson &config) {
 
         processConfigFile(config);
         
@@ -90,10 +97,10 @@ public:
         light.setPosition(0,0,0);
     }
 
-    void newPointLocs(float** vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
-        if(vecHistoryFull){
-            bool is_used[vector_length];
-            for(int i = 0; i < vector_length; i++){
+    void newPointLocs(VectorHistory &vecHistory) {
+        if(vecHistory.isFull){
+            bool is_used[DESCRIPTORS_VECTOR_LENGTH];
+            for(int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++){
                 is_used[i] = false;
             }
             int n_dims = 3;
@@ -101,15 +108,15 @@ public:
             
             for(int i = 0; i < n_dims; i++) {
                 int choice;
-                choice = int(ofRandom(vector_length));// there are 14 non-mfcc values
+                choice = int(ofRandom(DESCRIPTORS_VECTOR_LENGTH));// there are 14 non-mfcc values
                 while (is_used[choice]) {
-                    choice = int(ofRandom(vector_length));
+                    choice = int(ofRandom(DESCRIPTORS_VECTOR_LENGTH));
                 }
                 choices[i] = choice;
             }
             
             for(int i = 0; i < nPoints; i++) {
-                points[i].setXYZ(vecHistory[i][choices[0]], vecHistory[i][choices[1]], vecHistory[i][choices[2]]);
+                points[i].setXYZ(vecHistory.history[i][choices[0]], vecHistory.history[i][choices[1]], vecHistory.history[i][choices[2]]);
             }
         } else {
             for (int i = 0; i < nPoints; i++) {
@@ -118,8 +125,8 @@ public:
         }
     }
 
-    void newParams(int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull, unsigned long long frame_num) {
-        newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
+    void newParams(int width, int height, VectorHistory &vecHistory, unsigned long long frame_num) {
+        newPointLocs(vecHistory);
         
         if (ofRandom(1.0) < 0.8) {
             useFF = true;
@@ -130,8 +137,8 @@ public:
         waveformEffectDim = ofRandom(3);
     }
     
-    nlohmann::json saveState(){
-        nlohmann::json dict;
+    ofJson saveState(){
+        ofJson dict;
         
         dict["useFF"] = useFF;
         dict["waveformEffectDim"] = waveformEffectDim;
@@ -139,38 +146,38 @@ public:
         return dict;
     }
     
-    void loadState(nlohmann::json &dict, int width, int height, float** vecHistory, int vector_length, int history_length, bool vecHistoryFull){
+    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory, int vector_length, int history_length, bool vecHistoryFull){
         
         useFF = dict["useFF"].get<bool>();
         waveformEffectDim = dict["waveformEffectDim"].get<int>();
         
-        newPointLocs(vecHistory, vector_length, history_length, vecHistoryFull);
+        newPointLocs(vecHistory);
     }
 
     void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose) {
-
-//        ofEnableDepthTest();
         ofEnableLighting();
         light.enable();
-        
-        
         ofFill();
-        
-        
-        
         float amp = common_features->at("loudness");
         float sensDis = common_features->at("sensoryDissonance");
-        jitterMag.update(amp * jitter_mul);//amp * 0.01;//MIN(0.01, amp);
-        //float jitterMag = 1;
+        jitterMag.update(amp * jitter_mul);
         float distThresh = 0.02 + (sensDis * dist_thresh_mul);
-        //println(specFlatness);
         int n_lines = 0;
-        
         velLimit.update((amp * speed) + minSpeed);
-        
         float scale_factor = height / 1080.f; // 1080 is the native so we'll scale based on that
-        
-        
+
+        cout << "Mesh" << endl;
+        cout << "\tamp: " << amp << endl;
+        cout << "\tsensDis: " << sensDis << endl;
+        cout << "\tjitter_mul: " << jitter_mul << endl;
+        cout << "\tjitterMag: " << jitterMag.value << endl;
+        cout << "\tdist_thresh_mul: " << dist_thresh_mul << endl;
+        cout << "\tuseFF: " << useFF << endl;
+        cout << "\tdistThresh: " << distThresh << endl;
+        cout << "\tmin speed: " << minSpeed << endl;
+        cout << "\tspeed: " << speed << endl;
+        cout << "\tflow field influence: " << flow_field_influence << endl;
+
         ofFill();
         ofSetColor(255,255);
         
@@ -188,8 +195,6 @@ public:
                 points[i].move(jitterMag.value * 0.1, velLimit.value);
             }
             
-            //println(velLimit.value);
-            
             points[i].checkEdges();
             points[i].display(width,height,point_size * scale_factor);
             
@@ -198,7 +203,7 @@ public:
                 for (int j = i + 1; j < nPoints; j++) {
                     
                     if (i_lines < maxLines * 0.01){
-                        float dist = points[i].distanceTo(&points[j]);
+                        float dist = points[i].distanceTo(points[j]);
                         if(dist < distThresh) {
                             float alpha = ofMap(dist,0.f,distThresh,255.f,0.f);
                             ofSetColor(255,alpha);
@@ -215,7 +220,6 @@ public:
         
         light.disable();
         ofDisableLighting();
-//        ofDisableDepthTest();
     }
 
     void drawLine(VideoDesignPoint* a, VideoDesignPoint* b, float dist, int width, int height, float scale_factor) {

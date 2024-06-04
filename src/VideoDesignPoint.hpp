@@ -1,6 +1,5 @@
 //
 //  Point.hpp
-//  fonema video
 //
 //  Created by Ted Moore on 1/1/21.
 //
@@ -9,15 +8,15 @@
 #define PointTM_hpp
 
 #include <stdio.h>
+
 #include "ofMain.h"
 
 class VideoDesignPoint {
-public:
-    
+   public:
     ofVec3f pos, vel, acc;
     float xsize, ysize, zmax, xmin, xmax, ymin, ymax, zmin;
     int zDir;
-    
+
     void setup(float xsize_, float ysize_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, int zDir_) {
         pos.set(ofRandom(0, xsize), ofRandom(0, ysize), ofRandom(0, zmax));
         xsize = xsize_;
@@ -40,21 +39,14 @@ public:
     void move(float jitterMag, float velLimit) {
         vel.operator+=(acc);
         vel.limit(velLimit);
-        //println(vel);
-        //println(velLimit);
         pos.operator+=(vel);
-        
         jitter(jitterMag);
         acc.operator*=(0.0);
     }
 
-    void add(ofVec3f* other){
+    void add(ofVec3f* other) {
         pos.operator+=(*other);
     }
-
-    //void setXYZnormed(float x_, float y_, float z_) {
-    //    setXYZ(x_ * xsize, y_ * ysize, z_ * zmax);
-    //}
 
     void setXYZ(float x_, float y_, float z_) {
         pos.x = x_;
@@ -93,9 +85,8 @@ public:
         return pos.z;
     }
 
-    float distanceTo(VideoDesignPoint* other){
-        return pos.distance(other->pos);
+    float distanceTo(const VideoDesignPoint& other) {
+        return pos.distance(other.pos);
     }
-
 };
 #endif /* Point_hpp */

@@ -17,5 +17,12 @@
 		}
 	],
 	"openFrameworksProjectGeneratorVersion": "33",
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"iosfwd": "cpp",
+			"vector": "cpp",
+			"ostream": "cpp",
+			"iostream": "cpp"
+		}
+	}
 }

@@ -2,12 +2,11 @@
 #include "ofApp.h"
 #include "defines.h"
 //========================================================================
-int main( ){
+int main(int argc, char *argv[]){
 	ofSetupOpenGL(1920,1080,OF_WINDOW);			// <-------- setup the GL context
     //ofSetupOpenGL(1280, 720, OF_WINDOW);
 	// this kicks off the running of my app
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
-	ofRunApp(new ofApp());
-
+	ofRunApp(new ofApp(ofToString(argv[1])));
 }

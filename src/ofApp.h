@@ -1,25 +1,219 @@
 #pragma once
 
-#include "defines.h"
-#include "VectorHistory.h"
+#include <unordered_set>
+
 #include "ofMain.h"
+#include "defines.h"
+
+class VisualModule;
+class FlowField;
+
 #include "ofxOsc.h"
+#include "ForceOnsetFrames.h"
+#include "VectorHistory.h"
+#include "FboRenderer.h"
+#include "AudioFeatures.h"
+#include "ofxPostGlitch.h"
+#include "SystemState.h"
+#include "FlowField.hpp"
+
+// Modules
 #include "VisualModule.hpp"
-#include "VideoModule.hpp"
-#include "Waveform.hpp"
+#include "Lines.hpp"
 #include "Mesh.hpp"
 #include "Turtle.hpp"
-#include "Lines.hpp"
-#include "ofxPostGlitch.h"
-#include "ForceOnsetFrames.h"
+#include "VideoModule.hpp"
+#include "Waveform.hpp"
 
-class ofApp : public ofBaseApp
-{
+inline void addVCOptions(SystemState &s, int module_index, int num_times_to_insert) {
+    for (int i = 0; i < num_times_to_insert; i++) {
+        s.vc_i_options.push_back(module_index);
+    };
+}
 
-public:
+inline string getTimeFromFrameNum(SystemState &s) {
+    float sec = s.frame_num / (float)s.target_framerate;
+    int min = int(sec / 60);
+    sec = sec - (min * 60);
+    int sec_whole = int(sec);
+    //        int sec_frac = int(round((sec - sec_whole) * 1000));
+    int sub_second_frame = s.frame_num % s.target_framerate;
+    return ofToString(min) + ":" + ofToString(sec_whole, 2, '0') + "." + ofToString(sub_second_frame, 2, '0');
+}
+
+inline void setActiveIndices(SystemState &s, vector<int> &ai) {
+    for (int i = 0; i < s.active_module_indices.size(); i++) {
+        s.active_module_indices[i] = ai[i];
+        if (s.active_module_indices[i] >= 0 && s.modules[s.active_module_indices[i]]->newParamsProb > ofRandom(1.f)) {
+            s.modules[s.active_module_indices[i]]->newParams(s);
+        }
+    }
+}
+
+inline void onsetActions(SystemState &s) {
+    if (s.verbose)
+        cout << "Onset Actions." << endl;
+
+    // Write the `currentRandomSeed` to the file, indicating the frame number so that it can be referenced later
+    if (s.isNRT) {
+        s.randomSeedLog << s.frame_num << "," << getTimeFromFrameNum(s) << "," << s.currentRandomSeed << endl;
+    }
+
+    // new active vc i
+
+    vector<int> chosen_i;
+    vector<int> ai(s.active_module_indices.size());
+    for (int i = 0; i < s.active_module_indices.size(); i++) {  // go through the max number that we'll display
+
+        if (s.moduleIndexUnlocked[i] and (ofRandom(1.f) < s.onsetSwitchProb)) {
+            std::unordered_set<int> chosen_set(chosen_i.begin(), chosen_i.end());
+            bool found = false;
+            while (!found) {
+                int rand_int = rand() % s.vc_i_options.size();  // random int the size of the options array
+                int result = s.vc_i_options[rand_int];          // the int from the options array (which is the index for the modules array)
+
+                if (chosen_set.find(result) == chosen_set.end()) {
+                    found = true;
+                    chosen_i.push_back(result);
+                    ai[i] = result;
+                    break;
+                }
+            }
+        } else {
+            ai[i] = s.active_module_indices[i];
+            chosen_i.push_back(ai[i]);
+        }
+    }
+
+    setActiveIndices(s, ai);
+
+    // blend mode
+    if (ofRandom(1.f) < s.onsetSwitchProb)
+        s.blendMode = s.blendModes[s.blendModePool[int(ofRandom(s.blendModePool.size()))]];
+
+    s.feedback_amt = (ofRandom(1.f) < s.feedback_prob) * ofRandom(1, s.feedback_max);
+
+    s.postGlitch.onset();
+}
+
+inline void onsetFromSeed(SystemState &s, unsigned long seed) {
+    if (s.verbose)
+        cout << "onsetFromSeed" << endl;
+    s.currentRandomSeed = seed;
+    ofSetRandomSeed(s.currentRandomSeed);
+    onsetActions(s);
+}
+
+/* The `onset` method is what should be called if there is no specific seed
+ that needs to be set. It will randomly generate a seed, use that seed to
+ call `onsetFromSeed`, which then will set the seed with ofSetRandomSeed, and then
+ call `onsetActions` to have the proper onset actions unfold*/
+inline void onset(SystemState &s) {
+    if (s.verbose)
+        cout << "onset" << endl;
+    onsetFromSeed(s, (unsigned long)ofRandom(INT_MAX));
+}
+
+inline void loadConfigFile(SystemState &s, string path) {
+    cout << "Loading config file at: " << ofToDataPath(path) << endl;
+
+    ofFile file(path);
+    if (!file.exists()) {
+        cout << "Config file not found at: " << path << endl;
+        ofExit();
+    }
+
+    s.config = ofLoadJson(path);
+
+    cout << "File loaded" << endl;
+
+    s.force_onset_frames.setup(s.config);
+
+    s.verbose = checkJsonKey(s.config, "verbose", false);
+    s.debug = checkJsonKey(s.config, "debug", false);
+    s.n_modules = s.config["modules"].size();
+
+    s.active_module_indices.resize(s.config["initial-active-modules"].size());
+    for (int i = 0; i < s.active_module_indices.size(); i++) {
+        s.active_module_indices[i] = s.config["initial-active-modules"][i].get<int>();
+        assert(active_module_indices[i] < s.n_modules);
+    }
+
+    s.moduleIndexUnlocked.resize(s.active_module_indices.size());
+    for (int i = 0; i < s.active_module_indices.size(); i++) {
+        s.moduleIndexUnlocked[i] = s.config["module-indexes-unlocked"].get<vector<int>>()[i];
+    }
+
+    s.onsetSwitchProb = checkJsonKey(s.config, "onset-switch-prob", 1.0);
+
+    s.feedback_prob = checkJsonKey(s.config, "feedback-prob", 0.25);
+    s.feedback_max = checkJsonKey(s.config, "feedback-max", 254);
+
+    ofSetFrameRate(s.config["target-framerate"].get<int>());
+
+    s.use_sc_onsets = checkJsonKey(s.config, "use-sc-onsets", true);
+
+    s.postGlitch.loadState(s.config["postGlitch"]);
+
+    s.blendModePool.clear();
+    for (int i = 0; i < s.config["blend-mode-probs"].size(); i++) {
+        int n = s.config["blend-mode-probs"][i].get<int>();
+        for (int j = 0; j < n; j++) {
+            s.blendModePool.push_back(i);
+        }
+    }
+
+    for (int i = 0; i < s.n_modules; i++) {
+        s.modules[i]->loadState(s, s.config["modules"][i]);
+    }
+}
+
+inline ofJson save(SystemState &s) {
+    ofJson dict;
+
+    for (int i = 0; i < s.n_modules; i++) {
+        dict["vc-save-" + ofToString(i)] = s.modules[i]->saveState();
+    }
+
+    for (int i = 0; i < s.active_module_indices.size(); i++) {
+        dict["active_vc" + ofToString(i)] = s.active_module_indices[i];
+    }
+
+    dict["postGlitch"] = s.postGlitch.saveState();
+    dict["feedback_amt"] = s.feedback_amt;
+    dict["blendMode"] = (int)s.blendMode;
+    dict["debug"] = s.debug;
+
+    return dict;
+}
+
+inline void load(SystemState &s, ofJson &dict) {
+    for (int i = 0; i < s.n_modules; i++) {
+        ofJson child = dict["vc-save-" + ofToString(i)];
+
+        s.modules[i]->loadState(s, child);
+    }
+
+    for (int i = 0; i < s.active_module_indices.size(); i++) {
+        s.active_module_indices[i] = dict["active_vc" + ofToString(i)].get<int>();
+    }
+
+    s.postGlitch.loadState(dict["post-glitch"]);
+
+    s.feedback_amt = checkJsonKey(dict,"feedback_amt",254);
+    s.blendMode = (ofBlendMode)checkJsonKey(dict,"blendMode",0);
+    s.debug = checkJsonKey(dict,"debug",false);
+}
+
+class ofApp : public ofBaseApp {
+   public:
+    SystemState s;
+    ofxOscReceiver osc_receiver;
+
     void setup();
     void update();
     void draw();
+    void runNrtRender(SystemState &s);
 
     void keyPressed(int key);
     void keyReleased(int key);
@@ -32,283 +226,13 @@ public:
     void windowResized(int w, int h);
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
-    void displayIncomingData(int width, int height);
-    void onsetActions(int width, int height, unsigned long long frame_num, bool isNRT);
-    void renderFrame(int width, int height, unsigned long long frameNum, bool isNRT);
-    void setValsFromCSV(int width, int height, vector<float> &csv_data, unsigned long long frame_num, bool isNRT);
-    void processReaperMarker(string &cmd, int width, int height, unsigned long long frame_num, bool isNRT);
-    void setActiveIndices(int *ai, int width, int height, unsigned long long frame_num);
-    void prUpdate(bool isNRT);
-    void runNrtRender(int width, int height);
-    void drawBounds();
 
-    ofApp(string config_path_)
-    {
-        config_path = config_path_;
-        cout << "Loading config file at: " << config_path << endl;
-        loadConfigFile(config_path);
+    ofApp(string config_path_) {
+        s.config_path = config_path_;
     }
 
-    void exit()
-    {
-        randomSeedLog.close();
+    void exit() {
+        s.randomSeedLog.close();
         ofExit();
-    }
-
-    /* The `onset` method is what should be called if there is no specific seed
-     that needs to be set. It will randomly generate a seed, use that seed to
-     call `onsetFromSeed`, which then will set the seed with ofSetRandomSeed, and then
-     call `onsetActions` to have the proper onset actions unfold*/
-    void onset(int width, int height, unsigned long long frame_num, bool isNRT)
-    {
-        if (verbose)
-            cout << "onset" << endl;
-        onsetFromSeed((unsigned long)ofRandom(INT_MAX), width, height, frame_num, isNRT);
-    }
-
-    void onsetFromSeed(unsigned long seed, int width, int height, unsigned long long frame_num, bool isNRT)
-    {
-        if (verbose)
-            cout << "onsetFromSeed" << endl;
-        currentRandomSeed = seed;
-        ofSetRandomSeed(currentRandomSeed);
-        onsetActions(width, height, frame_num, isNRT);
-    }
-
-    string getTimeFromFrameNum(unsigned long long frame_num)
-    {
-        float sec = frame_num / (float)config["target-framerate"].get<int>();
-        int min = int(sec / 60);
-        sec = sec - (min * 60);
-        int sec_whole = int(sec);
-        //        int sec_frac = int(round((sec - sec_whole) * 1000));
-        int sub_second_frame = frame_num % config["target-framerate"].get<int>();
-        return ofToString(min) + ":" + ofToString(sec_whole, 2, '0') + "." + ofToString(sub_second_frame, 2, '0');
-    }
-
-    void loadConfigFile(string path)
-    {
-        cout << "Loading config file at: " << ofToDataPath(path) << endl;
-
-        ofFile file(path);
-        if (!file.exists())
-        {
-            cout << "Config file not found at: " << path << endl;
-            ofExit();
-        }
-
-        config = ofLoadJson(path);
-
-        cout << "File loaded" << endl;
-
-        force_onset_frames.setup(config["force-onset-frames"].get<bool>(), config["force-onset-min-frames"].get<int>(), config["force-onset-max-frames"].get<int>());
-
-        verbose = config["verbose"].get<bool>();
-        debug = config["debug"].get<bool>();
-
-        active_module_indices.resize(config["max-active-modules"].get<int>());
-
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            active_module_indices[i] = config["initial-active-modules"][i].get<int>();
-            assert(active_module_indices[i] < n_modules);
-        }
-
-        moduleIndexUnlocked.resize(active_module_indices.size());
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            moduleIndexUnlocked[i] = config["module-indexes-unlocked"].get<vector<int>>()[i];
-        }
-
-        onsetSwitchProb = config["onset-switch-prob"].get<float>();
-
-        feedback_prob = config["feedback-prob"].get<float>();
-        feedback_max = config["feedback-max"].get<int>();
-
-        ofSetFrameRate(config["target-framerate"].get<int>());
-
-        use_sc_onsets = config["use-sc-onsets"].get<bool>();
-
-        postGlitchChangeProb = config["post-glitch"]["change-prob"].get<float>();
-
-        postGlitchProbs[0] = config["post-glitch"]["convergence-prob"].get<float>();
-        postGlitchProbs[1] = config["post-glitch"]["glow-prob"].get<float>();
-        postGlitchProbs[2] = config["post-glitch"]["shaker-prob"].get<float>();
-        postGlitchProbs[3] = config["post-glitch"]["cutslider-prob"].get<float>();
-        postGlitchProbs[4] = config["post-glitch"]["twist-prob"].get<float>();
-        postGlitchProbs[5] = config["post-glitch"]["outline-prob"].get<float>();
-        postGlitchProbs[6] = config["post-glitch"]["noise-prob"].get<float>();
-        postGlitchProbs[7] = config["post-glitch"]["slitscan-prob"].get<float>();
-        postGlitchProbs[8] = config["post-glitch"]["swell-prob"].get<float>();
-        postGlitchProbs[9] = config["post-glitch"]["invert-prob"].get<float>();
-        postGlitchProbs[10] = config["post-glitch"]["highcontrast-prob"].get<float>();
-        postGlitchProbs[11] = config["post-glitch"]["blueraise-prob"].get<float>();
-        postGlitchProbs[12] = config["post-glitch"]["redraise-prob"].get<float>();
-        postGlitchProbs[13] = config["post-glitch"]["greenraise-prob"].get<float>();
-        postGlitchProbs[14] = config["post-glitch"]["redinvert-prob"].get<float>();
-        postGlitchProbs[15] = config["post-glitch"]["blueinvert-prob"].get<float>();
-        postGlitchProbs[16] = config["post-glitch"]["greeninvert-prob"].get<float>();
-
-        blendModePool.clear();
-        for (int i = 0; i < config["blend-mode-probs"].size(); i++)
-        {
-            int n = config["blend-mode-probs"][i].get<int>();
-            for (int j = 0; j < n; j++)
-            {
-                blendModePool.push_back(i);
-            }
-        }
-
-        for (int i = 0; i < n_modules; i++)
-        {
-            modules[i]->processConfigFile(config["modules"][i]);
-        }
-
-        // TODO
-        //        for(int i = 0; i < N_STATE_SAVES; i++){
-        //            if(config["state-save-" + ofToString(i)]){
-        //                ofJson state;
-        //                state.load(config["state-save-" + ofToString(i)].get<string>());
-        //                saves[i] = state;
-        //            }
-        //        }
-    }
-
-    int addVCOptions(int counter, int num)
-    {
-        for (int i = 0; i < num; i++)
-        {
-            vc_i_options.push_back(counter);
-        };
-
-        return counter + 1;
-    }
-
-    bool verbose = false;
-
-    int n_modules = 0;
-    vector<VisualModule *> modules;
-    vector<int> vc_i_options;
-    vector<bool> moduleIndexUnlocked;
-
-    vector<int> active_module_indices;
-    FlowField ff;
-
-    // waveform data
-    float **waveforms;
-
-    // mags
-    float **magnitudes;
-
-    std::ofstream randomSeedLog;
-
-    // vector data
-    float vector_data[DESCRIPTORS_VECTOR_LENGTH - 1]; // 106 not including the onsets at the end
-    std::unordered_map<std::string, float> common_features;
-
-    VectorHistory vec_history;
-    ForceOnsetFrames force_onset_frames;
-
-    float xsize;
-    float ysize;
-    float x_size_mul;
-    float y_size_mul;
-    float xmin;
-    float xmax;
-    float ymin;
-    float ymax;
-    float zmin;
-    float zmax;
-
-    // OSC
-    ofxOscReceiver osc_receiver;
-
-    bool debug = false;
-    bool onset_occured = false;
-    float onsetSwitchProb = 1.f;
-
-    bool nrtRender = false;
-
-    unsigned long currentRandomSeed = 0;
-
-    ofFbo main_fbo;
-    ofxPostGlitch postGlitch;
-    float postGlitchProbs[GLITCH_NUM];
-    float postGlitchChangeProb = 0.5;
-
-    string config_path;
-    ofJson config;
-
-    ofBlendMode blendMode = OF_BLENDMODE_DISABLED;
-
-    ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD, OF_BLENDMODE_ALPHA, OF_BLENDMODE_SCREEN, OF_BLENDMODE_DISABLED, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SUBTRACT};
-
-    vector<int> blendModePool;
-
-    int feedback_amt = 0;
-    float feedback_prob = 0.f;
-    int feedback_max = 255;
-
-    bool use_sc_onsets = true;
-
-    ofJson saves[N_STATE_SAVES];
-    const char saveKeys[N_STATE_SAVES] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-
-    ofJson save()
-    {
-        ofJson dict;
-
-        for (int i = 0; i < n_modules; i++)
-        {
-            dict["vc-save-" + ofToString(i)] = modules[i]->saveState();
-        }
-
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            dict["active_vc" + ofToString(i)] = active_module_indices[i];
-        }
-
-        dict["postGlitch"] = postGlitch.saveState();
-        dict["feedback_amt"] = feedback_amt;
-        dict["blendMode"] = (int)blendMode;
-        dict["debug"] = debug;
-
-        return dict;
-    }
-
-    void load(ofJson &dict, int width, int height)
-    {
-
-        for (int i = 0; i < n_modules; i++)
-        {
-
-            ofJson child = dict["vc-save-" + ofToString(i)];
-
-            modules[i]->loadState(child, width, height, vec_history);
-        }
-
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            active_module_indices[i] = dict["active_vc" + ofToString(i)].get<int>();
-        }
-
-        ofJson child = dict["postGlitch"];
-        postGlitch.loadState(child);
-
-        feedback_amt = dict["feedback_amt"].get<int>();
-        blendMode = (ofBlendMode)dict["blendMode"].get<int>();
-        debug = dict["debug"].get<bool>();
-    }
-
-    int getVectorHistoryLength()
-    {
-        for (VisualModule *vm : modules)
-        {
-            if (vm->type == MESH)
-            {
-                return ((Mesh *)vm)->nPoints;
-            }
-        }
-        return 0;
     }
 };

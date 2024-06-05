@@ -1,171 +1,337 @@
 #include "ofApp.h"
+
 #include <algorithm>
-#include "ReaperMarkersFileParser.hpp"
 #include <unordered_set>
 
+#include "ReaperMarkersFileParser.hpp"
+
+int getVectorHistoryLength(SystemState &s) {
+    for (VisualModule *vm : s.modules) {
+        if (vm->type == MESH) {
+            return ((Mesh *)vm)->nPoints;
+        }
+    }
+    return 0;
+}
+
 //--------------------------------------------------------------
-void ofApp::setup()
-{
+void ofApp::setup() {
+    
+    s.config = ofLoadJson(s.config_path);
 
-    // the config file is loaded here just so that we know whether
-    // or not this is a nrt render
-    nrtRender = config["nrt-render"].is_null() ? false : config["nrt-render"].get<bool>();
+    s.isNRT = checkJsonKey(s.config, "nrt-render", false);
+    s.target_framerate = checkJsonKey(s.config, "target-framerate", 30);
 
-    int width = 0;
-    int height = 0;
-
-    if (nrtRender)
-    {
-        width = config["width"].is_null() ? 3840 : config["width"].get<int>();
-        height = config["height"].is_null() ? 2160 : config["height"].get<int>();
+    if (s.isNRT) {
+        s.fbo.allocate(checkJsonKey(s.config, "width", 3840), checkJsonKey(s.config, "height", 2160));
+    } else {
+        s.fbo.allocate(ofGetWidth(), ofGetHeight());
     }
-    else
-    {
-        width = ofGetWidth();
-        height = ofGetHeight();
-    }
+    cout << "Fbo allocated" << endl;
 
-    main_fbo.allocate(width, height);
-    postGlitch.setup(&main_fbo);
+    s.postGlitch.setup(&s.fbo.fbo);
+    cout << "PostGlitch setup" << endl;
 
     ofBackground(0);
     ofEnableSmoothing();
     ofEnableAntiAliasing();
     ofEnableAlphaBlending();
 
-    // ================ DATA STRUCTURES ========================
-
-    common_features["specCentroid"] = 0;
-    common_features["specSpread"] = 0;
-    common_features["specSkewness"] = 0;
-    common_features["specKurtosis"] = 0;
-    common_features["specRolloff"] = 0;
-    common_features["specFlatness"] = 0;
-    common_features["specCrest"] = 0;
-    common_features["pitch"] = 0;
-    common_features["pitchConfidence"] = 0;
-    common_features["loudness"] = 0;
-    common_features["truePeak"] = 0;
-    common_features["amplitude"] = 0;
-    common_features["sensoryDissonance"] = 0;
-    common_features["zeroCrossing"] = 0;
-
-    // waveforms
-    waveforms = (float **)malloc(sizeof(float *) * N_WAVEFORMS);
-    for (int i = 0; i < N_WAVEFORMS; i++)
-    {
-        waveforms[i] = (float *)malloc(sizeof(float) * WAVEFORM_LEN);
-    }
-    // mags
-    magnitudes = new float *[N_MAGNITUDES];
-    // magnitudes = (float**) malloc(sizeof(float*) * N_MAGNITUDES);
-    for (int i = 0; i < N_MAGNITUDES; i++)
-    {
-        // magnitudes[i] = (float*) malloc(sizeof(float) * MAGNITUDES_LEN);
-        magnitudes[i] = new float[MAGNITUDES_LEN];
-    }
-
     // ================== VISUAL CONTENTS ==========================
-    int vc_counter = 0;
-    xsize = 1;
-    ysize = 1;
-    x_size_mul = 0.6;
-    y_size_mul = 0.6;
-    xmin = -xsize * x_size_mul;
-    xmax = xsize * (1 + x_size_mul);
-    ymin = -ysize * y_size_mul;
-    ymax = ysize * (1 + y_size_mul);
-    zmin = 0;
-    zmax = ysize;
+    // setup flow field
+    s.flow_field = new FlowField;
+    s.flow_field->setup(checkJsonKey(s.config, "flow-field-resolution", 10));
+    cout << "Flow field setup" << endl;
 
     // movies points
-    ofVec3f initialPoints[4];
-    initialPoints[0].set(0, 0, -1);
-    initialPoints[1].set(width, 0, -1);
-    initialPoints[2].set(width, height, -1);
-    initialPoints[3].set(0, height, -1);
-
-    // setup flow field
-    ff.setup(config["flow-field-resolution"].get<int>(), xmin, xmax, ymin, ymax, zmin, zmax);
+    vector<glm::vec3> initialPoints(4);
+    initialPoints[0] = {0, 0, -1};
+    initialPoints[1] = {s.fbo.getWidth(), 0, -1};
+    initialPoints[2] = {s.fbo.getWidth(), s.fbo.getHeight(), -1};
+    initialPoints[3] = {0, s.fbo.getHeight(), -1};
 
     // ============ setup modules ===============
+    s.n_modules = s.config["modules"].size();
+    s.modules.resize(s.n_modules);
 
-    vc_i_options.clear();
-
-    modules.resize(config["modules"].size());
-
-    for (ofJson j : config["modules"])
-    {
-        if (j["module-type"] == "waveform")
-        {
+    for (int vc_counter = 0; vc_counter < s.config["modules"].size(); vc_counter++) {
+        cout << "Setting up module " << vc_counter << endl;
+        ofJson &j = s.config["modules"][vc_counter];
+        if (j["module-type"] == "waveform") {
             Waveform *wf = new Waveform;
-            wf->setup(width, height, waveforms, vec_history, j);
-            modules[vc_counter] = wf;
-            vc_counter = addVCOptions(vc_counter, j["prob"].get<int>());
-        }
-        else if (j["module-type"] == "mesh")
-        {
+            wf->setup(s, j);
+            s.modules[vc_counter] = wf;
+            addVCOptions(s,vc_counter, j["prob"].get<int>());
+        } else if (j["module-type"] == "mesh") {
             Mesh *mesh = new Mesh;
-            mesh->setup(&ff, xmin, xmax, ymin, ymax, zmin, zmax, xsize, ysize, j);
-            modules[vc_counter] = mesh;
-            vc_counter = addVCOptions(vc_counter, j["prob"].get<int>());
-        }
-        else if (j["module-type"] == "mag-lines")
-        {
+            mesh->setup(s, j);
+            s.modules[vc_counter] = mesh;
+            addVCOptions(s,vc_counter, j["prob"].get<int>());
+        } else if (j["module-type"] == "mag-lines") {
             Lines *lines0 = new Lines;
-            lines0->setup(magnitudes[0], 0, false, width, height, vec_history);
-            modules[vc_counter] = lines0;
-            vc_counter = addVCOptions(vc_counter, j["prob"].get<int>());
-        }
-        else if (j["module-type"] == "turtle")
-        {
+            lines0->setup(s, j);
+            lines0->setPtr(&s.features.magnitudes[0]);
+            s.modules[vc_counter] = lines0;
+            addVCOptions(s,vc_counter, j["prob"].get<int>());
+        } else if (j["module-type"] == "turtle") {
             Turtle *turtle0 = new Turtle;
-            turtle0->setup(width, height, vec_history, j);
-            modules[vc_counter] = turtle0;
-            vc_counter = addVCOptions(vc_counter, j["prob"].get<int>());
-        }
-        else if (j["module-type"] == "video")
-        {
-            string folder = j["folder"].get<string>();
+            turtle0->setup(s, j);
+            s.modules[vc_counter] = turtle0;
+            addVCOptions(s,vc_counter, j["prob"].get<int>());
+        } else if (j["module-type"] == "video") {
             VideoModule *vc = new VideoModule;
-            vc->setup(folder, initialPoints[0], initialPoints[1], initialPoints[2], initialPoints[3], magnitudes, N_MAGNITUDES, MAGNITUDES_LEN, nrtRender, &ff, j);
-            vc->newParams(width, height, vec_history, 0);
-            modules[vc_counter] = vc;
-            vc_counter = addVCOptions(vc_counter, j["prob"].get<int>());
+            vc->setInitialPoints(initialPoints);
+            vc->setup(s, j);
+            s.modules[vc_counter] = vc;
+            addVCOptions(s,vc_counter, j["prob"].get<int>());
         }
     }
 
-    // set how many modules there are total
-    n_modules = vc_counter;
+    cout << "Modules setup" << endl;
 
     // ============ setup vecHistory ===============
-    vec_history.setup(getVectorHistoryLength());
+    s.vec_history.setup(getVectorHistoryLength(s));
+
+    cout << "Vector history setup" << endl;
 
     // ======================= OSC ================
     osc_receiver.setup(11000);
 
+    loadConfigFile(s,s.config_path);
+    cout << "Config file loaded" << endl;
+
     // =========== NRT RENDERING =====================
-    if (nrtRender)
-    {
-        runNrtRender(width, height);
+    if (s.isNRT) {
+        runNrtRender(s);
     }
 
     // =========================== INITIALIZATION =====================
-    if (config["initial-onset"].get<bool>())
-    {
-        onset(width, height, 0, nrtRender);
+    if (s.config["initial-onset"].get<bool>()) {
+        onset(s);
     }
 }
 
-void ofApp::runNrtRender(int width, int height)
-{
-    if (verbose)
+void setValsFromCSV(SystemState &s, vector<float> &csv_data) {
+    s.features.spectral_centroid = csv_data[0];
+    s.features.spectral_spread = csv_data[1];
+    s.features.spectral_skewness = csv_data[2];
+    s.features.spectral_kurtosis = csv_data[3];
+    s.features.spectral_rolloff = csv_data[4];
+    s.features.spectral_flatness = csv_data[5];
+    s.features.spectral_crest = csv_data[6];
+    s.features.pitch = csv_data[7];
+    s.features.pitch_confidence = csv_data[8];
+    s.features.loudness = csv_data[9];
+    s.features.true_peak = csv_data[10];
+    s.features.amplitude = csv_data[11];
+    s.features.sensory_dissonance = csv_data[12];
+    s.features.zero_crossings = csv_data[13];
+
+    s.onset_occured = false;
+
+    s.features.descriptors_vector[csv_data.size() - 1] = csv_data[csv_data.size() - 1];
+    if (s.features.descriptors_vector[csv_data.size() - 1] > 0.5 && s.use_sc_onsets) {
+        s.onset_occured = true;
+    }
+
+    if (s.onset_occured || s.force_onset_frames.checkForOnset(s.frame_num))
+        onset(s); 
+
+    for (int i = 0; i < csv_data.size() - 1; i++) {
+        s.features.descriptors_vector[i] = csv_data[i];
+        s.vec_history.updateCurrentFrameAtIndex(i, csv_data[i]);
+    }
+    s.vec_history.incrementFrameIndex();
+}
+
+void processReaperMarker(SystemState &s, string &cmd) {
+    vector<string> tokens = ofSplitString(cmd, " ");
+    int index = 0;
+
+    while (index < tokens.size()) {
+        if (tokens[index] == "o") {
+            onset(s);
+        } else if (tokens[index] == "sai") {
+            vector<int> ai(s.active_module_indices.size());
+            for (int i = 0; i < s.active_module_indices.size(); i++) {
+                ai[i] = ofToInt(tokens[++index]);
+            }
+            setActiveIndices(s,ai);
+        } else if (tokens[index] == "loadState") {
+            load(s,s.saveStates[ofToInt(tokens[++index])]);
+        } else if (tokens[index] == "loadStateFromDisk") {
+            ofFile file(ofToDataPath(tokens[++index] + ".json"));
+
+            if (file.exists()) {
+                ofJson dict;
+                std::ifstream i(ofToDataPath(file.path()));
+                i >> dict;
+
+                load(s,dict);
+            } else {
+                cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
+            }
+        } else if (tokens[index] == "onsetSeed") {
+            onsetFromSeed(s,ofToInt(tokens[++index]));
+        } else if (tokens[index] == "sp") {  // set parameter
+            int moduleIndex = ofToInt(tokens[++index]);
+            string label = tokens[++index];
+            float val = ofToFloat(tokens[++index]);
+            s.modules[moduleIndex]->receiveOSC(s, label, val);
+        }
+
+        index++;  // always increment at least one!
+    }
+}
+
+void prUpdate(SystemState &s) {
+    for (int i = 0; i < s.n_modules; i++) {
+        s.modules[i]->update(s);
+    }
+}
+
+void displayIncomingData(SystemState &s) {
+    // mags
+    float xoff = 20;
+    int yoff = 20;
+    int ystart = s.fbo.getHeight() - yoff;
+    int mag_height = (s.fbo.getHeight() / 2) - (yoff * 2);
+    int bar_width = 2;
+    int bar_skip = bar_width + 1;
+    ofFill();
+    ofSetLineWidth(0);
+    for (int i = 0; i < N_MAGNITUDES; i++) {
+        ofSetColor(255, 200 - (i * 100));
+        for (int x = 0; x < MAGNITUDES_LEN; x++) {
+            int bar_height = s.features.magnitudes[i][x] * mag_height;
+            ofDrawRectangle(xoff + (x * bar_skip), ystart - bar_height, bar_width, bar_height);
+        }
+    }
+
+    // vector
+    xoff = 20;
+    yoff = 20;
+    ystart = (s.fbo.getHeight() / 2) - yoff;
+    int vec_height = (s.fbo.getHeight() / 2) - (yoff * 2);
+    bar_width = 3;
+    bar_skip = bar_width + 2;  // gap of 1
+    ofFill();
+    ofSetLineWidth(0);
+    for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++) {
+        int bar_height = s.features.descriptors_vector[i] * vec_height;
+        // TODO: i think the colors are wrong
+        if (i > 65) {
+            ofSetColor(255);
+        } else if (i > 53) {
+            ofSetColor(255, 50, 50);
+        } else if (i > 13) {
+            ofSetColor(50, 50, 255);
+        } else if (i > 6) {
+            ofSetColor(50, 255, 50);
+        } else {
+            ofSetColor(0, 255, 255);
+        }
+        ofDrawRectangle(xoff + (i * bar_skip), ystart - bar_height, bar_width, bar_height);
+    }
+
+    // onset
+    if (s.onset_occured) {
+        ofSetColor(255, 255, 0);
+        ofDrawRectangle((s.fbo.getWidth() / 2) - 20, 20, 40, 40);
+    }
+
+    // waveforms
+    xoff = (s.fbo.getWidth() * 0.35) + 20;
+    int xend = s.fbo.getWidth() - 20;
+    int wf_height = (s.fbo.getHeight() / 2) - 40;
+    int middle = (wf_height / 2) + 20;
+    ofNoFill();
+    ofSetLineWidth(1);
+    for (int i = 0; i < N_WAVEFORMS; i++) {
+        switch (i) {
+            case 0:
+                ofSetColor(255, 50, 255);
+                break;
+            case 1:
+                ofSetColor(255, 50, 50);
+                break;
+            case 2:
+                ofSetColor(50, 50, 255);
+                break;
+        }
+        ofBeginShape();
+        for (int x = 0; x < WAVEFORM_LEN; x++) {
+            int xpt = ofMap(x, 0, WAVEFORM_LEN - 1, xoff, xend);
+            float ypt = middle + (s.features.waveforms[i][x] * -0.5 * wf_height);
+            ofVertex(xpt, ypt);
+        }
+        ofEndShape();
+    }
+}
+
+void renderFrame(SystemState &s) {
+    if (s.verbose)
+        cout << "renderFrame " << s.frame_num << endl;
+
+    s.fbo.begin();
+
+    if (s.verbose)
+        cout << "fbo.begin()" << endl;
+
+    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+
+    if (s.verbose)
+        cout << "ofEnableBlendMode(OF_BLENDMODE_ALPHA)" << endl;
+
+    ofSetColor(0, 255 - s.feedback_amt);  // alpha of 255 = no feedback, alpha of 0 = full feedback
+    ofDrawRectangle(0, 0, s.fbo.getWidth(), s.fbo.getHeight());
+
+    if (s.verbose)
+        cout << "ofSetColor(0, 255 - feedback_amt)" << endl;
+
+    // =============== visualModules ===================
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+
+    if (!s.debug) {
+        if (s.verbose) {
+            cout << "Active Module Indices:";
+            for (int i = 0; i < s.active_module_indices.size(); i++) {
+                int index = s.active_module_indices[i];
+                if (index >= 0)
+                    cout << " " << s.modules[index]->getName();
+            }
+            cout << endl;
+        }
+
+        s.flow_field->update(s);
+
+        for (int i = 0; i < s.active_module_indices.size(); i++) {
+            int index = s.active_module_indices[i];
+            if (index >= 0) {
+                for (int j = 0; j < s.active_module_indices.size(); j++) {
+                    if ((j != i) && (s.active_module_indices[j] >= 0)) {
+                        s.modules[index]->interact(s,s.modules[s.active_module_indices[j]]);
+                    }
+                }
+                s.modules[index]->display(s);
+            }
+        }
+    } else {
+        displayIncomingData(s);
+    }
+
+    s.fbo.end();
+    s.postGlitch.generateFx(s.features);
+}
+
+void ofApp::runNrtRender(SystemState& s) {
+    if (s.verbose)
         cout << "running nrt render" << endl;
 
-    string csv_folder = config["csv-folder"].get<string>();
+    string csv_folder = s.config["csv-folder"].get<string>();
 
     // int max_frames = 600; // 600 frames = 20 seconds
-    int max_frames = config["max-frames"].get<int>() == -1 ? INT_MAX : config["max-frames"].get<int>();
+    int max_frames = s.config["max-frames"].get<int>() == -1 ? INT_MAX : s.config["max-frames"].get<int>();
 
     std::ifstream descriptors_file;
     descriptors_file.open(csv_folder + "/descriptors.csv");
@@ -181,38 +347,31 @@ void ofApp::runNrtRender(int width, int height)
     ReaperMarkersFileParser rmfp;
 
     if (usingReaperMarkers)
-        rmfp.setup(reaperMarkerPath, config["audio-sample-rate"].get<int>(), config["target-framerate"].get<int>());
+        rmfp.setup(reaperMarkerPath, s.config["audio-sample-rate"].get<int>(), s.target_framerate);
 
     // stuff for rendering
     string timestamp = ofGetTimestampString();
-    string new_dir_path = config["output-folder"].get<string>() + "/" + timestamp;
+    string new_dir_path = s.config["output-folder"].get<string>() + "/" + timestamp;
 
     ofDirectory new_dir(new_dir_path);
     new_dir.create();
 
     // TODO: make this path OS agnostic
-    randomSeedLog.open(new_dir_path + "/_" + timestamp + "-random-seed-log.csv");
+    s.randomSeedLog.open(new_dir_path + "/_" + timestamp + "-random-seed-log.csv");
     assert(randomSeedLog.is_open());
-    randomSeedLog << "Frame,Minute:Second.Frame,Seed" << endl;
+    s.randomSeedLog << "Frame,Minute:Second.Frame,Seed" << endl;
 
-    if (config["initial-onset"].get<bool>())
-    {
-        onset(width, height, 0, nrtRender);
+    if (s.config["initial-onset"].get<bool>()) {
+        onset(s);
     }
-
-    ofPixels pix;
-
-    int frame_num = 0;
 
     string line;
     vector<string> csv_line;
 
-    while (!descriptors_file.eof() && frame_num < max_frames)
-    {
+    while (!descriptors_file.eof() && s.frame_num < max_frames) {
+        cout << "frame num: " << s.frame_num << endl;
 
-        cout << "frame num: " << frame_num << endl;
-
-        if (verbose)
+        if (s.verbose)
             cout << "reading descriptors..." << endl;
         // descriptors
         line.clear();
@@ -221,16 +380,13 @@ void ofApp::runNrtRender(int width, int height)
         csv_line = ofSplitString(line, ",");
         assert(csv_line.size() == (DESCRIPTORS_VECTOR_LENGTH + 1));
         vector<float> csv_line_fl(csv_line.size());
-        for (int i = 0; i < csv_line.size(); i++)
-        {
+        for (int i = 0; i < csv_line.size(); i++) {
             csv_line_fl[i] = ofToFloat(csv_line[i]);
         }
 
-        if (verbose)
-        {
+        if (s.verbose) {
             cout << "set vals from csv..." << endl;
-            for (int i = 0; i < csv_line_fl.size(); i++)
-            {
+            for (int i = 0; i < csv_line_fl.size(); i++) {
                 cout << csv_line_fl[i] << "\t";
             }
             cout << endl;
@@ -239,16 +395,15 @@ void ofApp::runNrtRender(int width, int height)
             ;
         }
 
-        setValsFromCSV(width, height, csv_line_fl, frame_num, true);
+        setValsFromCSV(s,csv_line_fl);
 
-        if (usingReaperMarkers)
-        {
-            string rm = rmfp.currentFrame(frame_num);
+        if (usingReaperMarkers) {
+            string rm = rmfp.currentFrame(s.frame_num);
             cout << "from rmfp: " << rm << endl;
-            processReaperMarker(rm, main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
+            processReaperMarker(s,rm);
         }
 
-        if (verbose)
+        if (s.verbose)
             cout << "reading waveforms..." << endl;
         // waveforms
         line.clear();
@@ -257,9 +412,8 @@ void ofApp::runNrtRender(int width, int height)
         csv_line = ofSplitString(line, ",");
         //            cout << "\twaveform0 line size (strings): " << csv_line.size() << endl;
         assert(csv_line.size() == WAVEFORM_LEN);
-        for (int i = 0; i < csv_line.size(); i++)
-        {
-            waveforms[0][i] = ofToFloat(csv_line[i]);
+        for (int i = 0; i < csv_line.size(); i++) {
+            s.features.waveforms[0][i] = ofToFloat(csv_line[i]);
         }
 
         line.clear();
@@ -268,12 +422,11 @@ void ofApp::runNrtRender(int width, int height)
         csv_line = ofSplitString(line, ",");
         //            cout << "\twaveform1 line size (strings): " << csv_line.size() << endl;
         assert(csv_line.size() == WAVEFORM_LEN);
-        for (int i = 0; i < csv_line.size(); i++)
-        {
-            waveforms[1][i] = ofToFloat(csv_line[i]);
+        for (int i = 0; i < csv_line.size(); i++) {
+            s.features.waveforms[1][i] = ofToFloat(csv_line[i]);
         }
 
-        if (verbose)
+        if (s.verbose)
             cout << "reading mags..." << endl;
         // mags
         line.clear();
@@ -282,26 +435,24 @@ void ofApp::runNrtRender(int width, int height)
         csv_line = ofSplitString(line, ",");
         //            cout << "\tmags line size (strings): " << csv_line.size() << endl;
         assert(csv_line.size() == MAGNITUDES_LEN);
-        for (int i = 0; i < csv_line.size(); i++)
-        {
-            magnitudes[0][i] = ofToFloat(csv_line[i]);
+        for (int i = 0; i < csv_line.size(); i++) {
+            s.features.magnitudes[0][i] = ofToFloat(csv_line[i]);
         }
 
         // ============     ================
-        if (verbose) cout << "prUpdate..." << endl;
-        prUpdate(true);
+        if (s.verbose) cout << "prUpdate..." << endl;
+        prUpdate(s);
 
         // ============ DRAW ====================
-        if (verbose) cout << "rendering frame..." << endl;
-        renderFrame(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, true);
+        if (s.verbose) cout << "rendering frame..." << endl;
+        renderFrame(s);
 
-        if (verbose) cout << "save to disk..." << endl;
+        if (s.verbose) cout << "save to disk..." << endl;
         // save to disk
-        main_fbo.readToPixels(pix);
-        ofSaveImage(pix, new_dir_path + "/" + ofToString(frame_num, 6, '0') + ".tiff", OF_IMAGE_QUALITY_BEST);
+        s.fbo.write(new_dir_path + "/" + ofToString(s.frame_num, 6, '0') + ".png");
 
-        cout << "frame num: " << frame_num << endl;
-        frame_num++;
+        cout << "frame num: " << s.frame_num << endl;
+        s.frame_num++;
     }
 
     descriptors_file.close();
@@ -312,407 +463,91 @@ void ofApp::runNrtRender(int width, int height)
     exit();
 }
 
-void ofApp::processReaperMarker(string &cmd, int width, int height, unsigned long long frame_num, bool isNRT)
-{
-    vector<string> tokens = ofSplitString(cmd, " ");
-    int index = 0;
-
-    while (index < tokens.size())
-    {
-
-        if (tokens[index] == "o")
-        {
-            onset(main_fbo.getWidth(), main_fbo.getHeight(), frame_num, isNRT);
-        }
-        else if (tokens[index] == "sai")
-        {
-            int ai[active_module_indices.size()];
-            for (int i = 0; i < active_module_indices.size(); i++)
-            {
-                ai[i] = ofToInt(tokens[++index]);
-            }
-            setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(), frame_num);
-        }
-        else if (tokens[index] == "loadState")
-        {
-            load(saves[ofToInt(tokens[++index])], width, height);
-        }
-        else if (tokens[index] == "loadStateFromDisk")
-        {
-            ofFile file(ofToDataPath(tokens[++index] + ".json"));
-
-            if (file.exists())
-            {
-
-                ofJson dict;
-                std::ifstream i(ofToDataPath(file.path()));
-                i >> dict;
-
-                load(dict, width, height);
-            }
-            else
-            {
-                cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
-            }
-        }
-        else if (tokens[index] == "onsetSeed")
-        {
-            onsetFromSeed(ofToInt(tokens[++index]), width, height, frame_num, isNRT);
-        }
-        else if (tokens[index] == "sp")
-        { // set parameter
-            int moduleIndex = ofToInt(tokens[++index]);
-            string label = tokens[++index];
-            float val = ofToFloat(tokens[++index]);
-            modules[moduleIndex]->receiveOSC(width, height, label, val);
-        }
-
-        index++; // always increment at least one!
-    }
-}
-
-void ofApp::setValsFromCSV(int width, int height, vector<float> &csv_data, unsigned long long frame_num, bool isNRT)
-{
-
-    common_features["specCentroid"] = vector_data[0];
-    common_features["specSpread"] = vector_data[1];
-    common_features["specSkewness"] = vector_data[2];
-    common_features["specKurtosis"] = vector_data[3];
-    common_features["specRolloff"] = vector_data[4];
-    common_features["specFlatness"] = vector_data[5];
-    common_features["specCrest"] = vector_data[6];
-    common_features["pitch"] = vector_data[7];
-    common_features["pitchConfidence"] = vector_data[8];
-    common_features["loudness"] = vector_data[9];
-    common_features["truePeak"] = vector_data[10];
-    common_features["amplitude"] = vector_data[11];
-    common_features["sensoryDissonance"] = vector_data[12];
-    common_features["zeroCrossing"] = vector_data[13];
-
-    onset_occured = false;
-
-    float onset_val = csv_data[csv_data.size() - 1];
-    if (onset_val > 0.5 && use_sc_onsets)
-    {
-        onset_occured = true;
-    }
-
-    if (onset_occured || force_onset_frames.checkForOnset(frame_num))
-        onset(width, height, frame_num, isNRT); // onsets
-
-    for (int i = 0; i < csv_data.size() - 1; i++)
-    {
-        float val = csv_data[i];
-        vector_data[i] = val;
-        vec_history.updateCurrentFrameAtIndex(i, val);
-    }
-
-    vec_history.incrementFrameIndex();
-}
-
-void ofApp::setActiveIndices(int *ai, int width, int height, unsigned long long frame_num)
-{
-    for (int i = 0; i < active_module_indices.size(); i++)
-    {
-        active_module_indices[i] = ai[i];
-        if (active_module_indices[i] >= 0 && modules[active_module_indices[i]]->newParamsProb > ofRandom(1.f))
-        {
-            modules[active_module_indices[i]]->newParams(width, height, vec_history, frame_num);
-        }
-    }
-}
-
-void ofApp::onsetActions(int width, int height, unsigned long long frame_num, bool isNRT)
-{
-
-    if (verbose)
-        cout << "Onset Actions." << endl;
-
-    // Write the `currentRandomSeed` to the file, indicating the frame number so that it can be referenced later
-    if (isNRT)
-    {
-        randomSeedLog << frame_num << "," << getTimeFromFrameNum(frame_num) << "," << currentRandomSeed << endl;
-    }
-
-    // new active vc i
-
-    vector<int> chosen_i;
-    int ai[active_module_indices.size()];
-    for (int i = 0; i < active_module_indices.size(); i++)
-    { // go through the max number that we'll display
-
-        if (moduleIndexUnlocked[i] and (ofRandom(1.f) < onsetSwitchProb))
-        {
-            std::unordered_set<int> chosen_set(chosen_i.begin(), chosen_i.end());
-            bool found = false;
-            while (!found)
-            {
-                int rand_int = rand() % vc_i_options.size(); // random int the size of the options array
-                int result = vc_i_options[rand_int];         // the int from the options array (which is the index for the modules array)
-
-                if (chosen_set.find(result) == chosen_set.end())
-                {
-                    found = true;
-                    chosen_i.push_back(result);
-                    ai[i] = result;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            ai[i] = active_module_indices[i];
-            chosen_i.push_back(ai[i]);
-        }
-    }
-
-    setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(), frame_num);
-
-    // blend mode
-    if (ofRandom(1.f) < onsetSwitchProb)
-        blendMode = blendModes[blendModePool[int(ofRandom(blendModePool.size()))]];
-
-    feedback_amt = (ofRandom(1.f) < feedback_prob) * ofRandom(1, feedback_max);
-
-    // ofx post glitch
-    postGlitch.newParams();
-
-    for (int i = 0; i < GLITCH_NUM; i++)
-    {
-        if (ofRandom(1.f) < postGlitchChangeProb)
-        {
-            if (ofRandom(1.f) < postGlitchProbs[i])
-            {
-                postGlitch.setFx((ofxPostGlitchType)i, true);
-            }
-            else
-            {
-                postGlitch.setFx((ofxPostGlitchType)i, false);
-            }
-        }
-    }
-}
-
 //--------------------------------------------------------------
-void ofApp::update()
-{
-
-    if (verbose)
+void ofApp::update() {
+    if (s.verbose)
         cout << "update " << ofGetFrameNum() << endl;
 
-    onset_occured = false;
+    s.onset_occured = false;
 
     // ==================== OSC ================================
-    while (osc_receiver.hasWaitingMessages())
-    {
+    while (osc_receiver.hasWaitingMessages()) {
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
 
         string address = oscMsg.getAddress();
 
         // from Reaper:
-        if (address == "/lastmarker/name")
-        {
+        if (address == "/lastmarker/name") {
             string cmd = oscMsg.getArgAsString(0);
-            processReaperMarker(cmd, ofGetWidth(), ofGetHeight(), ofGetFrameNum(), false);
+            processReaperMarker(s,cmd);
 
             // from SuperCollider:
-        }
-        else if (address == "/setActiveIndices")
-        {
-            int ai[active_module_indices.size()];
-            for (int i = 0; i < active_module_indices.size(); i++)
-            {
+        } else if (address == "/setActiveIndices") {
+            vector<int> ai(s.active_module_indices.size());
+            for (int i = 0; i < s.active_module_indices.size(); i++) {
                 ai[i] = oscMsg.getArgAsInt(i);
             }
-            setActiveIndices(ai, main_fbo.getWidth(), main_fbo.getHeight(), ofGetFrameNum());
-        }
-        else if (address == "/onset")
-        {
-            onset(main_fbo.getWidth(), main_fbo.getHeight(), ofGetFrameNum(), false);
-        }
-        else if (address == "/onsetSeed")
-        {
+            setActiveIndices(s,ai);
+        } else if (address == "/onset") {
+            onset(s);
+        } else if (address == "/onsetSeed") {
             unsigned long seed = oscMsg.getArgAsInt(0);
-            onsetFromSeed(seed, main_fbo.getWidth(), main_fbo.getHeight(), ofGetFrameNum(), false);
-        }
-        else if (address == "/setOnsetSwitchProb")
-        {
-            onsetSwitchProb = oscMsg.getArgAsFloat(0);
-        }
-        else if (address == "/setNewParamsProb")
-        {
+            onsetFromSeed(s,seed);
+        } else if (address == "/setOnsetSwitchProb") {
+            s.onsetSwitchProb = oscMsg.getArgAsFloat(0);
+        } else if (address == "/setNewParamsProb") {
             int vc_i = oscMsg.getArgAsInt(0);
-            modules[vc_i]->newParamsProb = oscMsg.getArgAsFloat(1);
-        }
-        else if (address == "/setVCOptions")
-        {
+            s.modules[vc_i]->newParamsProb = oscMsg.getArgAsFloat(1);
+        } else if (address == "/setVCOptions") {
             int n_options = oscMsg.getArgAsInt(0);
-            vc_i_options.resize(n_options);
-            for (int i = 0; i < n_options; i++)
-            {
-                vc_i_options[i] = oscMsg.getArgAsInt(i + 1);
+            s.vc_i_options.resize(n_options);
+            for (int i = 0; i < n_options; i++) {
+                s.vc_i_options[i] = oscMsg.getArgAsInt(i + 1);
             }
-        }
-        else if (address == "/cmd")
-        {
+        } else if (address == "/cmd") {
             int index = oscMsg.getArgAsInt(0);
             std::string str = oscMsg.getArgAsString(1);
             float val = oscMsg.getArgAsFloat(2);
-            modules[index]->receiveOSC(ofGetWidth(), ofGetHeight(), str, val);
-        }
-        else if (address == "/waveform")
-        {
+            s.modules[index]->receiveOSC(s, str, val);
+        } else if (address == "/waveform") {
             int index = oscMsg.getArgAsInt(0);
             for (int i = 0; i < WAVEFORM_LEN; i++)
-                waveforms[index][i] = oscMsg.getArgAsFloat(i + 1);
-        }
-        else if (address == "/mags")
-        {
+                s.features.waveforms[index][i] = oscMsg.getArgAsFloat(i + 1);
+        } else if (address == "/mags") {
             int index = oscMsg.getArgAsInt(0);
             for (int i = 0; i < MAGNITUDES_LEN; i++)
-                magnitudes[index][i] = oscMsg.getArgAsFloat(i + 1);
-        }
-        else if (address == "/vector")
-        {
-            for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++)
-            {
-                vector_data[i] = oscMsg.getArgAsFloat(i);
-                vec_history.updateCurrentFrameAtIndex(i, vector_data[i]);
+                s.features.magnitudes[index][i] = oscMsg.getArgAsFloat(i + 1);
+        } else if (address == "/vector") {
+            for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++) {
+                s.features.descriptors_vector[i] = oscMsg.getArgAsFloat(i);
+                s.vec_history.updateCurrentFrameAtIndex(i, s.features.descriptors_vector[i]);
             }
 
-            vec_history.incrementFrameIndex();
+            s.vec_history.incrementFrameIndex();
 
-            common_features["specCentroid"] = vector_data[0];
-            common_features["specSpread"] = vector_data[1];
-            common_features["specSkewness"] = vector_data[2];
-            common_features["specKurtosis"] = vector_data[3];
-            common_features["specRolloff"] = vector_data[4];
-            common_features["specFlatness"] = vector_data[5];
-            common_features["specCrest"] = vector_data[6];
-            common_features["pitch"] = vector_data[7];
-            common_features["pitchConfidence"] = vector_data[8];
-            common_features["loudness"] = vector_data[9];
-            common_features["truePeak"] = vector_data[10];
-            common_features["amplitude"] = vector_data[11];
-            common_features["sensoryDissonance"] = vector_data[12];
-            common_features["zeroCrossing"] = vector_data[13];
+            setValsFromCSV(s, s.features.descriptors_vector);
 
-            onset_occured = use_sc_onsets && (oscMsg.getArgAsFloat(DESCRIPTORS_VECTOR_LENGTH) > 0.5);
+            s.onset_occured = s.use_sc_onsets && (oscMsg.getArgAsFloat(DESCRIPTORS_VECTOR_LENGTH) > 0.5);
         }
     }
 
-    if (onset_occured)
-        onset(main_fbo.getWidth(), main_fbo.getHeight(), ofGetFrameNum(), false);
+    if (s.onset_occured)
+        onset(s);
 
-    prUpdate(false);
+    prUpdate(s);
 }
 
-void ofApp::prUpdate(bool isNRT)
-{
-    for (int i = 0; i < n_modules; i++)
-    {
-        modules[i]->update(isNRT, &common_features, verbose);
-    }
-}
-
-void ofApp::renderFrame(int width, int height, unsigned long long frameNum, bool isNRT)
-{
-
-    if (verbose)
-        cout << "renderFrame " << frameNum << endl;
-
-    main_fbo.begin();
-
-    if (verbose)
-        cout << "main_fbo.begin()" << endl;
-
-    ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-
-    if (verbose)
-        cout << "ofEnableBlendMode(OF_BLENDMODE_ALPHA)" << endl;
-
-    ofSetColor(0, 255 - feedback_amt); // alpha of 255 = no feedback, alpha of 0 = full feedback
-    ofDrawRectangle(0, 0, main_fbo.getWidth(), main_fbo.getHeight());
-
-    if (verbose)
-        cout << "ofSetColor(0, 255 - feedback_amt)" << endl;
-
-    // =============== visualModules ===================
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-
-    if (!debug)
-    {
-
-        if (verbose)
-        {
-            cout << "Active Module Indices:";
-            for (int i = 0; i < active_module_indices.size(); i++)
-            {
-                int index = active_module_indices[i];
-                if (index >= 0)
-                    cout << " " << modules[index]->getName();
-            }
-            cout << endl;
-        }
-
-        ff.update(frameNum, &common_features);
-
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            int index = active_module_indices[i];
-            if (index >= 0)
-            {
-                for (int j = 0; j < active_module_indices.size(); j++)
-                {
-                    if ((j != i) && (active_module_indices[j] >= 0))
-                    {
-                        modules[index]->interact(modules[active_module_indices[j]]);
-                    }
-                }
-                modules[index]->display(width, height, frameNum, &common_features, isNRT, verbose);
-            }
-        }
-    }
-    else
-    {
-        displayIncomingData(width, height);
-    }
-
-    main_fbo.end();
-    postGlitch.generateFx(&common_features);
-}
-
-//--------------------------------------------------------------
-void ofApp::draw()
-{
-    if (verbose)
-        cout << "draw " << ofGetFrameNum() << endl;
-
-    renderFrame(main_fbo.getWidth(), main_fbo.getHeight(), ofGetFrameNum(), false);
-    main_fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
-
-    if (config["draw-bounds"].get<bool>())
-    {
-        drawBounds();
-    };
-}
-
-void ofApp::drawBounds()
-{
-
+void drawBounds() {
     ofNoFill();
     ofSetColor(200, 100);
     ofDrawBox(ofGetWidth() * 0.5, ofGetHeight() * 0.5, ofGetHeight() * -0.5, ofGetWidth(), ofGetHeight(), ofGetHeight());
 
     ofFill();
     int offset = 20;
-    for (int x = 0; x < 2; x++)
-    {
-        for (int y = 0; y < 2; y++)
-        {
-            for (int z = 0; z < 2; z++)
-            {
+    for (int x = 0; x < 2; x++) {
+        for (int y = 0; y < 2; y++) {
+            for (int z = 0; z < 2; z++) {
                 int x_ = (x * ofGetWidth()) + ((x == 0) * offset) + ((x == 1) * -offset);
                 int y_ = (y * ofGetHeight()) + ((y == 0) * offset) + ((y == 1) * -offset);
                 int z_ = (-z * ofGetHeight()) + ((z == 0) * -offset) + ((z == 1) * offset);
@@ -724,174 +559,82 @@ void ofApp::drawBounds()
 
     int len = 1000;
     ofSetLineWidth(15);
-    for (int dir = 0; dir < 3; dir++)
-    {
+    for (int dir = 0; dir < 3; dir++) {
         ofSetColor((dir == 0) * 255, (dir == 1) * 255, (dir == 2) * 255);
         ofDrawLine(0, 0, 0, (dir == 0) * len, (dir == 1) * len, (dir == 2) * -len);
     }
 }
 
-void ofApp::displayIncomingData(int width, int height)
-{
+//--------------------------------------------------------------
+void ofApp::draw() {
+    if (s.verbose)
+        cout << "draw " << ofGetFrameNum() << endl;
 
-    // mags
-    float xoff = 20;
-    int yoff = 20;
-    int ystart = height - yoff;
-    int mag_height = (height / 2) - (yoff * 2);
-    int bar_width = 2;
-    int bar_skip = bar_width + 1;
-    ofFill();
-    ofSetLineWidth(0);
-    for (int i = 0; i < N_MAGNITUDES; i++)
-    {
-        ofSetColor(255, 200 - (i * 100));
-        for (int x = 0; x < MAGNITUDES_LEN; x++)
-        {
-            int bar_height = magnitudes[i][x] * mag_height;
-            ofDrawRectangle(xoff + (x * bar_skip), ystart - bar_height, bar_width, bar_height);
-        }
-    }
+    renderFrame(s);
+    s.fbo.draw(0, 0, ofGetWidth(), ofGetHeight());
 
-    // vector
-    xoff = 20;
-    yoff = 20;
-    ystart = (height / 2) - yoff;
-    int vec_height = (height / 2) - (yoff * 2);
-    bar_width = 3;
-    bar_skip = bar_width + 2; // gap of 1
-    ofFill();
-    ofSetLineWidth(0);
-    for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++)
-    {
-        int bar_height = vector_data[i] * vec_height;
-        // TODO: i think the colors are wrong
-        if (i > 65)
-        {
-            ofSetColor(255);
-        }
-        else if (i > 53)
-        {
-            ofSetColor(255, 50, 50);
-        }
-        else if (i > 13)
-        {
-            ofSetColor(50, 50, 255);
-        }
-        else if (i > 6)
-        {
-            ofSetColor(50, 255, 50);
-        }
-        else
-        {
-            ofSetColor(0, 255, 255);
-        }
-        ofDrawRectangle(xoff + (i * bar_skip), ystart - bar_height, bar_width, bar_height);
-    }
+    if (s.config["draw-bounds"].get<bool>()) {
+        drawBounds();
+    };
 
-    // onset
-    if (onset_occured)
-    {
-        ofSetColor(255, 255, 0);
-        ofDrawRectangle((width / 2) - 20, 20, 40, 40);
-    }
-
-    // waveforms
-    xoff = (width * 0.35) + 20;
-    int xend = width - 20;
-    int wf_height = (height / 2) - 40;
-    int middle = (wf_height / 2) + 20;
-    ofNoFill();
-    ofSetLineWidth(1);
-    for (int i = 0; i < N_WAVEFORMS; i++)
-    {
-        switch (i)
-        {
-        case 0:
-            ofSetColor(255, 50, 255);
-            break;
-        case 1:
-            ofSetColor(255, 50, 50);
-            break;
-        case 2:
-            ofSetColor(50, 50, 255);
-            break;
-        }
-        ofBeginShape();
-        for (int x = 0; x < WAVEFORM_LEN; x++)
-        {
-            int xpt = ofMap(x, 0, WAVEFORM_LEN - 1, xoff, xend);
-            float ypt = middle + (waveforms[i][x] * -0.5 * wf_height);
-            ofVertex(xpt, ypt);
-        }
-        ofEndShape();
-    }
+    s.frame_num++;
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key)
-{
-    if (key == 'd')
-    {
-        debug = !debug;
+void ofApp::keyPressed(int key) {
+    if (key == 'd') {
+        s.debug = !s.debug;
     }
 
     if (key == 'c')
-        loadConfigFile(config_path);
+        loadConfigFile(s,s.config_path);
 
     if (key == 's')
-        use_sc_onsets = !use_sc_onsets;
+        s.use_sc_onsets = !s.use_sc_onsets;
 
     if (key == 'o')
-        onset(ofGetWidth(), ofGetHeight(), ofGetFrameNum(), false);
-    if (key == 'p')
-    {
-        for (int i = 0; i < active_module_indices.size(); i++)
-        {
-            if (active_module_indices[i] >= 0)
-            {
-                modules[active_module_indices[i]]->newParams(ofGetWidth(), ofGetHeight(), vec_history, ofGetFrameNum());
+        onset(s);
+    if (key == 'p') {
+        for (int i = 0; i < s.active_module_indices.size(); i++) {
+            if (s.active_module_indices[i] >= 0) {
+                s.modules[s.active_module_indices[i]]->newParams(s);
             }
         }
     }
 
-    for (int i = 0; i < 10; i++)
-    {
-        if (key == saveKeys[i])
-        {
-            saves[i] = save();
+    for (int i = 0; i < 10; i++) {
+        if (key == s.saveStateKeys[i]) {
+            s.saveStates[i] = save(s);
             std::ofstream fout(ofToDataPath(ofGetTimestampString() + "_save-" + ofToString(i) + ".json"));
-            fout << saves[i];
+            fout << s.saveStates[i];
             break;
         }
     }
 
     if (key == ')')
-        load(saves[0], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[0]);
     if (key == '!')
-        load(saves[1], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[1]);
     if (key == '@')
-        load(saves[2], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[2]);
     if (key == '#')
-        load(saves[3], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[3]);
     if (key == '$')
-        load(saves[4], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[4]);
     if (key == '%')
-        load(saves[5], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[5]);
     if (key == '^')
-        load(saves[6], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[6]);
     if (key == '&')
-        load(saves[7], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[7]);
     if (key == '*')
-        load(saves[8], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[8]);
     if (key == '(')
-        load(saves[9], ofGetWidth(), ofGetHeight());
+        load(s,s.saveStates[9]);
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key)
-{
-
+void ofApp::keyReleased(int key) {
     // post glitch manual controls
     //    if (key == '1') postGlitch.setFx(OFXPOSTGLITCH_CONVERGENCE    , false);
     //    if (key == '2') postGlitch.setFx(OFXPOSTGLITCH_GLOW            , false);
@@ -914,52 +657,42 @@ void ofApp::keyReleased(int key)
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y)
-{
+void ofApp::mouseMoved(int x, int y) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button)
-{
+void ofApp::mouseDragged(int x, int y, int button) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button)
-{
+void ofApp::mousePressed(int x, int y, int button) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button)
-{
+void ofApp::mouseReleased(int x, int y, int button) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y)
-{
+void ofApp::mouseEntered(int x, int y) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y)
-{
+void ofApp::mouseExited(int x, int y) {
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h)
-{
-    main_fbo.allocate(w, h);
-    postGlitch.setup(&main_fbo);
-    for (int i = 0; i < n_modules; i++)
-    {
-        modules[i]->screenResize(w, h);
+void ofApp::windowResized(int w, int h) {
+    s.fbo.allocate(w, h);
+    s.postGlitch.setup(&s.fbo.fbo);
+    for (int i = 0; i < s.n_modules; i++) {
+        s.modules[i]->screenResize(s);
     }
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg)
-{
+void ofApp::gotMessage(ofMessage msg) {
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo)
-{
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 }

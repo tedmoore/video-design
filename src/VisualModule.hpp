@@ -26,16 +26,16 @@ class VisualModule {
     VIS_TYPE type = NONE;
     float newParamsProb = 1.f;
 
-    virtual void interact(VisualModule *other) = 0;
-    virtual void receiveOSC(int width, int height, std::string label, float val) = 0;
-    virtual void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float> *common_features, bool isNRT, bool verbose) = 0;
-    virtual void screenResize(int w, int h) = 0;
-    virtual void newParams(int width, int height, VectorHistory &vecHistory, unsigned long long frame_num) = 0;
-    virtual void update(bool isNRT, std::unordered_map<std::string, float> *common_features, bool verbose) = 0;
-    virtual void processConfigFile(ofJson &dict) = 0;
+    virtual void setup(SystemState &s, ofJson &config) = 0;
+    virtual void interact(SystemState &s, VisualModule *other) = 0;
+    virtual void receiveOSC(SystemState &s, std::string label, float val) = 0;
+    virtual void display(SystemState &s) = 0;
+    virtual void screenResize(SystemState &s) = 0;
+    virtual void newParams(SystemState &s) = 0;
+    virtual void update(SystemState &s) = 0;
     virtual void printStatus() = 0;
     virtual ofJson saveState() = 0;
-    virtual void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory) = 0;
+    virtual void loadState(SystemState &s, ofJson &dict) = 0;
     virtual string getName() = 0;
 };
 

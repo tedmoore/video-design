@@ -41,7 +41,7 @@ public:
         float theta = ofNoise((i*scaler) + azoff + time, (j*scaler) + azoff + time, (k*scaler) + azoff + time) * TWO_PI;
         float phi = ofNoise((i*scaler) + eloff + time, (j*scaler) + eloff + time, (k*scaler) + eloff + time) * TWO_PI;
         
-        //println("time in ff point", time);
+        //println("time in flow_field point", time);
         theta = theta + thetaRot;
         phi = phi + phiRot;
         

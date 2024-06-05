@@ -11,11 +11,12 @@ public:
     int max;
     int nextOnset;
 
-    void setup(bool forceOnsets_, int min_, int max_)
+    void setup(ofJson &config)
     {
-        min = min_;
-        max = max_;
-        forceOnsets = forceOnsets_;
+        
+        min = checkJsonKey(config, "force-onset-min-frames", 300);
+        max = checkJsonKey(config, "force-onset-max-frames", 600);
+        forceOnsets = checkJsonKey(config, "force-onset-frames", false);
         nextOnset = ofRandom(min, max);
     }
 

@@ -9,240 +9,174 @@
 #define Param_hpp
 
 #include <stdio.h>
+
 #include "ofMain.h"
 
 class Param {
-public:
+   public:
     string name = "";
     bool randomizable = true;
-    
-    void virtual load(ofJson &y){
+
+    void virtual load(ofJson &y) {
         reportError("load");
     }
-    
-    void reportError(string method){
-        cout << "Param::" << method <<" ERROR: " << method << " being called in Param parent class." << endl;
+
+    void reportError(string method) {
+        cout << "Param::" << method << " ERROR: " << method << " being called in Param parent class." << endl;
     }
-    
-    void virtual newRandom(){
+
+    void virtual newRandom() {
         reportError("newRandom");
     }
-    
-    ofJson virtual save(){
-        reportError("save");
-        ofJson dict;
-        return dict;
-    }
-    
-    void virtual post(){
+
+    void virtual post() {
         cout << "post being called in Param parent class\n";
     }
-    
-    void virtual setValue(float val){
+
+    void virtual setValue(float val) {
         cout << "Param::setValue being called in Param parent class\n";
     }
 };
 
 class ParamBool : public Param {
-public:
-    
+   public:
     bool value = false;
     float trueProb = 0.5;
-    
-    void post(){
+
+    void post() {
         cout << value;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = ofRandom(1.f) < trueProb;
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<bool>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = ofRandom(1.f) < trueProb;
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = val > 0.5;
     }
 };
 
 class ParamFloat : public Param {
-public:
+   public:
     float value = 0.f;
     float min = 0.f;
     float max = 1.f;
     float power = 1.f;
-    
-    void post(){
+
+    void post() {
         cout << value;
     }
-    
-    void setup(float min_, float max_, float power_, float val){
+
+    void setup(float min_, float max_, float power_, float val) {
         min = min_;
         max = max_;
         power = power_;
         value = val;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = ofMap(pow(ofRandom(1.f), power), 0.f, 1.f, min, max);
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<float>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = ofMap(pow(ofRandom(1.f),power),0.f,1.f,min,max);
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = val;
     }
 };
 
 class ParamInt : public Param {
-public:
+   public:
     int value = 0.f;
     int min = 0.f;
     int max = 1.f;
-    
-    void post(){
+
+    void post() {
         cout << value;
     }
-    
-    void setup(int min_, int max_, int val){
+
+    void setup(int min_, int max_, int val) {
         min = min_;
         max = max_;
         value = val;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = ofRandom(min, max);
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<int>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = ofRandom(min,max);
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = static_cast<int>(round(val));
     }
 };
 
 class ParamIntList : public Param {
-public:
+   public:
     vector<int> listOptions;
     int value = 0;
-    
-    void post(){
+
+    void post() {
         cout << value << " (whole list:";
-        for(int op : listOptions){
+        for (int op : listOptions) {
             cout << " " << op;
         }
         cout << ")";
     }
-    
-    void setup(vector<int> list, int val){
+
+    void setup(vector<int> list, int val) {
         listOptions = list;
         value = val;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = listOptions[ofRandom(listOptions.size())];
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<int>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = listOptions[ofRandom(listOptions.size())];
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = static_cast<int>(round(val));
     }
 };
 
 class ParamEnum : public Param {
-public:
+   public:
     int nEntries = 0;
     int value = 0;
-    
-    void post(){
+
+    void post() {
         cout << value;
     }
-    
-    void setup(int nEntries_, int val){
+
+    void setup(int nEntries_, int val) {
         nEntries_ = nEntries;
         value = val;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = (int)ofRandom(nEntries);
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<int>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = (int)ofRandom(nEntries);
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = static_cast<int>(round(val));
     }
 };
 
 class ParamEnumWeighted : public Param {
-public:
+   public:
     vector<int> options;
     int value = 0;
-    
-    void post(){
+
+    void post() {
         cout << value;
     }
-    
-    void setup(vector<int> options_, int val){
+
+    void setup(vector<int> options_, int val) {
         options = options_;
         value = val;
     }
-    
-    ofJson save(){
-        ofJson dict;
-        dict["value"] = value;
-        return dict;
+
+    void newRandom() {
+        if (randomizable) value = options[ofRandom(options.size())];
     }
-    
-    void load(ofJson &y){
-        value = y["value"].get<int>();
-    }
-    
-    void newRandom(){
-        if(randomizable) value = options[ofRandom(options.size())];
-    }
-    
-    void setValue(float val){
+
+    void setValue(float val) {
         value = static_cast<int>(round(val));
     }
 };

@@ -12,14 +12,13 @@
 
 #include <VisualModule.hpp>
 
-#include "FlowField.hpp"
 #include "MoviePoint.hpp"
 #include "Param.hpp"
 #include "defines.h"
 #include "ofMain.h"
 #include "ofxHapPlayer.h"
 
-#define N_CLUSTERS 4
+// #define N_CLUSTERS 4
 #define VIDEO_MINI_WIDTH 32
 #define VIDEO_MINI_HEIGHT 32
 
@@ -39,8 +38,8 @@ class Video {
    public:
     ofxHapPlayer hap;
     ofVideoPlayer mini_vid;
-    ofColor center_colors[N_CLUSTERS];
-    int center_color_indices[N_CLUSTERS];
+    // ofColor center_colors[N_CLUSTERS];
+    // int center_color_indices[N_CLUSTERS];
 
     bool clustered = true;
     vector<ofFile> pngs;
@@ -84,23 +83,22 @@ class Video {
             mini_vid.play();
         }
 
-        for (int i = 0; i < N_CLUSTERS; i++) {
-            center_color_indices[i] = ofRandom(MAGNITUDES_LEN);
-        }
+        // for (int i = 0; i < N_CLUSTERS; i++) {
+        //     center_color_indices[i] = ofRandom(MAGNITUDES_LEN);
+        // }
     }
 };
 
 class VideoModule : public VisualModule {
    public:
+    VideoModule() : points(4) {
+    }
+
     vector<Video*> videos;
 
     ofTexture texture;
-    ofVec3f points[4];
+    vector<glm::vec3> points;
     ofPixels mini_pix;
-
-    float** mags;
-    int n_mag;
-    int mag_len;
 
     int alpha = 255;
 
@@ -110,7 +108,6 @@ class VideoModule : public VisualModule {
     ofImage mini_img;
 
     vector<MoviePoint> moviePoints;
-    FlowField* ff;
 
     bool bUseFFMaster = true;
 
@@ -145,10 +142,9 @@ class VideoModule : public VisualModule {
     ofLight light;
     ofVec3f lightPosition = {0, 0, 0};
 
-    void printStatus(){}
-    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory){}
+    void printStatus() override {}
 
-    string getName() {
+    string getName() override {
         return "HapMovie";
     }
 
@@ -156,75 +152,57 @@ class VideoModule : public VisualModule {
         return videos[currentSubVideoIndex.value];
     }
 
-    void setup(std::string& name, ofVec3f pt0, ofVec3f pt1, ofVec3f pt2, ofVec3f pt3, float** mags_, int n_mag_, int mag_len_, bool isNRT, FlowField* ff_, ofJson& config) {
-        vector<string> subDirs = config["sub-videos"].get<vector<string>>();
-        videos.resize(subDirs.size());
-
-        for (int i = 0; i < subDirs.size(); i++) {
-            Video* v = new Video();
-            videos[i] = v;
-            ofDirectory subDirPath(name + "/" + subDirs[i]);
-            if (!subDirPath.exists()) {
-                cout << subDirPath.getAbsolutePath() << " doesn't exist";
-                assert(false);
-            }
-            videos[i]->setup(subDirPath.getAbsolutePath(), isNRT);
-        }
-
-        if (isNRT) {
-            for (int i = 1; i < videos.size(); i++) {
-                assert(videos[0]->getTotalFrames() == videos[i]->getTotalFrames());
-            }
-
-            mini_img.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_IMAGE_COLOR);
-            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_PIXELS_RGBA);
-
-        } else {
-            // is real-time
-            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, videos[0]->mini_vid.getPixelFormat());
-        }
+    void setup(SystemState& s, ofJson& config) override {
+        loadVideos(s, config);
+        cout << "VideoModule::setup videos loaded\n";
 
         // speed
         speed.name = "speed";
-        speed.min = config["speed-min"].get<float>();
-        speed.max = config["speed-max"].get<float>();
-        speed.power = config["speed-pow"].get<float>();
+        speed.min = checkJsonKey(config, "speed-min", 0.8);
+        speed.max = checkJsonKey(config, "speed-max", 4);
+        speed.power = checkJsonKey(config, "speed-pow", 2);
         speed.newRandom();
         params.push_back(&speed);
 
         // speed_dir
         speedDir.name = "speedDir";
-        speedDir.randomizable = config["position-randomizable"].get<bool>();
+        speedDir.randomizable = checkJsonKey(config, "position-randomizable", true);
         speedDir.setup({-1, 1}, 1);
         params.push_back(&speedDir);
 
         // showHap
         bShowHap.name = "bShowHap";
-        bShowHap.trueProb = config["bShowHap-prob"].get<float>();  // 0.2
+        bShowHap.trueProb = checkJsonKey(config, "bShowHap-prob", 0.2);  // 0.2
         params.push_back(&bShowHap);
 
         // use_ff
         bUseFF.name = "bUseFF";
-        bUseFF.trueProb = config["use-ff-prob"].get<float>();  // 0.28
+        bUseFF.trueProb = checkJsonKey(config, "use-flow-field-prob", 0.28);  // 0.28
         params.push_back(&bUseFF);
 
         // reactive_speed;
         bReactiveSpeed.name = "reactiveSpeed";
+        bReactiveSpeed.trueProb = checkJsonKey(config, "reactive-speed-prob", 0.5);
         params.push_back(&bReactiveSpeed);
 
         // bTile;
         bTile.name = "bTile";
-        bTile.trueProb = config["bTile-prob"].get<float>();
+        bTile.trueProb = checkJsonKey(config, "bTile-prob", 0.4);
         params.push_back(&bTile);
 
         // bDontUnfoldTiles
         bDontUnfoldTiles.name = "bDontUnfoldTiles";
+        bDontUnfoldTiles.trueProb = checkJsonKey(config, "bDontUnfoldTiles-prob", 0.5);
         params.push_back(&bDontUnfoldTiles);
+
+        cout << "VideoModule::setup bDontUnfoldTiles: " << bDontUnfoldTiles.value << "\n";
 
         // rect_w_mul
         rect_w_mul.name = "rect_w_mul";
         rect_w_mul.setup(1.f, 3.f, 1.f, 1.f);
         params.push_back(&rect_w_mul);
+
+        cout << "VideoModule::setup rect_w_mul: " << rect_w_mul.value << "\n";
 
         // rect_h_mul
         rect_h_mul.name = "rect_h_mul";
@@ -258,7 +236,7 @@ class VideoModule : public VisualModule {
 
         // bZShiftBoxes
         bZShiftBoxes.name = "bZShiftBoxes";
-        bZShiftBoxes.trueProb = config["bZShiftBoxes-prob"].get<float>();
+        bZShiftBoxes.trueProb = checkJsonKey(config, "bZShiftBoxes-prob", 0.5);
         params.push_back(&bZShiftBoxes);
 
         // rectType
@@ -268,7 +246,7 @@ class VideoModule : public VisualModule {
 
         // nrtPlayHead
         nrtPlayHead.name = "nrtPlayHead";
-        nrtPlayHead.randomizable = config["position-randomizable"].get<bool>();
+        nrtPlayHead.randomizable = checkJsonKey(config, "position-randomizable", true);
         nrtPlayHead.setup(0.f, videos[0]->getTotalFrames(), 1.f, 0.f);
         params.push_back(&nrtPlayHead);
 
@@ -277,43 +255,36 @@ class VideoModule : public VisualModule {
         currentSubVideoIndex.setup(0, videos.size(), 0);  // max argument is just used for randomness, it is [min,max)
         params.push_back(&currentSubVideoIndex);
 
-        mags = mags_;
-        points[0] = pt0;
-        points[1] = pt1;
-        points[2] = pt2;
-        points[3] = pt3;
-
-        ff = ff_;
+        cout << "VideoModule::setup params size: " << params.size() << "\n";
 
         type = HAP;
 
         moviePoints.resize(VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT);
         for (int i = 0; i < VIDEO_MINI_WIDTH; i++) {
             for (int j = 0; j < VIDEO_MINI_HEIGHT; j++) {
-                moviePoints[(j * VIDEO_MINI_WIDTH) + i].setup(i / float(VIDEO_MINI_WIDTH), j / float(VIDEO_MINI_HEIGHT));
+                int index = (j * VIDEO_MINI_WIDTH) + i;
+                cout << "VideoModule::setup index: " << index << "\n";
+                moviePoints[index].setup(i / (float)VIDEO_MINI_WIDTH, j / (float)VIDEO_MINI_HEIGHT);
             }
         }
+
+        cout << "VideoModule::setup moviePoints size: " << moviePoints.size() << "\n";
 
         light.setPointLight();
         light.setAmbientColor(0);
 
-        processConfigFile(config);
+        newParams(s);
+        cout << "VideoModule::setup newParams completed\n";
+        loadState(s, config);
+        cout << "VideoModule::setup loadState completed\n";
     }
 
-    void processConfigFile(ofJson& dict) {
-        for (Param* p : params) {
-            if (dict.contains(p->name)) {
-                p->setValue(dict[p->name].get<float>());
-            }
-        }
-    }
-
-    void update(bool isNRT, std::unordered_map<std::string, float>* common_features, bool verbose) {
+    void update(SystemState& s) override {
         if (bReactiveSpeed.value) {
-            speed.value = ofMap(pow(common_features->at("specFlatness"), 3.f), 0.f, 1.f, 0.8, 10);
+            speed.value = ofMap(pow(s.features.spectral_flatness, 3.f), 0.f, 1.f, 0.8, 10);
         }
 
-        if (isNRT) {
+        if (s.isNRT) {
             nrtPlayHead.value += getSpeed();
             int total_frames = videos[0]->getTotalFrames();
             while (nrtPlayHead.value < 0) nrtPlayHead.value += total_frames;
@@ -326,8 +297,41 @@ class VideoModule : public VisualModule {
         }
     }
 
-    void displayHap(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) {
-        if (isNRT) {
+    void setInitialPoints(vector<glm::vec3> pts) {
+        points = pts;
+    }
+
+    void loadVideos(SystemState& s, ofJson& config) {
+        vector<string> subDirs = config["sub-videos"].get<vector<string>>();
+        videos.resize(subDirs.size());
+
+        for (int i = 0; i < subDirs.size(); i++) {
+            Video* v = new Video();
+            videos[i] = v;
+            ofDirectory subDirPath(config["folder"].get<string>() + "/" + subDirs[i]);
+            if (!subDirPath.exists()) {
+                cout << subDirPath.getAbsolutePath() << " doesn't exist";
+                assert(false);
+            }
+            videos[i]->setup(subDirPath.getAbsolutePath(), s.isNRT);
+        }
+
+        if (s.isNRT) {
+            for (int i = 1; i < videos.size(); i++) {
+                assert(videos[0]->getTotalFrames() == videos[i]->getTotalFrames());
+            }
+
+            mini_img.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_IMAGE_COLOR);
+            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, OF_PIXELS_RGBA);
+
+        } else {
+            // is real-time
+            mini_pix.allocate(VIDEO_MINI_WIDTH, VIDEO_MINI_HEIGHT, videos[0]->mini_vid.getPixelFormat());
+        }
+    }
+
+    void displayHap(SystemState& s) {
+        if (s.isNRT) {
             img.load(videos[currentSubVideoIndex.value]->pngs[int(nrtPlayHead.value)].getAbsolutePath());
             texture = img.getTexture();
         } else {
@@ -336,69 +340,69 @@ class VideoModule : public VisualModule {
 
         if (bTile.value) {
             ofSetColor(255, tiles_alpha.value);
-            int w = width * tile_scale.value;
-            int h = height * tile_scale.value;
-            int x_off = width * tile_offset_scale.value;
-            int y_off = height * tile_offset_scale.value;
+            int w = s.fbo.getWidth() * tile_scale.value;
+            int h = s.fbo.getHeight() * tile_scale.value;
+            int x_off = s.fbo.getWidth() * tile_offset_scale.value;
+            int y_off = s.fbo.getHeight() * tile_offset_scale.value;
             int x_hop = w + x_off;
             int y_hop = h + y_off;
             int tileCounter = 0;
 
-            unsigned long long make_n_tiles = (frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
+            unsigned long long make_n_tiles = (s.frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
 
             switch (unfold_tiles_order) {
                 case LRTB:  // 0
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < height; y += y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < width; x += x_hop) {
+                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
+                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case LRBT:  // 1
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, height, height - y_hop); y > -h; y -= y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < width; x += x_hop) {
+                    for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
+                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case RLTB:  // 2
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < height; y += y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, width, width - x_hop); x > -w; x -= x_hop) {
+                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
+                        for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case RLBT:  // 3
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, height, height - y_hop); y > -h; y -= y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, width, width - x_hop); x > -w; x -= x_hop) {
+                    for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
+                        for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case TBLR:  // 4
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < width; x += x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < height; y += y_hop) {
+                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
+                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case BTLR:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < width; x += x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, height, height - y_hop); y > -h; y -= y_hop) {
+                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
+                        for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case TBRL:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, width, width - x_hop); x > -w; x -= x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < height; y += y_hop) {
+                    for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
+                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
                     break;
                 case BTRL:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, width, width - x_hop); x > -w; x -= x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, height, height - y_hop); y > -h; y -= y_hop) {
+                    for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
+                        for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
                             if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
                         }
                     }
@@ -410,9 +414,9 @@ class VideoModule : public VisualModule {
         }
     }
 
-    void displayRects(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT) {
+    void displayRects(SystemState& s) {
         // just getting the pixels
-        if (isNRT) {
+        if (s.isNRT) {
             string path = videos[currentSubVideoIndex.value]->bitexact_pngs[int(nrtPlayHead.value)].getAbsolutePath();
             mini_img.load(path);
             mini_pix = mini_img.getPixels();
@@ -423,8 +427,8 @@ class VideoModule : public VisualModule {
         ofSetLineWidth(1);
         int i_counter = 0;
         float summingmag = 0;
-        float rec_w = (width / VIDEO_MINI_WIDTH) * rect_w_mul.value;
-        float rec_h = (height / VIDEO_MINI_HEIGHT) * rect_h_mul.value;
+        float rec_w = (s.fbo.getWidth() / VIDEO_MINI_WIDTH) * rect_w_mul.value;
+        float rec_h = (s.fbo.getHeight() / VIDEO_MINI_HEIGHT) * rect_h_mul.value;
         int i = 0;
         int x_pos_scaled = 0;
 
@@ -432,40 +436,40 @@ class VideoModule : public VisualModule {
         ofEnableLighting();
         light.enable();
 
-        while (i < VIDEO_MINI_WIDTH && x_pos_scaled < width) {
+        while (i < VIDEO_MINI_WIDTH && x_pos_scaled < s.fbo.getWidth()) {
             int j = 0;
             int y_pos_scaled = 0;
-            while (j < VIDEO_MINI_HEIGHT && y_pos_scaled < height) {
+            while (j < VIDEO_MINI_HEIGHT && y_pos_scaled < s.fbo.getHeight()) {
                 ofColor col = mini_pix.getColor(i, j);
 
-                for (int i = 0; i < N_CLUSTERS; i++) {
-                    if (videos[currentSubVideoIndex.value]->center_color_indices[i] == i_counter) {
-                        videos[currentSubVideoIndex.value]->center_colors[i] = col;
-                        break;
-                    }
-                }
+                // for (int i = 0; i < N_CLUSTERS; i++) {
+                //     if (videos[currentSubVideoIndex.value]->center_color_indices[i] == i_counter) {
+                //         videos[currentSubVideoIndex.value]->center_colors[i] = col;
+                //         break;
+                //     }
+                // }
 
                 // figure out the alpha
-                float local_mag = mags[0][i_counter];
+                float local_mag = s.features.magnitudes[0][i_counter];
                 summingmag += local_mag;
                 float local_alpha = ofMap(pow(local_mag, 0.5), 0.f, 1.f, -10.f, 255.f);
 
                 int x = x_pos_scaled;
                 int y = y_pos_scaled;
-                int z = ofMap(local_mag, 0.f, 1.f, height * 0.5, 0) * bZShiftBoxes.value * ((RectTypes)rectType.value != SPHERE);
+                int z = ofMap(local_mag, 0.f, 1.f, s.fbo.getHeight() * 0.5, 0) * bZShiftBoxes.value * ((RectTypes)rectType.value != SPHERE);
 
-                // get the point at this i, j and apply the force from the ff
+                // get the point at this i, j and apply the force from the flow_field
                 MoviePoint& mp = moviePoints[(j * VIDEO_MINI_WIDTH) + i];
                 if (bUseFF.value && bUseFFMaster) {
-                    ofVec3f force = ff->getOrientationFromPos(mp.pos);
+                    ofVec3f force = s.flow_field->getOrientationFromPos(mp.pos);
                     force.normalize();
-                    force.operator*=(common_features->at("specCentroid") * 0.002);
-                    force.z = 0.0005 * common_features->at("specFlatness");
+                    force *= s.features.spectral_centroid * 0.002;
+                    force.z = 0.0005 * s.features.spectral_flatness;
                     mp.applyForce(&force);
-                    mp.move(common_features->at("loudness") * 0.05);
-                    x = mp.pos.x * rect_w_mul.value * width;
-                    y = mp.pos.y * rect_h_mul.value * height;
-                    z = mp.pos.z * rect_h_mul.value * height * zDir;
+                    mp.move(s.features.loudness * 0.05);
+                    x = mp.pos.x * rect_w_mul.value * s.fbo.getWidth();
+                    y = mp.pos.y * rect_h_mul.value * s.fbo.getHeight();
+                    z = mp.pos.z * rect_h_mul.value * s.fbo.getHeight() * zDir;
                 }
 
                 // move to the point on the screen that we want to put the rectangle
@@ -516,8 +520,8 @@ class VideoModule : public VisualModule {
         }
     }
 
-    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float>* common_features, bool isNRT, bool verbose) {
-        if (verbose) {
+    void display(SystemState& s) override {
+        if (s.verbose) {
             cout << "VideoModule::display\n";
             cout << "\tsrc: " << videos[currentSubVideoIndex.value]->src_path << endl;
             for (Param* p : params) {
@@ -529,20 +533,16 @@ class VideoModule : public VisualModule {
         }
 
         if (bShowHap.value) {
-            displayHap(width, height, frame_num, common_features, isNRT);
+            displayHap(s);
         } else {
-            displayRects(width, height, frame_num, common_features, isNRT);
+            displayRects(s);
         }
     }
 
-    ofJson saveState() {
+    ofJson saveState() override {
         ofJson dict;
 
-        for (Param* p : params) {
-            if (p->name != "") {
-                dict[p->name] = p->save();
-            }
-        }
+        // TODO: make a ParamManager that can iterate over the params and automatically save them
 
         dict["n_new_tiles_per_frame"] = n_new_tiles_per_frame;
         dict["unfold_tiles_order"] = (int)unfold_tiles_order;
@@ -550,30 +550,28 @@ class VideoModule : public VisualModule {
         // TODO: because `lightPosition` is a ofVec3 and the nlohmann json package doesn't know what to do with this class
         //        dict["lightPosition"] = lightPosition;
 
-        for (int i = 0; i < N_CLUSTERS; i++) {
-            dict["center_color_indices" + ofToString(i)] = videos[currentSubVideoIndex.value]->center_color_indices[i];
-        }
+        // for (int i = 0; i < N_CLUSTERS; i++) {
+        //     dict["center_color_indices" + ofToString(i)] = videos[currentSubVideoIndex.value]->center_color_indices[i];
+        // }
 
         return dict;
     }
 
-    void loadState(ofJson& dict, int width, int height, VectorHistory& vecHistory, int vector_length, int history_length, bool vecHistoryFull) {
-        for (Param* p : params) {
-            if (dict[p->name]) {
-                ofJson child = dict[p->name];
-                p->load(child);
-            }
-        }
+    void loadState(SystemState& s, ofJson& dict) override {
 
-        n_new_tiles_per_frame = dict["n_new_tiles_per_frame"].get<int>();
-        unfold_tiles_order = (UnfoldTilesOrder)dict["unfold_tiles_order"].get<int>();
+        // TODO: make a ParamManager that can iterate over the dict and automatically load the params
+
+        n_new_tiles_per_frame = checkJsonKey(dict,"n_new_tiles_per_frame",4);
+        unfold_tiles_order = (UnfoldTilesOrder)checkJsonKey(dict,"unfold_tiles_order",0);
 
         // TODO:
+        // replace all ofVec3f with glm::vec3
         //        lightPosition = dict["lightPosition"].get<ofVec3f>();
 
-        for (int i = 0; i < N_CLUSTERS; i++) {
-            videos[currentSubVideoIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].get<int>();
-        }
+        // TODO: consider putting the clustering back in? but maybe with the color cut technique
+        // for (int i = 0; i < N_CLUSTERS; i++) {
+        //     videos[currentSubVideoIndex.value]->center_color_indices[i] = dict["center_color_indices" + ofToString(i)].get<int>();
+        // }
 
         for (int i = 0; i < (VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT); i++) {
             moviePoints[i].resetPos();
@@ -584,16 +582,16 @@ class VideoModule : public VisualModule {
         return speed.value * speedDir.value;
     }
 
-    void newParams(int width, int height, VectorHistory& vecHistory, unsigned long long frame_num) {
+    void newParams(SystemState& s) override {
         for (Param* p : params) {
             p->newRandom();
         }
 
         unfold_tiles_order = (UnfoldTilesOrder)ofRandom(8);
 
-        for (int i = 0; i < N_CLUSTERS; i++) {
-            videos[currentSubVideoIndex.value]->center_color_indices[i] = ofRandom(mag_len);
-        }
+        // for (int i = 0; i < N_CLUSTERS; i++) {
+        //     videos[currentSubVideoIndex.value]->center_color_indices[i] = ofRandom(s.features.magnitudes[0].size());
+        // }
 
         for (int i = 0; i < (VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT); i++) {
             moviePoints[i].resetPos();
@@ -601,18 +599,18 @@ class VideoModule : public VisualModule {
 
         n_new_tiles_per_frame = ofRandom(1, 4) + (999 * bDontUnfoldTiles.value);
 
-        counting_tiles_start_frame = frame_num;
+        counting_tiles_start_frame = s.frame_num;
 
-        lightPosition.x = ofRandom(width);
-        lightPosition.y = ofRandom(height);
-        lightPosition.z = ofRandom(height);
+        lightPosition.x = ofRandom(s.fbo.getWidth());
+        lightPosition.y = ofRandom(s.fbo.getHeight());
+        lightPosition.z = ofRandom(s.fbo.getHeight());
 
         light.setPosition(lightPosition);
     }
 
-    void interact(VisualModule* other) {}
+    void interact(SystemState& s, VisualModule* other) override {}
 
-    void receiveOSC(int width, int height, std::string label, float val) {
+    void receiveOSC(SystemState& s, std::string label, float val) override {
         for (Param* p : params) {
             if (label == p->name) {
                 p->setValue(val);
@@ -633,31 +631,32 @@ class VideoModule : public VisualModule {
         }
     }
 
-    void screenResize(int w, int h) {
-        int displayX = 0;
-        int displayW = 0;
-        float displayRatio;
-        int displayH = 0;
-        int displayY = 0;
+    // TODO: why is this needed? can't it be computed in the draw loop? is it really saving that much computation?
+    void screenResize(SystemState& s) override {
+        // int displayX = 0;
+        // int displayW = 0;
+        // float displayRatio;
+        // int displayH = 0;
+        // int displayY = 0;
 
-        if (((float)texture.getWidth() / (float)w) > ((float)texture.getHeight() / (float)h)) {
-            displayX = 0;
-            displayW = w;
-            displayRatio = (float)w / (float)texture.getWidth();
-            displayH = texture.getHeight() * displayRatio;
-            displayY = (ofGetHeight() - displayH) * 0.5;
-        } else {
-            displayY = 0;
-            displayH = h;
-            displayRatio = (float)h / (float)texture.getHeight();
-            displayW = texture.getWidth() * displayRatio;
-            displayX = (w - displayW) * 0.5;
-        }
+        // if (((float)texture.getWidth() / (float)w) > ((float)texture.getHeight() / (float)h)) {
+        //     displayX = 0;
+        //     displayW = w;
+        //     displayRatio = (float)w / (float)texture.getWidth();
+        //     displayH = texture.getHeight() * displayRatio;
+        //     displayY = (ofGetHeight() - displayH) * 0.5;
+        // } else {
+        //     displayY = 0;
+        //     displayH = h;
+        //     displayRatio = (float)h / (float)texture.getHeight();
+        //     displayW = texture.getWidth() * displayRatio;
+        //     displayX = (w - displayW) * 0.5;
+        // }
 
-        points[0].set(displayX, displayY, 0);
-        points[1].set(displayX + displayW, displayY, 0);
-        points[2].set(displayX + displayW, displayY + displayH, 0);
-        points[3].set(displayX, displayY + displayH, 0);
+        // points[0] = {displayX, displayY, 0};
+        // points[1] = {displayX + displayW, displayY, 0};
+        // points[2] = {displayX + displayW, displayY + displayH, 0};
+        // points[3] = {displayX, displayY + displayH, 0};
     }
 };
 

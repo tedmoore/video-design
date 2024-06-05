@@ -42,15 +42,12 @@ class Waveform : public VisualModule {
     rectsDirection rectsDir = ANGLE_L;
     rectsShape rects_shape = SQUARE;
 
-    // TODO: make this a vector of vectors
-    float **waveforms;
-
-    int h;
-    int *xoff;
-    int *yoff;
-    int *zoff;
-    float *hmul;
-    bool *show;
+    // int h;
+    vector<int> xoff;
+    vector<int> yoff;
+    vector<int> zoff;
+    vector<float> hmul;
+    vector<bool> show;
     float lissajous_line_width = 1.f;
     float waveform_line_width = 1.f;
     float ikeda_avg = 0.2;
@@ -62,44 +59,41 @@ class Waveform : public VisualModule {
     bool trianglesDir = true;
     bool scale_size = true;
 
-    string getName() {
+    string getName() override {
         return "Waveform";
     }
 
-    void update(bool isNRT, std::unordered_map<std::string, float> *common_features, bool verbose){}
-    void loadState(ofJson &dict, int width, int height, VectorHistory &vecHistory) {}
-    void printStatus() {}
-    void processConfigFile(ofJson &config) {}
+    void update(SystemState &s) override {}
+    void loadState(SystemState &s, ofJson &dict) override {}
+    void printStatus() override {}
 
-    void setup(int width, int height, float **waveforms_, VectorHistory &vecHistory, ofJson &config) {
+    void setup(SystemState &s, ofJson &config) override {
         lissajous_line_width = config["lissajous-line-width"].get<float>();
         waveform_line_width = config["waveform-line-width"].get<float>();
-        waveforms = waveforms_;
-        h = height;
+        // h = height;
 
         wfType.setup(config["waveform-type-weights"].get<vector<int>>(), config["waveform-type-default"].get<int>());
         wfType.setValue(1);
 
-        xoff = new int[N_WAVEFORMS];
-        yoff = new int[N_WAVEFORMS];
-        zoff = new int[N_WAVEFORMS];
+        // TODO: make these vectors...
+        xoff.resize(N_WAVEFORMS);
+        yoff.resize(N_WAVEFORMS);
+        zoff.resize(N_WAVEFORMS);
 
-        hmul = new float[N_WAVEFORMS];
-        show = new bool[N_WAVEFORMS];
+        hmul.resize(N_WAVEFORMS);
+        show.resize(N_WAVEFORMS);
 
         show[0] = true;
         xoff[0] = 0;
         zoff[0] = 0;
         hmul[0] = 1;
 
-        screenResize(width, height);
-        newParams(width, height, vecHistory, 0);
+        screenResize(s);
+        newParams(s);
     }
 
-    // void Waveform::update(){}
-
-    void display(int width, int height, unsigned long long frame_num, std::unordered_map<std::string, float> *common_features, bool isNRT, bool verbose) {
-        if (verbose) {
+    void display(SystemState &s) override {
+        if (s.verbose) {
             cout << "Waveform::display\n";
             cout << "\twfType:   " << wfType.value << endl;
         };
@@ -109,30 +103,30 @@ class Waveform : public VisualModule {
                 ofSetColor(255);
                 ofNoFill();
                 ofSetLineWidth(lissajous_line_width);
-                float w = width / 2.f;
+                float w = s.fbo.getWidth() / 2.f;
                 ofBeginShape();
                 for (int i = 0; i < WAVEFORM_LEN * 0.1; i++) {
-                    ofVertex(xoff[1] + w + (waveforms[0][i] * h), yoff[1] + (waveforms[1][i] * h));
+                    ofVertex(xoff[1] + w + (s.features.waveforms[0][i] * s.fbo.getHeight()), yoff[1] + (s.features.waveforms[1][i] * s.fbo.getHeight()));
                 }
                 ofEndShape();
             } break;
             case NORM: {
                 for (int i = 0; i < N_WAVEFORMS; i++) {
                     if (show[i]) {
-                        displayWaveform(i % maxNWaveforms, xoff[i], yoff[i], zoff[i], hmul[i], width, height);
+                        displayWaveform(s, i % maxNWaveforms, xoff[i], yoff[i], zoff[i], hmul[i], s.fbo.getWidth(), s.fbo.getHeight());
                     }
                 }
             } break;
             case IKEDA: {
-                int w = width / N_WAVEFORMS;
-                float rect_height = (float)height / WAVEFORM_LEN;
-                ofSetColor(255, pow(common_features->at("loudness"), 2) * 255);  // what should the ikeda alpha be
+                int w = s.fbo.getWidth() / N_WAVEFORMS;
+                float rect_height = (float)s.fbo.getHeight() / WAVEFORM_LEN;
+                ofSetColor(255, pow(s.features.loudness, 2) * 255);  // what should the ikeda alpha be
                 ofSetLineWidth(0);
                 float runningsum = 0;
                 ofSetRectMode(OF_RECTMODE_CORNER);
                 for (int i = 0; i < N_WAVEFORMS; i++) {
                     for (int y = 0; y < WAVEFORM_LEN; y++) {
-                        float absval = abs(waveforms[i][y]);
+                        float absval = abs(s.features.waveforms[i][y]);
                         runningsum += absval;
                         if (absval > ikeda_avg) {
                             ofDrawRectangle(w * i, y * rect_height, w, rect_height);
@@ -140,30 +134,30 @@ class Waveform : public VisualModule {
                     }
                 }
 
-                ikeda_avg = ofLerp(ikeda_avg, (runningsum / (N_WAVEFORMS * height)), 0.01);
+                ikeda_avg = ofLerp(ikeda_avg, (runningsum / (N_WAVEFORMS * s.fbo.getHeight())), 0.01);
             } break;
             case GRID: {
-                if (verbose) {
+                if (s.verbose) {
                     cout << "\trectsDir: " << rectsDir << endl;
                 };
                 switch (rectsDir) {
                     case HEIGHT_WIDTH:
-                        traverseHeightWidth(width, height, rects_shape, verbose);
+                        traverseHeightWidth(s, rects_shape);
                         break;
                     case WIDTH_HEIGHT:
-                        traverseWidthHeight(width, height, rects_shape, verbose);
+                        traverseWidthHeight(s, rects_shape);
                         break;
                     case ANGLE_L:
-                        traverseAngleL(width, height, rects_shape);
+                        traverseAngleL(s, rects_shape);
                         break;
                     case ANGLE_R:
-                        traverseAngleR(width, height, rects_shape, verbose);
+                        traverseAngleR(s, rects_shape);
                         break;
                 }
             } break;
             case BITS: {
                 // TODO have a boolean Param for whether to draw the bits ((L to R) (T to B)) or ((T to B) (L to R))
-                int w = width / 200;
+                int w = s.fbo.getWidth() / 200;
                 int sampleCounter = 0;
                 int16_t integer;
                 bool keepGoing = true;
@@ -172,10 +166,10 @@ class Waveform : public VisualModule {
                 ofSetLineWidth(0);
 
                 int y = 0;
-                while (y < height and keepGoing) {
+                while (y < s.fbo.getHeight() and keepGoing) {
                     int x = 0;
-                    while (x < width and keepGoing) {
-                        integer = static_cast<int16_t>(waveforms[0][sampleCounter++] * 32767);
+                    while (x < s.fbo.getWidth() and keepGoing) {
+                        integer = static_cast<int16_t>(s.features.waveforms[0][sampleCounter++] * 32767);
 
                         for (int i = 0; i < N_BITS; i++)
                             if (integer & (1 << i))
@@ -191,112 +185,112 @@ class Waveform : public VisualModule {
         }
     }
 
-    void traverseHeightWidth(int width, int height, rectsShape rs, bool verbose) {
+    void traverseHeightWidth(SystemState &s, rectsShape rs) {
         int counter = 0;
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
 
-        if (verbose) {
-            cout << "\treceived width:  " << width << endl;
-            cout << "\trecieved height: " << height << endl;
+        if (s.verbose) {
+            cout << "\treceived width:  " << s.fbo.getWidth() << endl;
+            cout << "\trecieved height: " << s.fbo.getHeight() << endl;
             cout << "\tside: " << side << endl;
         };
 
-        int n_down = (height / side) + 1;
-        int n_across = (width / side) + 1;
+        int n_down = (s.fbo.getHeight() / side) + 1;
+        int n_across = (s.fbo.getWidth() / side) + 1;
 
         for (int j = 0; j < n_down; j++) {
             for (int i = 0; i < n_across; i++) {
-                drawShape(i, j, side, rs, counter);
+                drawShape(s, i, j, side, rs, counter);
                 counter++;
             }
         }
     }
 
-    void traverseWidthHeight(int width, int height, rectsShape rs, bool verbose) {
+    void traverseWidthHeight(SystemState &s, rectsShape rs) {
         int counter = 0;
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
 
-        if (verbose) {
-            cout << "\treceived width:  " << width << endl;
-            cout << "\trecieved height: " << height << endl;
+        if (s.verbose) {
+            cout << "\treceived width:  " << s.fbo.getWidth() << endl;
+            cout << "\trecieved height: " << s.fbo.getHeight() << endl;
             cout << "\tside: " << side << endl;
         };
 
-        int n_down = (height / side) + 1;
-        int n_across = (width / side) + 1;
+        int n_down = (s.fbo.getHeight() / side) + 1;
+        int n_across = (s.fbo.getWidth() / side) + 1;
 
         for (int i = 0; i < n_across; i++) {
             for (int j = 0; j < n_down; j++) {
-                drawShape(i, j, side, rs, counter);
+                drawShape(s, i, j, side, rs, counter);
                 counter++;
             }
         }
     }
 
-    void traverseAngleL(int width, int height, rectsShape rs) {
+    void traverseAngleL(SystemState &s, rectsShape rs) {
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
 
-        int i = (width / side) + 1;
-        int j = (height / side) + 1;
+        int i = (s.fbo.getWidth() / side) + 1;
+        int j = (s.fbo.getHeight() / side) + 1;
         int counter = 0;
 
         for (int x = 0; x < i; x++) {
-            counter = getNextRect(x, 0, i, j, counter, -1, side, rs);
+            counter = getNextRect(s, x, 0, i, j, counter, -1, side, rs);
         }
 
         for (int y = 1; y < j; y++) {
-            counter = getNextRect(i - 1, y, i, j, counter, -1, side, rs);
+            counter = getNextRect(s, i - 1, y, i, j, counter, -1, side, rs);
         }
     }
 
-    void traverseAngleR(int width, int height, rectsShape rs, bool verbose) {
+    void traverseAngleR(SystemState &s, rectsShape rs) {
         int side = (rect_side * (rs != TWO_TRIANGLES)) + (triangle_side * (rs == TWO_TRIANGLES));
 
-        int i = (width / side) + 1;
-        int j = (height / side) + 1;
+        int i = (s.fbo.getWidth() / side) + 1;
+        int j = (s.fbo.getHeight() / side) + 1;
         int counter = 0;
 
-        if (verbose) {
+        if (s.verbose) {
             cout << "\t\tside: " << side << endl;
             cout << "\t\ti:    " << i << endl;
             cout << "\t\tj:    " << j << endl;
         }
 
         for (int x = (i - 1); x >= 0; x--) {
-            counter = getNextRect(x, 0, i, j, counter, 1, side, rs);
+            counter = getNextRect(s,x, 0, i, j, counter, 1, side, rs);
         }
 
         for (int y = 1; y < j; y++) {
-            counter = getNextRect(0, y, i, j, counter, 1, side, rs);
+            counter = getNextRect(s,0, y, i, j, counter, 1, side, rs);
         }
     }
 
-    int getNextRect(int x, int y, int i, int j, int counter, int xplus, int side, rectsShape rs) {
-        drawShape(x, y, side, rs, counter);
+    int getNextRect(SystemState &s, int x, int y, int i, int j, int counter, int xplus, int side, rectsShape rs) {
+        drawShape(s, x, y, side, rs, counter);
 
         x += xplus;
         y += 1;
 
         if ((x >= 0) && (y < j) && (x < i)) {
-            return getNextRect(x, y, i, j, counter + 1, xplus, side, rs);
+            return getNextRect(s,x, y, i, j, counter + 1, xplus, side, rs);
         }
 
         return counter++;
     }
 
-    void drawShape(int i, int j, int side, rectsShape rs, int counter) {
+    void drawShape(SystemState &s, int i, int j, int side, rectsShape rs, int counter) {
         switch (rs) {
             case SQUARE:
                 ofSetRectMode(OF_RECTMODE_CENTER);
-                drawSquare(i * side, j * side, side, abs(waveforms[int(counter / WAVEFORM_LEN)][counter % WAVEFORM_LEN]));
+                drawSquare(i * side, j * side, side, abs(s.features.waveforms[int(counter / WAVEFORM_LEN)][counter % WAVEFORM_LEN]));
                 break;
 
             case CIRCLE:
-                drawCircle(i * side, j * side, side, abs(waveforms[int(counter / WAVEFORM_LEN)][counter % WAVEFORM_LEN]));
+                drawCircle(i * side, j * side, side, abs(s.features.waveforms[int(counter / WAVEFORM_LEN)][counter % WAVEFORM_LEN]));
                 break;
 
             case TWO_TRIANGLES:
-                drawTwoTriangles(i * side, j * side, side, counter);
+                drawTwoTriangles(s, i * side, j * side, side, counter);
                 break;
         }
     }
@@ -308,21 +302,21 @@ class Waveform : public VisualModule {
         ofDrawRectangle(x + half_side, y + half_side, side_scaled, side_scaled);
     }
 
-    void drawTwoTriangles(int x, int y, int side, int counter) {
+    void drawTwoTriangles(SystemState &s, int x, int y, int side, int counter) {
         ofPushMatrix();
         int half_side = side / 2;
         ofTranslate(x + half_side, y + half_side);
 
         ofRotateZDeg(90.f * trianglesDir);
 
-        ofSetColor(255, abs(waveforms[0][counter % WAVEFORM_LEN]) * 255);
+        ofSetColor(255, abs(s.features.waveforms[0][counter % WAVEFORM_LEN]) * 255);
         ofBeginShape();
         ofVertex(-half_side, -half_side);
         ofVertex(half_side, -half_side);
         ofVertex(half_side, half_side);
         ofEndShape();
 
-        ofSetColor(255, abs(waveforms[1][counter % WAVEFORM_LEN]) * 255);
+        ofSetColor(255, abs(s.features.waveforms[1][counter % WAVEFORM_LEN]) * 255);
         ofBeginShape();
         ofVertex(-half_side, -half_side);
         ofVertex(-half_side, half_side);
@@ -339,21 +333,21 @@ class Waveform : public VisualModule {
         ofDrawCircle(x + half_side, y + half_side, r);
     }
 
-    void displayWaveform(int wf_int, int x, int y, int z, float hmul2, int display_width, int display_height) {
+    void displayWaveform(SystemState &s, int wf_int, int x, int y, int z, float hmul2, int display_width, int display_height) {
         ofSetColor(255, 255, 255, 255);
         ofNoFill();
         ofSetLineWidth(waveform_line_width);
         ofBeginShape();
         float xhop = (float)display_width / (float)WAVEFORM_LEN;
         for (int i = 0; i < WAVEFORM_LEN; i++) {
-            float y2 = y + (waveforms[wf_int][i] * h * hmul2);
+            float y2 = y + (s.features.waveforms[wf_int][i] * s.fbo.getHeight() * hmul2);
             float x2 = x + (i * xhop);
             ofVertex(x2, y2, -z);
         }
         ofEndShape();
     }
 
-    void newParams(int width, int height, VectorHistory &vecHistory, unsigned long long frame_num) {
+    void newParams(SystemState &s) override {
         wfType.newRandom();
 
         rectsDir = (rectsDirection)ofRandom(5);
@@ -363,9 +357,9 @@ class Waveform : public VisualModule {
 
         for (int i = 0; i < N_WAVEFORMS; i++) {
             if (i > 0) {
-                xoff[i] = ofRandom(-width, width);
-                yoff[i] = ofRandom(0, height);
-                zoff[i] = ofRandom(0, height);
+                xoff[i] = ofRandom(-s.fbo.getWidth(), s.fbo.getWidth());
+                yoff[i] = ofRandom(0, s.fbo.getHeight());
+                zoff[i] = ofRandom(0, s.fbo.getHeight());
                 show[i] = ofRandom(1.0) > 0.5;
             }
 
@@ -373,7 +367,7 @@ class Waveform : public VisualModule {
         }
     }
 
-    ofJson saveState() {
+    ofJson saveState() override {
         ofJson dict;
 
         dict["wfType"] = wfType.value;
@@ -415,22 +409,22 @@ class Waveform : public VisualModule {
         }
     }
 
-    void interact(VisualModule *other) {}
+    void interact(SystemState &s, VisualModule *other) override {}
 
-    void receiveOSC(int width, int height, std::string label, float val) {
+    void receiveOSC(SystemState &s, std::string label, float val) override {
         if (label == "setMaxNWaveforms") {
             maxNWaveforms = int(val);
         } else if (label == "setWaveformType") {
             wfType.setValue(val);
         } else if (label == "resetLissajousXY") {
             xoff[1] = 0;
-            yoff[1] = height / 2;
+            yoff[1] = s.fbo.getHeight() / 2;
         }
     }
 
-    void screenResize(int w, int h) {
-        yoff[0] = h / 2;
-        int bigA = w * h;
+    void screenResize(SystemState &s) override {
+        yoff[0] = s.fbo.getHeight() / 2;
+        int bigA = s.fbo.getWidth() * s.fbo.getHeight();
         float littleA = bigA / WAVEFORM_LEN;
         triangle_side = ceil(sqrt(littleA));
 

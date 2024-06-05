@@ -14,20 +14,9 @@
 class VideoDesignPoint {
    public:
     ofVec3f pos, vel, acc;
-    float xsize, ysize, zmax, xmin, xmax, ymin, ymax, zmin;
-    int zDir;
 
-    void setup(float xsize_, float ysize_, float xmin_, float xmax_, float ymin_, float ymax_, float zmin_, float zmax_, int zDir_) {
-        pos.set(ofRandom(0, xsize), ofRandom(0, ysize), ofRandom(0, zmax));
-        xsize = xsize_;
-        ysize = ysize_;
-        xmin = xmin_;
-        xmax = xmax_;
-        ymin = ymin_;
-        ymax = ymax_;
-        zmin = zmin_;
-        zmax = zmax_;
-        zDir = zDir_;
+    void setup(FlowFieldParameters &ff_parameters) {
+        pos.set(ofRandom(0, ff_parameters.xsize), ofRandom(0, ff_parameters.ysize), ofRandom(0, ff_parameters.zmax));
         vel.set(0, 0, 0);
         acc.set(0, 0, 0);
     }
@@ -62,17 +51,18 @@ class VideoDesignPoint {
         pos.z += ofRandom(-mag, mag);
     }
 
-    void checkEdges() {
-        if (pos.x >= xmax) pos.x = xmin;
-        if (pos.x < xmin) pos.x = xmax;
-        if (pos.y >= ymax) pos.y = ymin;
-        if (pos.y < ymin) pos.y = ymax;
-        if (pos.z >= zmax) pos.z = zmin;
-        if (pos.z < zmin) pos.z = zmax;
+    void checkEdges(FlowFieldParameters &ff_parameters) {
+        if (pos.x >= ff_parameters.xmax) pos.x = ff_parameters.xmin;
+        if (pos.x < ff_parameters.xmin) pos.x = ff_parameters.xmax;
+        if (pos.y >= ff_parameters.ymax) pos.y = ff_parameters.ymin;
+        if (pos.y < ff_parameters.ymin) pos.y = ff_parameters.ymax;
+        if (pos.z >= ff_parameters.zmax) pos.z = ff_parameters.zmin;
+        if (pos.z < ff_parameters.zmin) pos.z = ff_parameters.zmax;
     }
 
-    void display(int width, int height, float size) {
-        ofDrawIcoSphere(pos.x * width, pos.y * height, pos.z * zDir * height, size);
+    void display(SystemState &s, float size) {
+        ofSetSphereResolution(3);
+        ofDrawIcoSphere(pos.x * s.fbo.getWidth(), pos.y * s.fbo.getHeight(), pos.z * s.flow_field->ff_parameters.zDir * s.fbo.getHeight(), size);
     }
 
     float x() {

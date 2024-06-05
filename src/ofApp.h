@@ -153,7 +153,7 @@ inline void loadConfigFile(SystemState &s, string path) {
 
     s.use_sc_onsets = checkJsonKey(s.config, "use-sc-onsets", true);
 
-    s.postGlitch.loadState(s.config["postGlitch"]);
+    s.postGlitch.loadState(s.config["post-glitch"]);
 
     s.blendModePool.clear();
     for (int i = 0; i < s.config["blend-mode-probs"].size(); i++) {
@@ -179,7 +179,7 @@ inline ofJson save(SystemState &s) {
         dict["active_vc" + ofToString(i)] = s.active_module_indices[i];
     }
 
-    dict["postGlitch"] = s.postGlitch.saveState();
+    dict["post-glitch"] = s.postGlitch.saveState();
     dict["feedback_amt"] = s.feedback_amt;
     dict["blendMode"] = (int)s.blendMode;
     dict["debug"] = s.debug;

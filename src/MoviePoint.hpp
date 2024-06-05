@@ -9,39 +9,38 @@
 #define MoviePoint_hpp
 
 #include <stdio.h>
-#include "ofMain.h"
+
 #include "LagUD.hpp"
+#include "ofMain.h"
 
 class MoviePoint {
-public:
-    ofVec3f vel, pos, acc;
-    float origx, origy;
+   public:
+    glm::vec3 vel, pos, acc, original_postiion;
     LagUD rect_outline_alpha;
-    
-    void resetPos(){
-        pos.set(origx,origy,0);
+
+    void resetPos() {
+        pos = original_postiion;
     }
-    
-    void setup(float origx_, float origy_){
-        origx = origx_;
-        origy = origy_;
-        
-        rect_outline_alpha.setup(1.f,0.14,0);
-        
+
+    void setup(float origx_, float origy_) {
+        original_postiion = {origx_, origy_, 0};
+
+        rect_outline_alpha.setup(1.f, 0.14, 0);
+
         resetPos();
-        vel.set(0,0,0);
-        acc.set(0,0,0);
+        vel = {0, 0, 0};
+        acc = {0, 0, 0};
     }
-    
-    void applyForce(ofVec3f *force){
-        acc.operator+=(*force);
+
+    void applyForce(glm::vec3 &force) {
+        acc += force;
     }
-    
-    void move(float velLimit){
-        vel.operator+=(acc);
-        vel.limit(velLimit);
-        pos.operator+=(vel);
-        acc.operator*=(0);
+
+    void move(float velLimit) {
+        vel += acc;
+        vel = limit(vel, velLimit);
+        pos += vel;
+        acc *= 0;
     }
 };
 

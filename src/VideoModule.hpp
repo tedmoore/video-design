@@ -140,7 +140,7 @@ class VideoModule : public VisualModule {
     ParamEnumWeighted rectType;
 
     ofLight light;
-    ofVec3f lightPosition = {0, 0, 0};
+    glm::vec3 lightPosition = {0, 0, 0};
 
     void printStatus() override {}
 
@@ -461,11 +461,11 @@ class VideoModule : public VisualModule {
                 // get the point at this i, j and apply the force from the flow_field
                 MoviePoint& mp = moviePoints[(j * VIDEO_MINI_WIDTH) + i];
                 if (bUseFF.value && bUseFFMaster) {
-                    ofVec3f force = s.flow_field->getOrientationFromPos(mp.pos);
-                    force.normalize();
+                    glm::vec3 force = s.flow_field->getOrientationFromPos(mp.pos);
+                    force /= force.length();
                     force *= s.features.spectral_centroid * 0.002;
                     force.z = 0.0005 * s.features.spectral_flatness;
-                    mp.applyForce(&force);
+                    mp.applyForce(force);
                     mp.move(s.features.loudness * 0.05);
                     x = mp.pos.x * rect_w_mul.value * s.fbo.getWidth();
                     y = mp.pos.y * rect_h_mul.value * s.fbo.getHeight();
@@ -565,8 +565,8 @@ class VideoModule : public VisualModule {
         unfold_tiles_order = (UnfoldTilesOrder)checkJsonKey(dict,"unfold_tiles_order",0);
 
         // TODO:
-        // replace all ofVec3f with glm::vec3
-        //        lightPosition = dict["lightPosition"].get<ofVec3f>();
+        // replace all glm::vec3 with glm::vec3
+        //        lightPosition = dict["lightPosition"].get<glm::vec3>();
 
         // TODO: consider putting the clustering back in? but maybe with the color cut technique
         // for (int i = 0; i < N_CLUSTERS; i++) {

@@ -15,7 +15,7 @@
 
 class Turtle : public VisualModule {
    public:
-    vector<ofVec3f> path;
+    vector<glm::vec3> path;
     int divisor_i = 0;
     vector<int> divisors;
     int angle = 0;
@@ -44,7 +44,7 @@ class Turtle : public VisualModule {
         newParams(s);
     }
 
-    bool onScreen(ofVec3f pt, int width, int height) {
+    bool onScreen(glm::vec3 pt, int width, int height) {
         bool a = pt.x >= 0;
         bool b = pt.x < width;
         bool c = pt.y >= 0;
@@ -63,14 +63,14 @@ class Turtle : public VisualModule {
                 // using degrees
                 int turns = int(ofRandom(divisors[divisor_i]));  // how many turns of "angle" degrees to make;
 
-                ofVec3f newvec(stepSize * int(ofRandom(1, 4) * scale_factor), 0, 0);
+                glm::vec3 newvec(stepSize * int(ofRandom(1, 4) * scale_factor), 0, 0);
 
                 for (int j = 0; j < turns; j++) {
-                    newvec.rotate(0, 0, angle);
+                    newvec = glm::rotateZ(newvec,glm::radians(angle));
                 }
 
                 while (!onScreen(newvec + path[path.size() - 1], s.fbo.getWidth(), s.fbo.getHeight())) {
-                    newvec.rotate(0, 0, angle);
+                    newvec = glm::rotateZ(newvec,glm::radians(angle));
                 }
 
                 newvec += path[path.size() - 1];
@@ -101,7 +101,7 @@ class Turtle : public VisualModule {
         frame_counter = 0;
         angle = 360 / divisors[divisor_i];
         path.clear();
-        path.push_back(ofVec3f(ofRandom(s.fbo.getWidth()), ofRandom(s.fbo.getHeight()), 0));
+        path.push_back(glm::vec3(ofRandom(s.fbo.getWidth()), ofRandom(s.fbo.getHeight()), 0));
     }
 
     ofJson saveState() override {

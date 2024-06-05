@@ -13,36 +13,36 @@
 
 class VideoDesignPoint {
    public:
-    ofVec3f pos, vel, acc;
+    glm::vec3 pos, vel, acc;
 
-    void setup(FlowFieldParameters &ff_parameters) {
-        pos.set(ofRandom(0, ff_parameters.xsize), ofRandom(0, ff_parameters.ysize), ofRandom(0, ff_parameters.zmax));
-        vel.set(0, 0, 0);
-        acc.set(0, 0, 0);
+    void setup(FlowFieldParameters& ff_parameters) {
+        pos = {ofRandom(0, ff_parameters.xsize), ofRandom(0, ff_parameters.ysize), ofRandom(0, ff_parameters.zmax)};
+        vel = {0, 0, 0};
+        acc = {0, 0, 0};
     }
 
-    void applyForce(ofVec3f* force) {
-        acc.operator+=(*force);
+    void applyForce(glm::vec3 &force) {
+        acc += force;
     }
 
     void move(float jitterMag, float velLimit) {
-        vel.operator+=(acc);
-        vel.limit(velLimit);
-        pos.operator+=(vel);
+        vel += acc;
+        vel = limit(vel, velLimit);
+        pos += vel;
         jitter(jitterMag);
-        acc.operator*=(0.0);
+        acc *= 0.0 ;
     }
 
-    void add(ofVec3f* other) {
-        pos.operator+=(*other);
+    void add(glm::vec3 &other) {
+        pos += other;
     }
 
     void setXYZ(float x_, float y_, float z_) {
         pos.x = x_;
         pos.y = y_;
         pos.z = z_;
-        vel.operator*=(0.0);
-        acc.operator*=(0.0);
+        vel *= 0.0;
+        acc *= 0.0;
     }
 
     void jitter(float mag) {
@@ -51,7 +51,7 @@ class VideoDesignPoint {
         pos.z += ofRandom(-mag, mag);
     }
 
-    void checkEdges(FlowFieldParameters &ff_parameters) {
+    void checkEdges(FlowFieldParameters& ff_parameters) {
         if (pos.x >= ff_parameters.xmax) pos.x = ff_parameters.xmin;
         if (pos.x < ff_parameters.xmin) pos.x = ff_parameters.xmax;
         if (pos.y >= ff_parameters.ymax) pos.y = ff_parameters.ymin;
@@ -60,7 +60,7 @@ class VideoDesignPoint {
         if (pos.z < ff_parameters.zmin) pos.z = ff_parameters.zmax;
     }
 
-    void display(SystemState &s, float size) {
+    void display(SystemState& s, float size) {
         ofSetSphereResolution(3);
         ofDrawIcoSphere(pos.x * s.fbo.getWidth(), pos.y * s.fbo.getHeight(), pos.z * s.flow_field->ff_parameters.zDir * s.fbo.getHeight(), size);
     }
@@ -76,7 +76,7 @@ class VideoDesignPoint {
     }
 
     float distanceTo(const VideoDesignPoint& other) {
-        return pos.distance(other.pos);
+        return glm::distance(pos, other.pos);
     }
 };
 #endif /* Point_hpp */

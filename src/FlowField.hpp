@@ -97,7 +97,7 @@ class FlowField {
         return (k * ff_parameters.resolution * ff_parameters.resolution) + (j * ff_parameters.resolution) + i;
     }
 
-    ofVec3f getOrientationFromPos(ofVec3f pos) {
+    glm::vec3 getOrientationFromPos(glm::vec3 pos) {
         // println(width,height);
         // println(pos);
         // cout << pos << "\n";

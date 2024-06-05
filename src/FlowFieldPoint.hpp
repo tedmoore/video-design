@@ -14,8 +14,8 @@
 class FlowFieldPoint {
 public:
     
-    ofVec3f pos;
-    ofVec3f orientation;
+    glm::vec3 pos;
+    glm::vec3 orientation;
     int i, j, k;
     float scaler = 0.15;
     
@@ -23,8 +23,8 @@ public:
         i = i_;
         j = j_;
         k = k_;
-        pos.set(x, y, z);
-        orientation.set(0, 0, 0);
+        pos = {x, y, z};
+        orientation = {0, 0, 0};
         
         randomOrientation();
     }
@@ -33,7 +33,7 @@ public:
         orientation.x = ofRandom(-1.0, 1.0);
         orientation.y = ofRandom(-1.0, 1.0);
         orientation.z = ofRandom(-1.0, 1.0);
-        orientation.normalize();
+        orientation /= orientation.length();
         orientation *= 20;
     }
 
@@ -51,8 +51,8 @@ public:
         orientation.y = sin(theta) * sin(phi);
         orientation.x = cos(theta) * -1;
         
-        orientation.normalize();
-        orientation.operator*=(5);
+        orientation /= orientation.length();
+        orientation *= 5 ;
     }
 
     void display() {

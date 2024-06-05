@@ -54,7 +54,7 @@ class Mesh : public VisualModule {
         jitter_mul = checkJsonKey(dict, "jitter-mul", 0.006);
         dist_thresh_mul = checkJsonKey(dict, "dist-thresh-mul", 0.15);
         useFF = checkJsonKey(dict, "useFF", true);
-        waveformEffectDim = checkJsonKey(dict,"waveformEffectDim",0);
+        waveformEffectDim = checkJsonKey(dict, "waveformEffectDim", 0);
 
         newPointLocs(s);
     }
@@ -101,7 +101,7 @@ class Mesh : public VisualModule {
             }
         } else {
             for (int i = 0; i < nPoints; i++) {
-                points[i].setXYZ(ofRandom(0, s.flow_field->ff_parameters.xsize), ofRandom(0,s.flow_field->ff_parameters.ysize), ofRandom(0,s.flow_field->ff_parameters.zmax));
+                points[i].setXYZ(ofRandom(0, s.flow_field->ff_parameters.xsize), ofRandom(0, s.flow_field->ff_parameters.ysize), ofRandom(0, s.flow_field->ff_parameters.zmax));
             }
         }
     }
@@ -154,10 +154,10 @@ class Mesh : public VisualModule {
 
         for (int i = 0; i < nPoints; i++) {
             if (useFF && useFFmaster) {
-                ofVec3f ori = s.flow_field->getOrientationFromPos(points[i].pos);
-                ori.normalize();
+                glm::vec3 ori = s.flow_field->getOrientationFromPos(points[i].pos);
+                ori /= ori.length();
                 ori *= speed * flow_field_influence;  // this float multiplier changes the amount that the flow field affects the point's direction
-                points[i].applyForce(&ori);
+                points[i].applyForce(ori);
             }
             if (!waveformTracking) {
                 points[i].move(jitterMag.value, velLimit.value);
@@ -210,20 +210,9 @@ class Mesh : public VisualModule {
                     float wfb = s.features.waveforms[0][wfBI];
                     // make the y direction a result of that
                     float y = (wfb - wfa) * 0.1;
-                    // println(y);
-                    // if(i == 0) println(y);
-                    ofVec3f offset;
-
-                    if (waveformEffectDim == 0) {
-                        offset.set(y, 0, 0);
-                    } else if (waveformEffectDim == 1) {
-                        offset.set(0, y, 0);
-                    } else {
-                        offset.set(0, 0, y);
-                    }
-                    // force.mult(3);
-                    // println(force);
-                    points[i].add(&offset);
+                    glm::vec3 offset(0, 0, 0);
+                    offset[waveformEffectDim] = y;
+                    points[i].add(offset);
                 }
                 break;
         }

@@ -26,4 +26,15 @@ T checkJsonKey(ofJson &j, std::string key, T default_val) {
     }
 }
 
+inline glm::vec3 limit(glm::vec3 &v, float max) {
+    float lengthSquared = (v.x*v.x + v.y*v.y + v.z*v.z);
+    if( lengthSquared > max*max && lengthSquared > 0 ) {
+        float ratio = max/(float)sqrt(lengthSquared);
+        v.x *= ratio;
+        v.y *= ratio;
+        v.z *= ratio;
+    }
+    return v;
+}
+
 #endif /* defines_h */

@@ -321,6 +321,8 @@ void renderFrame(SystemState &s) {
     }
 
     s.fbo.end();
+
+    // TODO: maybe the fx should be generated in between the modules sometimes?
     s.postGlitch.generateFx(s.features);
 }
 

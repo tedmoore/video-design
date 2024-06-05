@@ -129,26 +129,29 @@ class Mesh : public VisualModule {
 
     void display(SystemState &s) override {
         ofEnableLighting();
+        // ofEnableDepthTest();
+        // ofEnableBlendMode(OF_BLENDMODE_ADD);
         light.enable();
-        ofFill();
 
         jitterMag.update(s.features.loudness * jitter_mul);
         float distThresh = 0.02 + (s.features.sensory_dissonance * dist_thresh_mul);
         int n_lines = 0;
         velLimit.update((s.features.loudness * speed) + minSpeed);
 
-        cout << "Mesh" << endl;
-        cout << "\tamp: " << s.features.loudness << endl;
-        cout << "\tsensDis: " << s.features.sensory_dissonance << endl;
-        cout << "\tjitter_mul: " << jitter_mul << endl;
-        cout << "\tjitterMag: " << jitterMag.value << endl;
-        cout << "\tdist_thresh_mul: " << dist_thresh_mul << endl;
-        cout << "\tuseFF: " << useFF << endl;
-        cout << "\tdistThresh: " << distThresh << endl;
-        cout << "\tmin speed: " << minSpeed << endl;
-        cout << "\tspeed: " << speed << endl;
-        cout << "\tflow field influence: " << flow_field_influence << endl;
-
+        if (s.verbose) {
+            cout << "Mesh" << endl;
+            cout << "\tamp: " << s.features.loudness << endl;
+            cout << "\tsensDis: " << s.features.sensory_dissonance << endl;
+            cout << "\tjitter_mul: " << jitter_mul << endl;
+            cout << "\tjitterMag: " << jitterMag.value << endl;
+            cout << "\tdist_thresh_mul: " << dist_thresh_mul << endl;
+            cout << "\tuseFF: " << useFF << endl;
+            cout << "\tdistThresh: " << distThresh << endl;
+            cout << "\tmin speed: " << minSpeed << endl;
+            cout << "\tspeed: " << speed << endl;
+            cout << "\tflow field influence: " << flow_field_influence << endl;
+        }
+        
         ofFill();
         ofSetColor(255, 255);
 
@@ -188,6 +191,8 @@ class Mesh : public VisualModule {
         waveformTracking = false;
 
         light.disable();
+        // ofEnableBlendMode(s.blendMode);
+        // ofDisableDepthTest();
         ofDisableLighting();
     }
 

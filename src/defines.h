@@ -37,4 +37,8 @@ inline glm::vec3 limit(glm::vec3 &v, float max) {
     return v;
 }
 
+inline bool endsWith(const std::string& str, const std::string& suffix) {
+    return str.rfind(suffix) == (str.size() - suffix.size());
+}
+
 #endif /* defines_h */

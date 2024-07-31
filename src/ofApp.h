@@ -162,8 +162,10 @@ inline void loadConfigFile(SystemState &s, string path) {
             s.blendModePool.push_back(i);
         }
     }
+    cout << "Blend Mode Pool loaded" << endl;
 
     for (int i = 0; i < s.n_modules; i++) {
+        cout << "Loading Module " << i << endl;
         s.modules[i]->loadState(s, s.config["modules"][i]);
     }
 }

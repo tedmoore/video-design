@@ -12,7 +12,7 @@ s.waitForBoot({
 	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
 
-	var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/reaper/02/_bounces/240317_183254/240317_183254-mvt-2-tape.wav");
+	var audio_buf = Buffer.read(s,"/Volumes/2024-May-Ted-Moore/arco/reaper/02/_bounces/240317_183254/240317_183254-mvt-2-tape.wav");
 
 	outpath.postln;
 
@@ -109,7 +109,7 @@ s.waitForBoot({
 });
 )
 
-/*~synth.set(\t_force_onset,1);
+~synth.set(\t_force_onset,1);
 ~synth.set(\onset_thresh,0.5);
 ~synth.set(\allow_onsets,0);
 ~synth.set(\allow_onsets,1);

@@ -23,7 +23,7 @@ class Mesh : public VisualModule {
     LagUD velLimit;
     int waveformEffectDim = 0;
     bool useFF = false, useFFmaster = true;
-    int maxLines = 1500;
+    int maxLines = 0;
     vector<VideoDesignPoint> points;
 
     float line_width = 1;
@@ -55,7 +55,7 @@ class Mesh : public VisualModule {
         dist_thresh_mul = checkJsonKey(dict, "dist-thresh-mul", 0.15);
         useFF = checkJsonKey(dict, "useFF", true);
         waveformEffectDim = checkJsonKey(dict, "waveformEffectDim", 0);
-
+        maxLines = checkJsonKey(dict, "maxLines", 0);
         newPointLocs(s);
     }
 
@@ -134,7 +134,7 @@ class Mesh : public VisualModule {
         light.enable();
 
         jitterMag.update(s.features.loudness * jitter_mul);
-        float distThresh = 0.02 + (s.features.sensory_dissonance * dist_thresh_mul);
+        float distThresh = 0.03 + (s.features.sensory_dissonance * dist_thresh_mul);
         int n_lines = 0;
         velLimit.update((s.features.loudness * speed) + minSpeed);
 
@@ -155,34 +155,53 @@ class Mesh : public VisualModule {
         ofFill();
         ofSetColor(255, 255);
 
+        // go through all the points...
         for (int i = 0; i < nPoints; i++) {
+
+            // if the flow field is currently being used, get the orientation from the flow field and apply it to the point
             if (useFF && useFFmaster) {
                 glm::vec3 ori = s.flow_field->getOrientationFromPos(points[i].pos);
                 ori /= ori.length();
                 ori *= speed * flow_field_influence;  // this float multiplier changes the amount that the flow field affects the point's direction
                 points[i].applyForce(ori);
             }
+
+            /* the actual waveform moving is done in the interact method, so here 
+            we're just checking to see if we need to jitter a lot (because we're not
+            waveform tracking) or a little, because we are */
             if (!waveformTracking) {
                 points[i].move(jitterMag.value, velLimit.value);
             } else {
                 points[i].move(jitterMag.value * 0.1, velLimit.value);
             }
 
+            /* make sure this point is not "off screen" (which really means) out of bounds
+            of the 3d space that has been defined... */
             points[i].checkEdges(s.flow_field->ff_parameters);
+            // display this point
             points[i].display(s, point_size);
 
-            if (i < nPoints - 1 && n_lines < maxLines) {
+            if ((i < (nPoints - 1)) && (n_lines < maxLines)) {
+                
                 int i_lines = 0;
                 for (int j = i + 1; j < nPoints; j++) {
-                    if (i_lines < maxLines * 0.01) {
+                    // each point can't have more than 1% of the total lines
+                    if (i_lines < (maxLines * 0.01)) {
+
                         float dist = points[i].distanceTo(points[j]);
+                        // cout << "dist: " << dist << " / thresh: " << distThresh;
+                        
                         if (dist < distThresh) {
-                            float alpha = ofMap(dist, 0.f, distThresh, 255.f, 0.f);
+                            int alpha = ofMap(dist, 0.f, distThresh, 255.f, 0.f,true);
+                            // cout << " alpha: " << alpha << endl;
                             ofSetColor(255, alpha);
+                            ofSetLineWidth(line_width);
                             drawLine(s, points[i], points[j], dist);
                             n_lines++;
                             i_lines++;
                         }
+
+                        // cout << endl;
                     }
                 }
             }
@@ -197,7 +216,6 @@ class Mesh : public VisualModule {
     }
 
     void drawLine(SystemState &s, VideoDesignPoint &a, VideoDesignPoint &b, float dist) {
-        ofSetLineWidth(line_width);
         ofDrawLine(a.x() * s.fbo.getWidth(), a.y() * s.fbo.getHeight(), a.z() * s.flow_field->ff_parameters.zDir * s.fbo.getHeight(), b.x() * s.fbo.getWidth(), b.y() * s.fbo.getHeight(), b.z() * s.flow_field->ff_parameters.zDir * s.fbo.getHeight());
     }
 

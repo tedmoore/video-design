@@ -350,7 +350,7 @@ class Waveform : public VisualModule {
     void newParams(SystemState &s) override {
         wfType.newRandom();
 
-        rectsDir = (rectsDirection)ofRandom(5);
+        rectsDir = (rectsDirection)ofRandom(4);
         rects_shape = (rectsShape)ofRandom(3);
         trianglesDir = ofRandom(1.f) < 0.5;
         scale_size = ofRandom(1.f) < 0.4;

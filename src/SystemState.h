@@ -2,6 +2,7 @@
 #define SYSTEMSTATE_H
 
 struct SystemState {
+    bool show_frame_rate = false;
     bool debug = false;
     bool onset_occured = false;
     bool target_framerate;

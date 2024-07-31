@@ -61,7 +61,8 @@ class VideoDesignPoint {
     }
 
     void display(SystemState& s, float size) {
-        ofSetSphereResolution(3);
+        // ofSetSphereResolution(3);
+        ofSetIcoSphereResolution(3);
         ofDrawIcoSphere(pos.x * s.fbo.getWidth(), pos.y * s.fbo.getHeight(), pos.z * s.flow_field->ff_parameters.zDir * s.fbo.getHeight(), size);
     }
 

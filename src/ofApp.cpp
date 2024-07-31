@@ -579,20 +579,27 @@ void ofApp::draw() {
         drawBounds();
     };
 
+    if (s.show_frame_rate) {
+        ofSetColor(255,0,0);
+        ofDrawBitmapString(ofToString(ofGetFrameRate()), 10, 20);
+    }
+
     s.frame_num++;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    if (key == 'd') {
+    if (key == 'd')
         s.debug = !s.debug;
-    }
-
+ 
     if (key == 'c')
         loadConfigFile(s,s.config_path);
 
     if (key == 's')
         s.use_sc_onsets = !s.use_sc_onsets;
+
+    if (key == 'f')
+        s.show_frame_rate = !s.show_frame_rate;
 
     if (key == 'o')
         onset(s);

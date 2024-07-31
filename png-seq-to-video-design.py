@@ -53,18 +53,18 @@ def make_video_variations(input,output,n_frames):
     n_digits = len(Path(files[0]).stem)
 
     # crop to center square
-    os.system(f'ffmpeg -i "{full_size_frames_path}/%0{n_digits}d.png" -vf "crop={height}:{height}:{x}:0" -start_number 0 "{small_frames_path}/%0{n_digits}d.png"')
+    os.system(f'ffmpeg -y -i "{full_size_frames_path}/%0{n_digits}d.png" -vf "crop={height}:{height}:{x}:0" -start_number 0 "{small_frames_path}/%0{n_digits}d.png"')
     # scale down to 32x32
-    os.system(f'ffmpeg -i "{small_frames_path}/%0{n_digits}d.png" -vf scale=32:32 -start_number 0 "{small_frames_path}/%0{n_digits}d.png"')
+    os.system(f'ffmpeg -y -i "{small_frames_path}/%0{n_digits}d.png" -vf scale=32:32 -start_number 0 "{small_frames_path}/%0{n_digits}d.png"')
 
     # CONVERT TO HAP (ALPHA)
-    os.system(f'ffmpeg -framerate 30 -f image2 -i "{full_size_frames_path}/%0{n_digits}d.png" -vcodec hap -format hap_alpha -pix_fmt rgba "{output}/hap.mov"')
+    os.system(f'ffmpeg -y -framerate 30 -f image2 -i "{full_size_frames_path}/%0{n_digits}d.png" -vcodec hap -format hap_alpha -pix_fmt rgba "{output}/hap.mov"')
 
     # MAKE MP4 OF SMALL IMAGES
-    os.system(f'ffmpeg -framerate 30 -pattern_type glob -i "{small_frames_path}/*.png" -c:v libx264 -pix_fmt yuv420p "{output}/mini.mp4"')
+    os.system(f'ffmpeg -y -framerate 30 -pattern_type glob -i "{small_frames_path}/*.png" -c:v libx264 -pix_fmt yuv420p "{output}/mini.mp4"')
 
     # MAKE MP4 OF ORIGINAL FOR REFERENCE
-    os.system(f'ffmpeg -framerate 30 -f image2 -i "{full_size_frames_path}/%0{n_digits}d.png" -c:v libx264 -pix_fmt yuv420p "{output}/h264.mp4"')
+    os.system(f'ffmpeg -y -framerate 30 -f image2 -i "{full_size_frames_path}/%0{n_digits}d.png" -c:v libx264 -pix_fmt yuv420p "{output}/h264.mp4"')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -72,6 +72,8 @@ if __name__ == '__main__':
     parser.add_argument('-o','--output',required=True,type=str)
     parser.add_argument('--n-frames',required=False,default=-1,type=int)
     args = parser.parse_args()
+    
+    Path(args.output).mkdir(exist_ok=True)
 
     for input in args.png_seq:
         make_video_variations(input,args.output,args.n_frames)

@@ -40,11 +40,6 @@ class Lines : public VisualModule {
         newParams(s);
 
         type = LINES;
-
-        // for (int i = 0; i < N_CLUSTERS; i++) {
-        //     ofColor col(255);
-        //     borrowed_colors[i] = col;
-        // }
     }
 
     void newParams(SystemState &s) override {
@@ -64,9 +59,9 @@ class Lines : public VisualModule {
     }
 
     void loadState(SystemState &s, ofJson &dict) override {
-        dir = (lines_direction)dict["dir"].get<int>();
-        inv = dict["inv"].get<bool>();
-        is_borrow_colors = dict["is_borrow_colors"].get<bool>();
+        dir = (lines_direction)checkJsonKey(dict,"dir",0);
+        inv = checkJsonKey(dict,"inv",false);
+        is_borrow_colors = checkJsonKey(dict,"is_borrow_colors",false);
     }
 
     void interact(SystemState &s, VisualModule *vc) override {
@@ -100,8 +95,8 @@ class Lines : public VisualModule {
         ofSetLineWidth(0);
         ofFill();
 
-        float line_w = s.fbo.getWidth() / (float)DESCRIPTORS_VECTOR_LENGTH;
-        float line_h = s.fbo.getHeight() / (float)DESCRIPTORS_VECTOR_LENGTH;
+        float line_w = s.fbo.getWidth() / (float)vec->size();
+        float line_h = s.fbo.getHeight() / (float)vec->size();
 
         if (s.verbose) {
             cout << "Lines\n";
@@ -115,7 +110,7 @@ class Lines : public VisualModule {
 
         ofSetRectMode(OF_RECTMODE_CORNER);
 
-        for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++) {
+        for (int i = 0; i < vec->size(); i++) {
             float alpha = pow(vec->at(i), 0.75) * 255.f * (vec->at(i) > 0);
             if (alpha > alphaThresh) {
                 // if (is_borrow_colors && can_borrow_colors) {

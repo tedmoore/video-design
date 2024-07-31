@@ -35,13 +35,7 @@ class Turtle : public VisualModule {
 
     void setup(SystemState &s, ofJson &config) override {
         type = TURTLE;
-        for (int i = 0; i < config["divisors"].size(); i++) {
-            divisors.push_back(config["divisors"][i].get<int>());
-        }
-
-        max_frames = config["max-frames"].get<int>();
-
-        newParams(s);
+        loadState(s, config);
     }
 
     bool onScreen(glm::vec3 pt, int width, int height) {
@@ -106,14 +100,26 @@ class Turtle : public VisualModule {
 
     ofJson saveState() override {
         ofJson dict;
-        dict["divisor_i"] = divisor_i;
+        dict["divisors"] = divisors;
         dict["stepSize"] = stepSize;
+        dict["max-frames"] = max_frames;   
         return dict;
     }
 
     void loadState(SystemState &s, ofJson &dict) override {
-        divisor_i = dict["divisor_i"].get<int>();
-        stepSize = dict["stepSize"].get<float>();
+
+        if(dict["divisors"].is_null()){
+            assert(false && "Turtle::setup divisors must be set");
+        }
+
+        divisors.clear();
+        for (int i = 0; i < dict["divisors"].size(); i++) {
+            divisors.push_back(dict["divisors"][i].get<int>());
+        }
+
+        max_frames = checkJsonKey(dict,"max-frames",20);
+        stepSize = checkJsonKey(dict,"stepSize",30.0);
+
         restartPath(s);
     }
 };

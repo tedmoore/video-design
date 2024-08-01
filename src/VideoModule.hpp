@@ -126,7 +126,7 @@ class VideoModule : public VisualModule {
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
-    ParamInt currentSubVideoIndex;
+    ParamEnumWeighted currentSubVideoIndex;
 
     unsigned long long n_new_tiles_per_frame = 1;
     unsigned long long counting_tiles_start_frame = 0;
@@ -238,7 +238,7 @@ class VideoModule : public VisualModule {
 
         // rectType
         rectType.name = "rectType";
-        rectType.setup(config["rectType-weights"].get<vector<int>>(), 0);
+        rectType.setup(config["rectType-weights"].get<vector<float>>(), 0);
         params.push_back(&rectType);
 
         // nrtPlayHead
@@ -248,8 +248,9 @@ class VideoModule : public VisualModule {
         params.push_back(&nrtPlayHead);
 
         // currentIndex
+        assert(config["sub-video-weights"].size() == videos.size() && "sub-video-weights size must match number of sub-videos");
         currentSubVideoIndex.name = "currentSubVideoIndex";
-        currentSubVideoIndex.setup(0, videos.size(), 0);  // max argument is just used for randomness, it is [min,max)
+        currentSubVideoIndex.setup(config["sub-video-weights"].get<vector<float>>(), 0);
         params.push_back(&currentSubVideoIndex);
 
         type = HAP;

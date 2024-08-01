@@ -72,10 +72,9 @@ class Waveform : public VisualModule {
         waveform_line_width = config["waveform-line-width"].get<float>();
         // h = height;
 
-        wfType.setup(config["waveform-type-weights"].get<vector<int>>(), config["waveform-type-default"].get<int>());
+        wfType.setup(config["waveform-type-weights"].get<vector<float>>(), config["waveform-type-default"].get<int>());
         wfType.setValue(1);
 
-        // TODO: make these vectors...
         xoff.resize(N_WAVEFORMS);
         yoff.resize(N_WAVEFORMS);
         zoff.resize(N_WAVEFORMS);

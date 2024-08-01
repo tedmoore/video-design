@@ -160,24 +160,24 @@ class ParamEnum : public Param {
 
 class ParamEnumWeighted : public Param {
    public:
-    vector<int> options;
+    vector<float> weights;
     int value = 0;
 
     void post() {
         cout << value;
     }
 
-    void setup(vector<int> options_, int val) {
-        options = options_;
-        value = val;
+    void setup(vector<float> weights_, int initial_value) {
+        weights = weights_;
+        value = initial_value;
     }
 
     void newRandom() {
-        if (randomizable) value = options[ofRandom(options.size())];
+        if (randomizable) value = getWeightedRandomIndex(weights);
     }
 
     void setValue(float val) {
-        value = static_cast<int>(round(val));
+        value = static_cast<int>(round(val)) % weights.size();
     }
 };
 

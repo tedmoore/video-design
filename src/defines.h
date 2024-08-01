@@ -8,6 +8,11 @@
 #ifndef defines_h
 #define defines_h
 
+#include <iostream>
+#include <vector>
+#include <random>
+#include <numeric>
+
 #define N_STATE_SAVES 10
 #define N_MAGNITUDES 1
 #define MAGNITUDES_LEN 1025
@@ -39,6 +44,32 @@ inline glm::vec3 limit(glm::vec3 &v, float max) {
 
 inline bool endsWith(const std::string& str, const std::string& suffix) {
     return str.rfind(suffix) == (str.size() - suffix.size());
+}
+
+// Function to generate a weighted random index
+inline int getWeightedRandomIndex(const std::vector<float>& weights) {
+    // Calculate the total sum of weights
+    double totalWeight = std::accumulate(weights.begin(), weights.end(), 0.0);
+    
+    // Create a random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, totalWeight);
+    
+    // Generate a random number between 0 and the total weight
+    double randomWeight = dis(gen);
+    
+    // Find the index corresponding to the random weight
+    double cumulativeWeight = 0.0;
+    for (size_t i = 0; i < weights.size(); ++i) {
+        cumulativeWeight += weights[i];
+        if (randomWeight <= cumulativeWeight) {
+            return i;
+        }
+    }
+    
+    // In case of rounding errors, return the last index
+    return weights.size() - 1;
 }
 
 #endif /* defines_h */

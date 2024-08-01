@@ -5,7 +5,7 @@ struct SystemState {
     bool show_frame_rate = false;
     bool debug = false;
     bool onset_occured = false;
-    bool target_framerate;
+    int target_framerate;
     float onsetSwitchProb = 1.f;
     unsigned long currentRandomSeed = 0;
     bool isNRT = false;

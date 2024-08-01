@@ -24,9 +24,8 @@ public:
         if(forceOnsets && current_frame >= nextOnset){
                 nextOnset = current_frame + ofRandom(min, max);
                 return true;
-        } else {
-            return false;
         }
+        return false;
     }
 };
 

@@ -61,7 +61,7 @@ class Lines : public VisualModule {
     void loadState(SystemState &s, ofJson &dict) override {
         dir = (lines_direction)checkJsonKey(dict,"dir",0);
         inv = checkJsonKey(dict,"inv",false);
-        is_borrow_colors = checkJsonKey(dict,"is_borrow_colors",false);
+        // is_borrow_colors = checkJsonKey(dict,"is_borrow_colors",false);
     }
 
     void interact(SystemState &s, VisualModule *vc) override {
@@ -113,11 +113,7 @@ class Lines : public VisualModule {
         for (int i = 0; i < vec->size(); i++) {
             float alpha = pow(vec->at(i), 0.75) * 255.f * (vec->at(i) > 0);
             if (alpha > alphaThresh) {
-                // if (is_borrow_colors && can_borrow_colors) {
-                //     ofSetColor(borrowed_colors[i % N_CLUSTERS], alpha);
-                // } else {
                 ofSetColor(255, 255, 255, alpha);
-                // }
                 drawLine(s.fbo.getWidth(), s.fbo.getHeight(), line_w, line_h, i);
             }
         }

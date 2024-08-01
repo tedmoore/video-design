@@ -18,14 +18,23 @@ int getVectorHistoryLength(SystemState &s) {
 void ofApp::setup() {
     
     s.config = ofLoadJson(s.config_path);
-
     s.isNRT = checkJsonKey(s.config, "nrt-render", false);
-    s.target_framerate = checkJsonKey(s.config, "target-framerate", 30);
+    s.target_framerate = checkJsonKey(s.config, "target-framerate-test123", 30);
+    cout << "Target framerate: " << s.target_framerate << endl;
+    s.features.magnitudes.resize(N_MAGNITUDES);
+    for(int i = 0; i < s.features.magnitudes.size(); i++){
+        s.features.magnitudes[i].resize(MAGNITUDES_LEN);
+    }
+    s.features.descriptors_vector.resize(DESCRIPTORS_VECTOR_LENGTH);
+    s.features.waveforms.resize(N_WAVEFORMS);
+    for(int i = 0; i < s.features.waveforms.size(); i++){
+        s.features.waveforms[i].resize(WAVEFORM_LEN);
+    }
 
     if (s.isNRT) {
-        s.fbo.allocate(checkJsonKey(s.config, "width", 3840), checkJsonKey(s.config, "height", 2160));
+        s.fbo.allocate(checkJsonKey(s.config, "width", 3840), checkJsonKey(s.config, "height", 2160), GL_RGBA);
     } else {
-        s.fbo.allocate(ofGetWidth(), ofGetHeight());
+        s.fbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);
     }
     cout << "Fbo allocated" << endl;
 
@@ -43,48 +52,42 @@ void ofApp::setup() {
     s.flow_field->setup(checkJsonKey(s.config, "flow-field-resolution", 10));
     cout << "Flow field setup" << endl;
 
-    // movies points
-    vector<glm::vec3> initialPoints(4);
-    initialPoints[0] = {0, 0, -1};
-    initialPoints[1] = {s.fbo.getWidth(), 0, -1};
-    initialPoints[2] = {s.fbo.getWidth(), s.fbo.getHeight(), -1};
-    initialPoints[3] = {0, s.fbo.getHeight(), -1};
-
     // ============ setup modules ===============
     s.n_modules = s.config["modules"].size();
     s.modules.resize(s.n_modules);
 
-    for (int vc_counter = 0; vc_counter < s.config["modules"].size(); vc_counter++) {
-        cout << "Setting up module " << vc_counter << endl;
-        ofJson &j = s.config["modules"][vc_counter];
-        if (j["module-type"] == "waveform") {
-            Waveform *wf = new Waveform;
-            wf->setup(s, j);
-            s.modules[vc_counter] = wf;
-            addVCOptions(s,vc_counter, j["prob"].get<int>());
-        } else if (j["module-type"] == "mesh") {
-            Mesh *mesh = new Mesh;
-            mesh->setup(s, j);
-            s.modules[vc_counter] = mesh;
-            addVCOptions(s,vc_counter, j["prob"].get<int>());
-        } else if (j["module-type"] == "mag-lines") {
-            Lines *lines0 = new Lines;
-            lines0->setup(s, j);
-            lines0->setPtr(&s.features.magnitudes[0]);
-            s.modules[vc_counter] = lines0;
-            addVCOptions(s,vc_counter, j["prob"].get<int>());
-        } else if (j["module-type"] == "turtle") {
-            Turtle *turtle0 = new Turtle;
-            turtle0->setup(s, j);
-            s.modules[vc_counter] = turtle0;
-            addVCOptions(s,vc_counter, j["prob"].get<int>());
-        } else if (j["module-type"] == "video") {
-            VideoModule *vc = new VideoModule;
-            vc->setInitialPoints(initialPoints);
-            vc->setup(s, j);
-            s.modules[vc_counter] = vc;
-            addVCOptions(s,vc_counter, j["prob"].get<int>());
-        }
+    ModuleFactory mf;
+    mf.registerFunction("waveform", [&](SystemState &s, ofJson &j) { 
+        Waveform *wf = new Waveform;
+        wf->setup(s, j); 
+        return wf;
+    });
+    mf.registerFunction("mesh", [&](SystemState &s, ofJson &j) { 
+        Mesh *mesh = new Mesh;
+        mesh->setup(s, j); 
+        return mesh;
+    });
+    mf.registerFunction("mag-lines", [&](SystemState &s, ofJson &j) { 
+        Lines *lines = new Lines;
+        lines->setup(s, j);
+        lines->setPtr(&s.features.magnitudes[0]);
+        return lines;
+    });
+    mf.registerFunction("turtle", [&](SystemState &s, ofJson &j) { 
+        Turtle *turtle = new Turtle;
+        turtle->setup(s, j); 
+        return turtle;
+    });
+    mf.registerFunction("video", [&](SystemState &s, ofJson &j) { 
+        VideoModule *vc = new VideoModule;
+        vc->setup(s, j); 
+        return vc;
+    });
+
+    for (int i = 0; i < s.n_modules; i++) {
+        cout << "Setting up module " << i << endl;
+        s.modules[i] = mf.createModule(s, s.config["modules"][i]);
+        //addVCOptions(s, i, s.config["modules"][i]["prob"].get<int>());
     }
 
     cout << "Modules setup" << endl;
@@ -148,8 +151,16 @@ void processReaperMarker(SystemState &s, string &cmd) {
     vector<string> tokens = ofSplitString(cmd, " ");
     int index = 0;
 
+    // cout << "tokens: ";
+    // for(int i = 0; i < tokens.size(); i++){
+    //     cout << tokens[i] << " ";
+    // }
+    // cout << endl;
+
+    // TODO: strategy pattern
     while (index < tokens.size()) {
         if (tokens[index] == "o") {
+            cout << "o found in tokens" << endl;
             onset(s);
         } else if (tokens[index] == "sai") {
             vector<int> ai(s.active_module_indices.size());
@@ -344,12 +355,12 @@ void ofApp::runNrtRender(SystemState& s) {
     std::ifstream mags_file;
     mags_file.open(csv_folder + "/mags.csv");
 
-    string reaperMarkerPath = csv_folder + "/reaper-markers.txt";
+    string reaperMarkerPath = s.config["reaper-markers"].get<string>();
     bool usingReaperMarkers = ofFile(reaperMarkerPath).exists();
     ReaperMarkersFileParser rmfp;
 
-    if (usingReaperMarkers)
-        rmfp.setup(reaperMarkerPath, s.config["audio-sample-rate"].get<int>(), s.target_framerate);
+    cout << "target framerate: " << s.target_framerate << endl;
+    if (usingReaperMarkers) rmfp.setup(reaperMarkerPath, s.config["audio-sample-rate"].get<int>(), s.target_framerate, s.config["audio-start-sample"].get<int>());
 
     // stuff for rendering
     string timestamp = ofGetTimestampString();
@@ -401,7 +412,6 @@ void ofApp::runNrtRender(SystemState& s) {
 
         if (usingReaperMarkers) {
             string rm = rmfp.currentFrame(s.frame_num);
-            cout << "from rmfp: " << rm << endl;
             processReaperMarker(s,rm);
         }
 
@@ -453,7 +463,6 @@ void ofApp::runNrtRender(SystemState& s) {
         // save to disk
         s.fbo.write(new_dir_path + "/" + ofToString(s.frame_num, 6, '0') + ".png");
 
-        cout << "frame num: " << s.frame_num << endl;
         s.frame_num++;
     }
 
@@ -479,6 +488,7 @@ void ofApp::update() {
 
         string address = oscMsg.getAddress();
 
+        // TODO: strategy pattern
         // from Reaper:
         if (address == "/lastmarker/name") {
             string cmd = oscMsg.getArgAsString(0);

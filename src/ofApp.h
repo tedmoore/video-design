@@ -24,6 +24,7 @@ class FlowField;
 #include "Turtle.hpp"
 #include "VideoModule.hpp"
 #include "Waveform.hpp"
+#include "ModuleFactory.hpp"
 
 inline void addVCOptions(SystemState &s, int module_index, int num_times_to_insert) {
     for (int i = 0; i < num_times_to_insert; i++) {
@@ -144,6 +145,11 @@ inline void loadConfigFile(SystemState &s, string path) {
         s.moduleIndexUnlocked[i] = s.config["module-indexes-unlocked"].get<vector<int>>()[i];
     }
 
+    s.vc_i_options.clear();
+    for (int i = 0; i < s.n_modules; i++) {
+        addVCOptions(s, i, s.config["modules"][i]["prob"].get<int>());
+    }
+
     s.onsetSwitchProb = checkJsonKey(s.config, "onset-switch-prob", 1.0);
 
     s.feedback_prob = checkJsonKey(s.config, "feedback-prob", 0.25);
@@ -201,7 +207,6 @@ inline void load(SystemState &s, ofJson &dict) {
     }
 
     s.postGlitch.loadState(dict["post-glitch"]);
-
     s.feedback_amt = checkJsonKey(dict,"feedback_amt",254);
     s.blendMode = (ofBlendMode)checkJsonKey(dict,"blendMode",0);
     s.debug = checkJsonKey(dict,"debug",false);

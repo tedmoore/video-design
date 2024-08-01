@@ -55,13 +55,11 @@ class Video {
 
         if (isNRT) {  // is non-real-time
             ofDirectory pngs_dir(dir + "/frames");
-            cout << "\t\t" << pngs_dir.getAbsolutePath() << "\n";
             pngs_dir.listDir();
             pngs_dir.sort();
             pngs = pngs_dir.getFiles();
 
             ofDirectory bitexact_pngs_dir(dir + "/mini-frames");
-            cout << "\t\t" << bitexact_pngs_dir.getAbsolutePath() << "\n";
             bitexact_pngs_dir.listDir();
             bitexact_pngs_dir.sort();
             bitexact_pngs = bitexact_pngs_dir.getFiles();
@@ -74,10 +72,7 @@ class Video {
             hap.play();
             hap.setVolume(0);
 
-            cout << dir + "/mini.mp4" << endl;
-
             mini_vid.load(dir + "/mini.mp4");
-            cout << "done loading" << endl;
             mini_vid.setVolume(0);
             mini_vid.setLoopState(OF_LOOP_NORMAL);
             mini_vid.play();
@@ -153,8 +148,14 @@ class VideoModule : public VisualModule {
     }
 
     void setup(SystemState& s, ofJson& config) override {
+
+        points.resize(4);
+        points[0] = {0, 0, -1};
+        points[1] = {s.fbo.getWidth(), 0, -1};
+        points[2] = {s.fbo.getWidth(), s.fbo.getHeight(), -1};
+        points[3] = {0, s.fbo.getHeight(), -1};
+
         loadVideos(s, config);
-        cout << "VideoModule::setup videos loaded\n";
 
         // speed
         speed.name = "speed";
@@ -195,14 +196,10 @@ class VideoModule : public VisualModule {
         bDontUnfoldTiles.trueProb = checkJsonKey(config, "bDontUnfoldTiles-prob", 0.5);
         params.push_back(&bDontUnfoldTiles);
 
-        cout << "VideoModule::setup bDontUnfoldTiles: " << bDontUnfoldTiles.value << "\n";
-
         // rect_w_mul
         rect_w_mul.name = "rect_w_mul";
         rect_w_mul.setup(1.f, 3.f, 1.f, 1.f);
         params.push_back(&rect_w_mul);
-
-        cout << "VideoModule::setup rect_w_mul: " << rect_w_mul.value << "\n";
 
         // rect_h_mul
         rect_h_mul.name = "rect_h_mul";
@@ -255,28 +252,21 @@ class VideoModule : public VisualModule {
         currentSubVideoIndex.setup(0, videos.size(), 0);  // max argument is just used for randomness, it is [min,max)
         params.push_back(&currentSubVideoIndex);
 
-        cout << "VideoModule::setup params size: " << params.size() << "\n";
-
         type = HAP;
 
         moviePoints.resize(VIDEO_MINI_WIDTH * VIDEO_MINI_HEIGHT);
         for (int i = 0; i < VIDEO_MINI_WIDTH; i++) {
             for (int j = 0; j < VIDEO_MINI_HEIGHT; j++) {
                 int index = (j * VIDEO_MINI_WIDTH) + i;
-                cout << "VideoModule::setup index: " << index << "\n";
                 moviePoints[index].setup(i / (float)VIDEO_MINI_WIDTH, j / (float)VIDEO_MINI_HEIGHT);
             }
         }
-
-        cout << "VideoModule::setup moviePoints size: " << moviePoints.size() << "\n";
 
         light.setPointLight();
         light.setAmbientColor(0);
 
         newParams(s);
-        cout << "VideoModule::setup newParams completed\n";
         loadState(s, config);
-        cout << "VideoModule::setup loadState completed\n";
     }
 
     void update(SystemState& s) override {
@@ -295,10 +285,6 @@ class VideoModule : public VisualModule {
                 videos[i]->hap.setSpeed(getSpeed());
             }
         }
-    }
-
-    void setInitialPoints(vector<glm::vec3> pts) {
-        points = pts;
     }
 
     void loadVideos(SystemState& s, ofJson& config) {

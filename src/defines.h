@@ -10,7 +10,6 @@
 
 #include <iostream>
 #include <vector>
-#include <random>
 #include <numeric>
 
 #define N_STATE_SAVES 10
@@ -51,13 +50,8 @@ inline int getWeightedRandomIndex(const std::vector<float>& weights) {
     // Calculate the total sum of weights
     double totalWeight = std::accumulate(weights.begin(), weights.end(), 0.0);
     
-    // Create a random number generator
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0.0, totalWeight);
-    
     // Generate a random number between 0 and the total weight
-    double randomWeight = dis(gen);
+    double randomWeight = ofRandom(0, totalWeight);
     
     // Find the index corresponding to the random weight
     double cumulativeWeight = 0.0;

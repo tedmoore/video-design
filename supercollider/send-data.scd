@@ -91,7 +91,7 @@ s.waitForBoot({
 		};
 		if(vec[vec.size - 1] > 0.5){
 			// "onset".postln;
-			~oF.sendMsg("/onset");
+			~oF.sendMsg("/o");
 		};
 		message = ["/vector"] ++ vec;
 

@@ -35,6 +35,7 @@ struct SystemState {
     ofBlendMode blendMode = OF_BLENDMODE_DISABLED;
     ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD, OF_BLENDMODE_ALPHA, OF_BLENDMODE_SCREEN, OF_BLENDMODE_DISABLED, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SUBTRACT};
     vector<int> blendModePool;
+    MessageParser messageParser;
 };
 
 #endif // SYSTEMSTATE_H

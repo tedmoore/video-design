@@ -14,6 +14,64 @@ int getVectorHistoryLength(SystemState &s) {
     return 0;
 }
 
+void setValsFromCSV(SystemState &s, vector<float> &csv_data) {
+    s.features.spectral_centroid = csv_data[0];
+    s.features.spectral_spread = csv_data[1];
+    s.features.spectral_skewness = csv_data[2];
+    s.features.spectral_kurtosis = csv_data[3];
+    s.features.spectral_rolloff = csv_data[4];
+    s.features.spectral_flatness = csv_data[5];
+    s.features.spectral_crest = csv_data[6];
+    s.features.pitch = csv_data[7];
+    s.features.pitch_confidence = csv_data[8];
+    s.features.loudness = csv_data[9];
+    s.features.true_peak = csv_data[10];
+    s.features.amplitude = csv_data[11];
+    s.features.sensory_dissonance = csv_data[12];
+    s.features.zero_crossings = csv_data[13];
+
+    s.onset_occured = false;
+
+    s.features.descriptors_vector[csv_data.size() - 1] = csv_data[csv_data.size() - 1];
+    if (s.features.descriptors_vector[csv_data.size() - 1] > 0.5 && s.use_sc_onsets) {
+        s.onset_occured = true;
+    }
+
+    if (s.onset_occured || s.force_onset_frames.checkForOnset(s.frame_num))
+        onset(s); 
+
+    for (int i = 0; i < csv_data.size() - 1; i++) {
+        s.features.descriptors_vector[i] = csv_data[i];
+        s.vec_history.updateCurrentFrameAtIndex(i, csv_data[i]);
+    }
+    s.vec_history.incrementFrameIndex();
+}
+
+void setupMessageParser(SystemState &s){
+    s.messageParser.registerAction("o", [&](const ofxOscMessage &msg) { onset(s); });
+    s.messageParser.registerAction("onsetSeed", [&](const ofxOscMessage &msg) { 
+        onsetFromSeed(s,msg.getArgAsInt(0));
+    });
+    s.messageParser.registerAction("waveform", [&](const ofxOscMessage &msg) { 
+        int waveform_i = msg.getArgAsInt(0);
+        for (int i = 0; i < WAVEFORM_LEN; i++)
+            s.features.waveforms[waveform_i][i] = msg.getArgAsFloat(i + 1);
+    });
+    s.messageParser.registerAction("mags", [&](const ofxOscMessage &msg) { 
+        int mag_i = msg.getArgAsInt(0);
+        for (int i = 0; i < MAGNITUDES_LEN; i++)
+            s.features.magnitudes[mag_i][i] = msg.getArgAsFloat(i + 1);
+    });
+    s.messageParser.registerAction("vector", [&](const ofxOscMessage &msg) { 
+        for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++){
+            s.features.descriptors_vector[i] = msg.getArgAsFloat(i);
+            s.vec_history.updateCurrentFrameAtIndex(i, s.features.descriptors_vector[i]);
+            s.vec_history.incrementFrameIndex();
+            setValsFromCSV(s, s.features.descriptors_vector);
+            s.onset_occured = s.use_sc_onsets && (msg.getArgAsFloat(DESCRIPTORS_VECTOR_LENGTH) > 0.5);
+        }
+    });
+}
 //--------------------------------------------------------------
 void ofApp::setup() {
     
@@ -37,6 +95,8 @@ void ofApp::setup() {
         s.fbo.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);
     }
     cout << "Fbo allocated" << endl;
+
+    setupMessageParser(s);
 
     s.postGlitch.setup(&s.fbo.fbo);
     cout << "PostGlitch setup" << endl;
@@ -111,87 +171,6 @@ void ofApp::setup() {
     // =========================== INITIALIZATION =====================
     if (s.config["initial-onset"].get<bool>()) {
         onset(s);
-    }
-}
-
-void setValsFromCSV(SystemState &s, vector<float> &csv_data) {
-    s.features.spectral_centroid = csv_data[0];
-    s.features.spectral_spread = csv_data[1];
-    s.features.spectral_skewness = csv_data[2];
-    s.features.spectral_kurtosis = csv_data[3];
-    s.features.spectral_rolloff = csv_data[4];
-    s.features.spectral_flatness = csv_data[5];
-    s.features.spectral_crest = csv_data[6];
-    s.features.pitch = csv_data[7];
-    s.features.pitch_confidence = csv_data[8];
-    s.features.loudness = csv_data[9];
-    s.features.true_peak = csv_data[10];
-    s.features.amplitude = csv_data[11];
-    s.features.sensory_dissonance = csv_data[12];
-    s.features.zero_crossings = csv_data[13];
-
-    s.onset_occured = false;
-
-    s.features.descriptors_vector[csv_data.size() - 1] = csv_data[csv_data.size() - 1];
-    if (s.features.descriptors_vector[csv_data.size() - 1] > 0.5 && s.use_sc_onsets) {
-        s.onset_occured = true;
-    }
-
-    if (s.onset_occured || s.force_onset_frames.checkForOnset(s.frame_num))
-        onset(s); 
-
-    for (int i = 0; i < csv_data.size() - 1; i++) {
-        s.features.descriptors_vector[i] = csv_data[i];
-        s.vec_history.updateCurrentFrameAtIndex(i, csv_data[i]);
-    }
-    s.vec_history.incrementFrameIndex();
-}
-
-void processReaperMarker(SystemState &s, string &cmd) {
-    vector<string> tokens = ofSplitString(cmd, " ");
-    int index = 0;
-
-    // cout << "tokens: ";
-    // for(int i = 0; i < tokens.size(); i++){
-    //     cout << tokens[i] << " ";
-    // }
-    // cout << endl;
-
-    // TODO: strategy pattern
-    while (index < tokens.size()) {
-        if (tokens[index] == "o") {
-            cout << "o found in tokens" << endl;
-            onset(s);
-        } else if (tokens[index] == "sai") {
-            vector<int> ai(s.active_module_indices.size());
-            for (int i = 0; i < s.active_module_indices.size(); i++) {
-                ai[i] = ofToInt(tokens[++index]);
-            }
-            setActiveIndices(s,ai);
-        } else if (tokens[index] == "loadState") {
-            load(s,s.saveStates[ofToInt(tokens[++index])]);
-        } else if (tokens[index] == "loadStateFromDisk") {
-            ofFile file(ofToDataPath(tokens[++index] + ".json"));
-
-            if (file.exists()) {
-                ofJson dict;
-                std::ifstream i(ofToDataPath(file.path()));
-                i >> dict;
-
-                load(s,dict);
-            } else {
-                cout << "ofApp::processReaperMarker loadStateFromDisk WARNING: There is no file on disk at that path: " << file.path() << endl;
-            }
-        } else if (tokens[index] == "onsetSeed") {
-            onsetFromSeed(s,ofToInt(tokens[++index]));
-        } else if (tokens[index] == "sp") {  // set parameter
-            int moduleIndex = ofToInt(tokens[++index]);
-            string label = tokens[++index];
-            float val = ofToFloat(tokens[++index]);
-            s.modules[moduleIndex]->receiveOSC(s, label, val);
-        }
-
-        index++;  // always increment at least one!
     }
 }
 
@@ -410,10 +389,7 @@ void ofApp::runNrtRender(SystemState& s) {
 
         setValsFromCSV(s,csv_line_fl);
 
-        if (usingReaperMarkers) {
-            string rm = rmfp.currentFrame(s.frame_num);
-            processReaperMarker(s,rm);
-        }
+        if (usingReaperMarkers) s.messageParser.processReaperMarker(rmfp.currentFrame(s.frame_num));
 
         if (s.verbose)
             cout << "reading waveforms..." << endl;
@@ -485,68 +461,14 @@ void ofApp::update() {
     while (osc_receiver.hasWaitingMessages()) {
         ofxOscMessage oscMsg;
         osc_receiver.getNextMessage(oscMsg);
-
         string address = oscMsg.getAddress();
-
-        // TODO: strategy pattern
-        // from Reaper:
-        if (address == "/lastmarker/name") {
-            string cmd = oscMsg.getArgAsString(0);
-            processReaperMarker(s,cmd);
-
-            // from SuperCollider:
-        } else if (address == "/setActiveIndices") {
-            vector<int> ai(s.active_module_indices.size());
-            for (int i = 0; i < s.active_module_indices.size(); i++) {
-                ai[i] = oscMsg.getArgAsInt(i);
-            }
-            setActiveIndices(s,ai);
-        } else if (address == "/onset") {
-            onset(s);
-        } else if (address == "/onsetSeed") {
-            unsigned long seed = oscMsg.getArgAsInt(0);
-            onsetFromSeed(s,seed);
-        } else if (address == "/setOnsetSwitchProb") {
-            s.onsetSwitchProb = oscMsg.getArgAsFloat(0);
-        } else if (address == "/setNewParamsProb") {
-            int vc_i = oscMsg.getArgAsInt(0);
-            s.modules[vc_i]->newParamsProb = oscMsg.getArgAsFloat(1);
-        } else if (address == "/setVCOptions") {
-            int n_options = oscMsg.getArgAsInt(0);
-            s.vc_i_options.resize(n_options);
-            for (int i = 0; i < n_options; i++) {
-                s.vc_i_options[i] = oscMsg.getArgAsInt(i + 1);
-            }
-        } else if (address == "/cmd") {
-            int index = oscMsg.getArgAsInt(0);
-            std::string str = oscMsg.getArgAsString(1);
-            float val = oscMsg.getArgAsFloat(2);
-            s.modules[index]->receiveOSC(s, str, val);
-        } else if (address == "/waveform") {
-            int index = oscMsg.getArgAsInt(0);
-            for (int i = 0; i < WAVEFORM_LEN; i++)
-                s.features.waveforms[index][i] = oscMsg.getArgAsFloat(i + 1);
-        } else if (address == "/mags") {
-            int index = oscMsg.getArgAsInt(0);
-            for (int i = 0; i < MAGNITUDES_LEN; i++)
-                s.features.magnitudes[index][i] = oscMsg.getArgAsFloat(i + 1);
-        } else if (address == "/vector") {
-            for (int i = 0; i < DESCRIPTORS_VECTOR_LENGTH; i++) {
-                s.features.descriptors_vector[i] = oscMsg.getArgAsFloat(i);
-                s.vec_history.updateCurrentFrameAtIndex(i, s.features.descriptors_vector[i]);
-            }
-
-            s.vec_history.incrementFrameIndex();
-
-            setValsFromCSV(s, s.features.descriptors_vector);
-
-            s.onset_occured = s.use_sc_onsets && (oscMsg.getArgAsFloat(DESCRIPTORS_VECTOR_LENGTH) > 0.5);
+        if (!address.empty() && address.front() == '/') {
+            address.erase(0, 1);
         }
+        s.messageParser.performAction(address, oscMsg);
     }
 
-    if (s.onset_occured)
-        onset(s);
-
+    if (s.onset_occured) onset(s);
     prUpdate(s);
 }
 

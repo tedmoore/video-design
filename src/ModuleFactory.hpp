@@ -3,14 +3,14 @@
 
 #include "ofMain.h"
 
-using FunctionType = std::function<VisualModule*(SystemState &s, ofJson &j)>;
+using BuildModule = std::function<VisualModule*(SystemState &s, ofJson &j)>;
 
 class ModuleFactory
 {
 public:
-    std::unordered_map<string,FunctionType> functions;
+    std::unordered_map<string,BuildModule> functions;
 
-    void registerFunction(string name, FunctionType f) {
+    void registerFunction(string name, BuildModule f) {
         functions[name] = f;
     }
 

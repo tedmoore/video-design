@@ -14,6 +14,7 @@ class FlowField;
 #include "FboRenderer.h"
 #include "AudioFeatures.h"
 #include "ofxPostGlitch.h"
+#include "MessageParser.hpp"
 #include "SystemState.h"
 #include "FlowField.hpp"
 
@@ -66,11 +67,11 @@ inline void onsetActions(SystemState &s) {
     vector<int> ai(s.active_module_indices.size());
     for (int i = 0; i < s.active_module_indices.size(); i++) {  // go through the max number that we'll display
 
-        if (s.moduleIndexUnlocked[i] and (ofRandom(1.f) < s.onsetSwitchProb)) {
+        if (s.moduleIndexUnlocked[i] && (ofRandom(1.f) < s.onsetSwitchProb)) {
             std::unordered_set<int> chosen_set(chosen_i.begin(), chosen_i.end());
             bool found = false;
             while (!found) {
-                int rand_int = rand() % s.vc_i_options.size();  // random int the size of the options array
+                int rand_int = ofRandom(0,s.vc_i_options.size());  // random int the size of the options array
                 int result = s.vc_i_options[rand_int];          // the int from the options array (which is the index for the modules array)
 
                 if (chosen_set.find(result) == chosen_set.end()) {
@@ -101,6 +102,7 @@ inline void onsetFromSeed(SystemState &s, unsigned long seed) {
     if (s.verbose)
         cout << "onsetFromSeed" << endl;
     s.currentRandomSeed = seed;
+    cout << "onset from seed: " << s.currentRandomSeed << endl;
     ofSetRandomSeed(s.currentRandomSeed);
     onsetActions(s);
 }

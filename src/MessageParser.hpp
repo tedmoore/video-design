@@ -25,15 +25,10 @@ class MessageParser {
 
         int index = 0;
         while (index < isAction.size()){
-            cout << "n tokens: " << tokens.size() << endl;
-            cout << "Processing token: " << index << endl;
-            cout << "\ttoken: " << tokens[index] << endl;
-            cout << "\tisAction: " << isAction[index] << endl;
             if(isAction[index]){
                 string action = tokens[index++];
                 ofxOscMessage msg;
                 while(index < isAction.size() && !isAction[index]){
-                    cout << "\tAdding arg: " << tokens[index] << endl;
                     msg.addFloatArg(ofToFloat(tokens[index++]));
                 }
                 performAction(action, msg);

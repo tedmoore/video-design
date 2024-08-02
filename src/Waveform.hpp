@@ -59,6 +59,9 @@ class Waveform : public VisualModule {
     bool trianglesDir = true;
     bool scale_size = true;
 
+    // raises the amplitude to this power in order to warp the mapping of the amplitude to the size of the shape displayed
+    double scale_size_warp = 0.5; 
+
     string getName() override {
         return "Waveform";
     }
@@ -297,7 +300,7 @@ class Waveform : public VisualModule {
     void drawSquare(int x, int y, int side, float amp) {
         ofSetColor(255, amp * 255);
         int half_side = side / 2;
-        int side_scaled = (side * amp * scale_size) + ((1 - scale_size) * side);
+        int side_scaled = (side * pow(amp,scale_size_warp) * scale_size) + ((1 - scale_size) * side);
         ofDrawRectangle(x + half_side, y + half_side, side_scaled, side_scaled);
     }
 
@@ -328,7 +331,7 @@ class Waveform : public VisualModule {
     void drawCircle(int x, int y, int side, float amp) {
         ofSetColor(255, amp * 255);
         int half_side = side / 2;
-        int r = (half_side * amp * scale_size) + ((1 - scale_size) * half_side);
+        int r = (half_side * pow(amp,scale_size_warp) * scale_size) + ((1 - scale_size) * half_side);
         ofDrawCircle(x + half_side, y + half_side, r);
     }
 

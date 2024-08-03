@@ -49,7 +49,7 @@ void setValsFromCSV(SystemState &s, vector<float> &csv_data) {
 
 void setupMessageParser(SystemState &s){
     s.messageParser.registerAction("o", [&](const ofxOscMessage &msg) { onset(s); });
-    s.messageParser.registerAction("onsetSeed", [&](const ofxOscMessage &msg) { 
+    s.messageParser.registerAction("os", [&](const ofxOscMessage &msg) { 
         onsetFromSeed(s,msg.getArgAsInt(0));
     });
     s.messageParser.registerAction("waveform", [&](const ofxOscMessage &msg) { 

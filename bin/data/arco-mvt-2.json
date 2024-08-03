@@ -1,5 +1,5 @@
 {
-    "nrt-render": true,
+    "nrt-render": false,
     "output-folder":"/Volumes/2024-May-Ted-Moore/arco/mvt2/_video-design-renders",
     "draw-bounds": false,
     "debug": false,

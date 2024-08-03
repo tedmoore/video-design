@@ -114,7 +114,7 @@ class Lines : public VisualModule {
             float alpha = pow(vec->at(i), 0.75) * 255.f * (vec->at(i) > 0);
             if (alpha > alphaThresh) {
                 ofSetColor(255, 255, 255, alpha);
-                drawLine(s.fbo.getWidth(), s.fbo.getHeight(), line_w, line_h, i);
+                //drawLine(s.fbo.getWidth(), s.fbo.getHeight(), line_w, line_h, i);
             }
         }
     }

@@ -136,6 +136,8 @@ inline void loadConfigFile(SystemState &s, string path) {
     s.debug = checkJsonKey(s.config, "debug", false);
     s.n_modules = s.config["modules"].size();
 
+    // assert(s.config["initial-active-modules"].size() == s.config["module-indexes-unlocked"].size() && "In config file 'initial-active-modules' and 'module-indexes-unlocked' are not the same length");
+
     s.active_module_indices.resize(s.config["initial-active-modules"].size());
     for (int i = 0; i < s.active_module_indices.size(); i++) {
         s.active_module_indices[i] = s.config["initial-active-modules"][i].get<int>();

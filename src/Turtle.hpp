@@ -78,11 +78,11 @@ class Turtle : public VisualModule {
         ofSetColor(255);
         ofNoFill();
 
-        ofBeginShape();
-        for (int i = 0; i < path.size(); i++) {
-            ofVertex(path[i]);
-        }
-        ofEndShape();
+        // ofBeginShape();
+        // for (int i = 0; i < path.size(); i++) {
+        //     ofVertex(path[i]);
+        // }
+        // ofEndShape();
     }
 
     void newParams(SystemState &s) override {

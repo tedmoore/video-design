@@ -14,6 +14,9 @@ class MessageParser {
     }
 
     void processReaperMarker(string marker){
+
+        cout << "Reaper Marker: " << marker << endl;
+
         vector<string> tokens = ofSplitString(marker, " ");
         vector<bool> isAction(tokens.size(), false);
 
@@ -23,13 +26,23 @@ class MessageParser {
             }
         }
 
+        cout << "\ttokens: ";
+        for(int i = 0; i < tokens.size(); i++){
+            cout << tokens[i] << " ";
+        }
+        cout << endl;
+
         int index = 0;
         while (index < isAction.size()){
             if(isAction[index]){
                 string action = tokens[index++];
                 ofxOscMessage msg;
                 while(index < isAction.size() && !isAction[index]){
-                    msg.addFloatArg(ofToFloat(tokens[index++]));
+                    float fl = ofToFloat(tokens[index]);
+                    int in = ofToInt(tokens[index]);
+                    cout << "float " << fl << " int " << in << endl;
+                    index++;
+                    msg.addFloatArg(fl);
                 }
                 performAction(action, msg);
             } else {

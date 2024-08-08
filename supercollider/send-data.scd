@@ -27,8 +27,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 0, nMels = 40;
-		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
-		var sig = SoundIn.ar([2,3]);
+		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
+		// var sig = SoundIn.ar([2,3]);
 		var sig_mono = Mix(sig) * 0.5;
 
 		var fft = FFT(LocalBuf(2048),sig_mono);
@@ -116,4 +116,4 @@ s.waitForBoot({
 
 
 
-m.getn(5,{arg v; v.postln});*/
+m.getn(5,{arg v; v.postln});

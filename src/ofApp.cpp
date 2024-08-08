@@ -77,7 +77,7 @@ void ofApp::setup() {
     
     s.config = ofLoadJson(s.config_path);
     s.isNRT = checkJsonKey(s.config, "nrt-render", false);
-    s.target_framerate = checkJsonKey(s.config, "target-framerate-test123", 30);
+    s.target_framerate = checkJsonKey(s.config, "target-framerate", 30);
     cout << "Target framerate: " << s.target_framerate << endl;
     s.features.magnitudes.resize(N_MAGNITUDES);
     for(int i = 0; i < s.features.magnitudes.size(); i++){

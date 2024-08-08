@@ -1,10 +1,10 @@
 {
-    "nrt-render": false,
+    "nrt-render": true,
     "output-folder":"/Volumes/2024-May-Ted-Moore/arco/mvt2/_video-design-renders",
     "draw-bounds": false,
     "debug": false,
     "csv-folder": "/Users/ted/dev/of_v20240206_osx_release/apps/myApps/video-design/supercollider/data-renders/240731_141357-arco-mvt-2",
-    "reaper-markers": "/Volumes/2024-May-Ted-Moore/arco/reaper/02/240731-acro-mvt-2-markers.txt",
+    "reaper-markers": "/Volumes/2024-May-Ted-Moore/arco/reaper/02/240803-acro-mvt-2-markers.txt",
     "max-frames": -1,
     "use-sc-onsets": false,
     "initial-active-modules": [0,1,2,3],

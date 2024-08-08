@@ -3,14 +3,29 @@
 
 #include "ofMain.h"
 
-using MessageAction = std::function<void(const ofxOscMessage &msg)>;
+using MessageActionFunction = std::function<void(const ofxOscMessage &msg)>;
+
+struct MessageAction {
+    vector<char> argument_types;
+    MessageActionFunction function;
+
+    // Default constructor
+    MessageAction() = default;
+
+    // constructor with parameters
+    MessageAction(vector<char> at, MessageActionFunction f) : argument_types(at), function(f) {}
+};
 
 class MessageParser {
     public:
     std::unordered_map<string,MessageAction> actions;
 
-    void registerAction(string name, MessageAction f) {
-        actions[name] = f;
+    void registerAction(string name, vector<char> arg_types, MessageActionFunction f) {
+        actions[name] = {arg_types,f};
+    }
+
+    void registerAction(string name, MessageActionFunction f) {
+        actions[name] = {{},f};
     }
 
     void processReaperMarker(string marker){
@@ -35,16 +50,29 @@ class MessageParser {
         int index = 0;
         while (index < isAction.size()){
             if(isAction[index]){
-                string action = tokens[index++];
+                string name = tokens[index++];
                 ofxOscMessage msg;
-                while(index < isAction.size() && !isAction[index]){
-                    float fl = ofToFloat(tokens[index]);
-                    int in = ofToInt(tokens[index]);
-                    cout << "float " << fl << " int " << in << endl;
-                    index++;
-                    msg.addFloatArg(fl);
+
+                int arg_i = 0;
+                while(index < isAction.size() && !isAction[index] && arg_i < actions[name].argument_types.size()){
+
+                    switch(actions[name].argument_types[arg_i]){
+                        case 'i':
+                            msg.addIntArg(ofToInt(tokens[index++]));
+                            break;
+                        case 'f':
+                            msg.addFloatArg(ofToFloat(tokens[index++]));
+                            break;
+                        default:
+                            cout << "MessageParser::processReaperMarker argument " << actions[name].argument_types[arg_i] << " type not recognized" << endl;
+                            assert(false);
+                            break;
+                    }
+                    
+                    arg_i++;
                 }
-                performAction(action, msg);
+
+                performAction(name, msg);
             } else {
                 index++;
             }
@@ -53,7 +81,7 @@ class MessageParser {
 
     void performAction(std::string action, ofxOscMessage &msg) {   
         if(actions.find(action) != actions.end()) {
-            actions[action](msg);
+            actions[action].function(msg);
         } else if (action == "lastmarker/name"){
             processReaperMarker(msg.getArgAsString(0));
         }

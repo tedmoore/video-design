@@ -16,9 +16,23 @@ struct MessageAction {
     MessageAction(vector<char> at, MessageActionFunction f) : argument_types(at), function(f) {}
 };
 
+using StringTransformer = std::function<void(const std::string &, ofxOscMessage &msg)>;
+
+inline void stringToFloat(const std::string &s, ofxOscMessage &msg) {
+    msg.addFloatArg(ofToFloat(s));
+}
+
+inline void stringToInt(const std::string &s, ofxOscMessage &msg) {
+    msg.addIntArg(ofToInt(s));
+}
+
 class MessageParser {
     public:
     std::unordered_map<string,MessageAction> actions;
+    std::unordered_map<char,StringTransformer> string_transformers = {
+        {'i', stringToInt},
+        {'f', stringToFloat}
+    };
 
     void registerAction(string name, vector<char> arg_types, MessageActionFunction f) {
         actions[name] = {arg_types,f};
@@ -30,22 +44,14 @@ class MessageParser {
 
     void processReaperMarker(string marker){
 
-        cout << "Reaper Marker: " << marker << endl;
-
         vector<string> tokens = ofSplitString(marker, " ");
         vector<bool> isAction(tokens.size(), false);
 
-        for (int i = 0; i < tokens.size(); i++){
+        for (int i = 0; i < isAction.size(); i++){
             if (actions.find(tokens[i]) != actions.end()){
                 isAction[i] = true;
             }
         }
-
-        cout << "\ttokens: ";
-        for(int i = 0; i < tokens.size(); i++){
-            cout << tokens[i] << " ";
-        }
-        cout << endl;
 
         int index = 0;
         while (index < isAction.size()){
@@ -54,24 +60,9 @@ class MessageParser {
                 ofxOscMessage msg;
 
                 int arg_i = 0;
-                while(index < isAction.size() && !isAction[index] && arg_i < actions[name].argument_types.size()){
-
-                    switch(actions[name].argument_types[arg_i]){
-                        case 'i':
-                            msg.addIntArg(ofToInt(tokens[index++]));
-                            break;
-                        case 'f':
-                            msg.addFloatArg(ofToFloat(tokens[index++]));
-                            break;
-                        default:
-                            cout << "MessageParser::processReaperMarker argument " << actions[name].argument_types[arg_i] << " type not recognized" << endl;
-                            assert(false);
-                            break;
-                    }
-                    
-                    arg_i++;
-                }
-
+                while(index < isAction.size() && !isAction[index] && arg_i < actions[name].argument_types.size())
+                    string_transformers[actions[name].argument_types[arg_i++]](tokens[index], msg);                    
+                
                 performAction(name, msg);
             } else {
                 index++;

@@ -7,7 +7,7 @@
     "reaper-markers": "/Volumes/2024-May-Ted-Moore/arco/reaper/02/240803-acro-mvt-2-markers.txt",
     "max-frames": -1,
     "use-sc-onsets": false,
-    "initial-active-modules": [2,3,1,0],
+    "initial-active-modules": [2,3,1,4],
     "module-indexes-unlocked": [false,false,false,false],
     "initial-onset": true,
     "verbose": false,

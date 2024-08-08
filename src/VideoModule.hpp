@@ -84,6 +84,21 @@ class Video {
     }
 };
 
+struct DrawTiledParams {
+    int& tileCounter;
+    size_t make_n_tiles;
+    float i_x_value;
+    float i_y_value;
+    int w;
+    int h;
+    int x_off;
+    int y_off;
+    int x_hop;
+    int y_hop;
+    ofTexture& texture;
+    FboRenderer& fbo;
+};
+
 class VideoModule : public VisualModule {
    public:
     VideoModule() : points(4) {
@@ -132,6 +147,16 @@ class VideoModule : public VisualModule {
     unsigned long long counting_tiles_start_frame = 0;
     UnfoldTilesOrder unfold_tiles_order = LRBT;
 
+    using UnfoldTilesStrategy = void(VideoModule::*)(const DrawTiledParams&);
+    UnfoldTilesStrategy unfold_tiles_strategies[8] = {&VideoModule::drawLRTB,
+                                                      &VideoModule::drawLRBT,
+                                                      &VideoModule::drawRLTB,
+                                                      &VideoModule::drawRLBT,
+                                                      &VideoModule::drawTBLR,
+                                                      &VideoModule::drawTBRL,
+                                                      &VideoModule::drawBTLR,
+                                                      &VideoModule::drawBTRL};
+
     ParamEnumWeighted rectType;
 
     ofLight light;
@@ -148,7 +173,6 @@ class VideoModule : public VisualModule {
     }
 
     void setup(SystemState& s, ofJson& config) override {
-
         points.resize(4);
         points[0] = {0, 0, -1};
         points[1] = {s.fbo.getWidth(), 0, -1};
@@ -334,70 +358,76 @@ class VideoModule : public VisualModule {
             int x_hop = w + x_off;
             int y_hop = h + y_off;
             int tileCounter = 0;
-
-            unsigned long long make_n_tiles = (s.frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
-
-            switch (unfold_tiles_order) {
-                case LRTB:  // 0
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case LRBT:  // 1
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case RLTB:  // 2
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case RLBT:  // 3
-                    for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
-                        for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case TBLR:  // 4
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case BTLR:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, -w, x_off); x < s.fbo.getWidth(); x += x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case TBRL:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, -h, y_off); y < s.fbo.getHeight(); y += y_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-                case BTRL:
-                    for (int x = ofMap(i_x.value, 0.f, 1.f, s.fbo.getWidth(), s.fbo.getWidth() - x_hop); x > -w; x -= x_hop) {
-                        for (int y = ofMap(i_y.value, 0.f, 1.f, s.fbo.getHeight(), s.fbo.getHeight() - y_hop); y > -h; y -= y_hop) {
-                            if (tileCounter++ < make_n_tiles) texture.draw(x, y, w, h);
-                        }
-                    }
-                    break;
-            }
+            size_t make_n_tiles = (s.frame_num - counting_tiles_start_frame) * n_new_tiles_per_frame;
+            DrawTiledParams params = {tileCounter, make_n_tiles, i_x.value, i_y.value, w, h, x_off, y_off, x_hop, y_hop, texture, s.fbo};
+            (this->*unfold_tiles_strategies[unfold_tiles_order])(params);
         } else {
             ofSetColor(255, alpha);
             texture.draw(points[0], points[1], points[2], points[3]);
+        }
+    }
+
+    void drawLRTB(const DrawTiledParams& params) {
+        for (int y = ofMap(params.i_y_value, 0.f, 1.f, -params.h, params.y_off); y < params.fbo.getHeight(); y += params.y_hop) {
+            for (int x = ofMap(params.i_x_value, 0.f, 1.f, -params.w, params.x_off); x < params.fbo.getWidth(); x += params.x_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawLRBT(const DrawTiledParams& params) {
+        for (int y = ofMap(params.i_y_value, 0.f, 1.f, params.fbo.getHeight(), params.fbo.getHeight() - params.y_hop); y > -params.h; y -= params.y_hop) {
+            for (int x = ofMap(params.i_x_value, 0.f, 1.f, -params.w, params.x_off); x < params.fbo.getWidth(); x += params.x_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawRLTB(const DrawTiledParams& params) {
+        for (int y = ofMap(params.i_y_value, 0.f, 1.f, -params.h, params.y_off); y < params.fbo.getHeight(); y += params.y_hop) {
+            for (int x = ofMap(params.i_x_value, 0.f, 1.f, params.fbo.getWidth(), params.fbo.getWidth() - params.x_hop); x > -params.w; x -= params.x_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawRLBT(const DrawTiledParams& params) {
+        for (int y = ofMap(params.i_y_value, 0.f, 1.f, params.fbo.getHeight(), params.fbo.getHeight() - params.y_hop); y > -params.h; y -= params.y_hop) {
+            for (int x = ofMap(params.i_x_value, 0.f, 1.f, params.fbo.getWidth(), params.fbo.getWidth() - params.x_hop); x > -params.w; x -= params.x_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawTBLR(const DrawTiledParams& params) {
+        for (int x = ofMap(params.i_x_value, 0.f, 1.f, -params.w, params.x_off); x < params.fbo.getWidth(); x += params.x_hop) {
+            for (int y = ofMap(params.i_y_value, 0.f, 1.f, -params.h, params.y_off); y < params.fbo.getHeight(); y += params.y_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawBTLR(const DrawTiledParams& params) {
+        for (int x = ofMap(params.i_x_value, 0.f, 1.f, -params.w, params.x_off); x < params.fbo.getWidth(); x += params.x_hop) {
+            for (int y = ofMap(params.i_y_value, 0.f, 1.f, params.fbo.getHeight(), params.fbo.getHeight() - params.y_hop); y > -params.h; y -= params.y_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawTBRL(const DrawTiledParams& params) {
+        for (int x = ofMap(params.i_x_value, 0.f, 1.f, params.fbo.getWidth(), params.fbo.getWidth() - params.x_hop); x > -params.w; x -= params.x_hop) {
+            for (int y = ofMap(params.i_y_value, 0.f, 1.f, -params.h, params.y_off); y < params.fbo.getHeight(); y += params.y_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
+        }
+    }
+
+    void drawBTRL(const DrawTiledParams& params) {
+        for (int x = ofMap(params.i_x_value, 0.f, 1.f, params.fbo.getWidth(), params.fbo.getWidth() - params.x_hop); x > -params.w; x -= params.x_hop) {
+            for (int y = ofMap(params.i_y_value, 0.f, 1.f, params.fbo.getHeight(), params.fbo.getHeight() - params.y_hop); y > -params.h; y -= params.y_hop) {
+                if (params.tileCounter++ < params.make_n_tiles) params.texture.draw(x, y, params.w, params.h);
+            }
         }
     }
 
@@ -545,11 +575,10 @@ class VideoModule : public VisualModule {
     }
 
     void loadState(SystemState& s, ofJson& dict) override {
-
         // TODO: make a ParamManager that can iterate over the dict and automatically load the params
 
-        n_new_tiles_per_frame = checkJsonKey(dict,"n_new_tiles_per_frame",4);
-        unfold_tiles_order = (UnfoldTilesOrder)checkJsonKey(dict,"unfold_tiles_order",0);
+        n_new_tiles_per_frame = checkJsonKey(dict, "n_new_tiles_per_frame", 4);
+        unfold_tiles_order = (UnfoldTilesOrder)checkJsonKey(dict, "unfold_tiles_order", 0);
 
         // TODO:
         // replace all glm::vec3 with glm::vec3

@@ -1,18 +1,26 @@
+
 (
 var folder = thisProcess.nowExecutingPath.dirname+/+"data-renders";
 s.options.numInputBusChannels_(8);
 s.options.numWireBufs_(64*2);
 s.options.sampleRate_(44100);
-s.options.device_("Fireface UC Mac (24006457)");
+// s.options.device_("Fireface UC Mac (24006457)");
+s.options.device_("ZoomAudioD");
 s.waitForBoot({
 	var analysis_bus = Bus.audio(s,2);
 	var frame_rate = 30;
-	var start_sec = 0;
+	var start_sec = 20;
 	var outpath = folder+/+Date.localtime.stamp;
 	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
 
-	var audio_buf = Buffer.read(s,"/Volumes/2024-May-Ted-Moore/arco/reaper/02/_bounces/240317_183254/240317_183254-mvt-2-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Volumes/2024-May-Ted-Moore/arco/reaper/02/_bounces/240317_183254/240317_183254-mvt-2-tape.wav");
+	var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/_ideas/from-with-luke/from-with-luke-000.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183450-mvt-3-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183202-mvt-1-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183254-mvt-2-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183450-mvt-3-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183911-mvt-5-tape.wav");
 
 	outpath.postln;
 
@@ -52,8 +60,8 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		// Out.ar(0,sig * -20.dbamp);
-		nil;
+		Out.ar(0,sig * -20.dbamp);
+		// nil;
 	}.play;
 
 	~waveformDisplay = Window(bounds:Rect(0,0,1000,400));
@@ -68,7 +76,7 @@ s.waitForBoot({
 		.drawLines_(true)
 		.reference_(0.5);
 
-		WaveformToOSC(s,analysis_bus,i,~oF,i,phase_tracking:true,outfile:if(render_data){outpath+/+"waveform-%.csv".format(i)}{nil},callback:{
+		WaveformToOSC(s,analysis_bus,i,~oF,i,phase_tracking:false,outfile:if(render_data){outpath+/+"waveform-%.csv".format(i)}{nil},callback:{
 			arg samps;
 			// samps.size.postln;
 			// defer{~msViews[i].value_(samps.linlin(-1,1,0,1))};

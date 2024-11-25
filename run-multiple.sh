@@ -7,10 +7,10 @@ else
     APP="./bin/video-design.app/Contents/MacOS/video-design"
 fi
 
-$APP test.json
+# $APP test.json
 
 # $APP arco-mvt-2.json &
 # $APP arco-mvt-2.json &
 # $APP arco-mvt-2.json &
 # $APP arco-mvt-2.json &
-# $APP arco-mvt-2.json
+$APP arco-mvt-2.json

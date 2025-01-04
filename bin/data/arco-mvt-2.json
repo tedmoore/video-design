@@ -8,7 +8,7 @@
     "max-frames": -1,
     "use-sc-onsets": false,
     "initial-active-modules": [0,1,2,3],
-    "module-indexes-unlocked": [true,true],
+    "module-indexes-unlocked": [true,true,true,true],
     "initial-onset": true,
     "verbose": false,
     "width":3840,

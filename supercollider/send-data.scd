@@ -1,7 +1,7 @@
 
 (
 var folder = thisProcess.nowExecutingPath.dirname+/+"data-renders";
-s.options.numInputBusChannels_(8);
+s.options.numInputBusChannels_(10);
 s.options.numWireBufs_(64*2);
 s.options.sampleRate_(44100);
 s.options.device_("Fireface UC Mac (24006457)");
@@ -14,7 +14,7 @@ s.waitForBoot({
 	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
 
-	var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183254-mvt-2-tape.wav");
+	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183254-mvt-2-tape.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/_ideas/from-with-luke/from-with-luke-000.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183450-mvt-3-tape.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183202-mvt-1-tape.wav");
@@ -35,8 +35,8 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 1, nMels = 40;
-		var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
-		// var sig = SoundIn.ar([2,3]);
+		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
+		var sig = SoundIn.ar([8,9]);
 		var sig_mono = Mix(sig) * 0.5;
 
 		var fft = FFT(LocalBuf(2048),sig_mono);
@@ -60,8 +60,8 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		Out.ar(0,sig * -20.dbamp);
-		// nil;
+		// Out.ar(0,sig * -20.dbamp);
+		nil;
 	}.play;
 
 	~waveformDisplay = Window(bounds:Rect(0,0,1000,400));
@@ -108,7 +108,7 @@ s.waitForBoot({
 	},"/vector");
 
 	if(render_data){
-		audio_buf.duration.wait;
+		// audio_buf.duration.wait;
 		s.quit({
 			outfile.close;
 			"done rendering data".postln;

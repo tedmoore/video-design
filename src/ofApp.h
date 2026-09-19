@@ -87,15 +87,39 @@ inline void onsetActions(SystemState &s) {
         }
     }
 
+    if (s.verbose) {
+        cout << "Chosen active module indices: ";
+        for (int i = 0; i < ai.size(); i++) {
+            cout << ai[i] << " ";
+        }
+        cout << endl;
+    }
+
     setActiveIndices(s, ai);
+
+    if (s.verbose) {
+        cout << "Active module indices set." << endl;
+    }
 
     // blend mode
     if (ofRandom(1.f) < s.onsetSwitchProb)
         s.blendMode = s.blendModes[s.blendModePool[int(ofRandom(s.blendModePool.size()))]];
 
+    if (s.verbose) {
+        cout << "Blend mode set to: " << s.blendMode << endl;
+    }
+
     s.feedback_amt = (ofRandom(1.f) < s.feedback_prob) * ofRandom(1, s.feedback_max);
 
+    if (s.verbose) {
+        cout << "Feedback amount set to: " << s.feedback_amt << endl;
+    }
+
     s.postGlitch.onset();
+
+    if (s.verbose) {
+        cout << "Post-glitch onset triggered." << endl;
+    }
 }
 
 inline void onsetFromSeed(SystemState &s, unsigned long seed) {
@@ -104,6 +128,7 @@ inline void onsetFromSeed(SystemState &s, unsigned long seed) {
     s.currentRandomSeed = seed;
     cout << "onset from seed: " << s.currentRandomSeed << endl;
     ofSetRandomSeed(s.currentRandomSeed);
+    cout << "random seed set to: " << s.currentRandomSeed << endl;
     onsetActions(s);
 }
 

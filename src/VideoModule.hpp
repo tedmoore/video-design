@@ -53,6 +53,11 @@ class Video {
     void setup(string dir, bool isNRT) {
         src_path = dir;
 
+        if(!ofDirectory(dir).exists()) {
+            ofLogError() << "Directory does not exist: " << dir;
+            ofExit();
+        }
+
         if (isNRT) {  // is non-real-time
             ofDirectory pngs_dir(dir + "/frames");
             pngs_dir.listDir();

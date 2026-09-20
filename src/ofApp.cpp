@@ -280,7 +280,8 @@ void renderFrame(SystemState &s) {
         cout << "ofSetColor(0, 255 - feedback_amt)" << endl;
 
     // =============== visualModules ===================
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    // ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofEnableBlendMode(s.blendMode);
 
     if (!s.debug) {
         if (s.verbose) {
@@ -350,7 +351,7 @@ void ofApp::runNrtRender(SystemState& s) {
 
     // TODO: make this path OS agnostic
     s.randomSeedLog.open(new_dir_path + "/_" + timestamp + "-random-seed-log.csv");
-    assert(randomSeedLog.is_open());
+    assert(s.randomSeedLog.is_open());
     s.randomSeedLog << "Frame,Minute:Second.Frame,Seed" << endl;
 
     if (s.config["initial-onset"].get<bool>()) {
@@ -524,8 +525,10 @@ void ofApp::keyPressed(int key) {
     if (key == 'd')
         s.debug = !s.debug;
  
-    if (key == 'c')
+    if (key == 'c') {
         loadConfigFile(s,s.config_path);
+        onset(s);
+    }
 
     if (key == 's')
         s.use_sc_onsets = !s.use_sc_onsets;

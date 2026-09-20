@@ -63,47 +63,71 @@ inline void onsetActions(SystemState &s) {
 
     // new active vc i
 
-    vector<int> chosen_i;
-    vector<int> ai(s.active_module_indices.size());
+    vector<int> chosen_indices;
+    vector<int> new_active_indices(s.active_module_indices.size());
+
+    if(s.verbose){
+        cout << "n active modules: " << s.active_module_indices.size() << endl;
+    }
+
     for (int i = 0; i < s.active_module_indices.size(); i++) {  // go through the max number that we'll display
 
         if (s.moduleIndexUnlocked[i] && (ofRandom(1.f) < s.onsetSwitchProb)) {
-            std::unordered_set<int> chosen_set(chosen_i.begin(), chosen_i.end());
+            // we'll change this index
+
+            std::unordered_set<int> chosen_set(chosen_indices.begin(), chosen_indices.end());
+
             bool found = false;
             while (!found) {
                 int rand_int = ofRandom(0,s.vc_i_options.size());  // random int the size of the options array
+                
+                if(s.verbose){
+                    cout << "Random int generated: " << rand_int << endl;
+                }
+                
                 int result = s.vc_i_options[rand_int];          // the int from the options array (which is the index for the modules array)
+                
+                if(s.verbose){
+                    cout << "Resulting module index: " << result << endl;
+                }
 
                 if (chosen_set.find(result) == chosen_set.end()) {
+                    // the result is not in the chosen set, so we can use it
                     found = true;
-                    chosen_i.push_back(result);
-                    ai[i] = result;
+                    chosen_indices.push_back(result);
+                    new_active_indices[i] = result;
+                    if(s.verbose){
+                        cout << "Chosen module index for active slot " << i << ": " << new_active_indices[i] << endl;
+                    }
                     break;
                 }
             }
         } else {
-            ai[i] = s.active_module_indices[i];
-            chosen_i.push_back(ai[i]);
+            new_active_indices[i] = s.active_module_indices[i];
+            chosen_indices.push_back(new_active_indices[i]);
         }
     }
 
     if (s.verbose) {
         cout << "Chosen active module indices: ";
-        for (int i = 0; i < ai.size(); i++) {
-            cout << ai[i] << " ";
+        for (int i = 0; i < new_active_indices.size(); i++) {
+            cout << new_active_indices[i] << " ";
         }
         cout << endl;
     }
 
-    setActiveIndices(s, ai);
+    setActiveIndices(s, new_active_indices);
 
     if (s.verbose) {
         cout << "Active module indices set." << endl;
     }
 
     // blend mode
-    if (ofRandom(1.f) < s.onsetSwitchProb)
+    if (ofRandom(1.f) < s.onsetSwitchProb){
         s.blendMode = s.blendModes[s.blendModePool[int(ofRandom(s.blendModePool.size()))]];
+        // ofEnableBlendMode(s.blendMode);
+        cout << "Blend mode changed to: " << s.blendMode << endl;
+    }
 
     if (s.verbose) {
         cout << "Blend mode set to: " << s.blendMode << endl;
@@ -166,7 +190,7 @@ inline void loadConfigFile(SystemState &s, string path) {
     s.active_module_indices.resize(s.config["initial-active-modules"].size());
     for (int i = 0; i < s.active_module_indices.size(); i++) {
         s.active_module_indices[i] = s.config["initial-active-modules"][i].get<int>();
-        assert(active_module_indices[i] < s.n_modules);
+        assert(s.active_module_indices[i] < s.n_modules);
     }
 
     s.moduleIndexUnlocked.resize(s.active_module_indices.size());
@@ -174,9 +198,25 @@ inline void loadConfigFile(SystemState &s, string path) {
         s.moduleIndexUnlocked[i] = s.config["module-indexes-unlocked"].get<vector<int>>()[i];
     }
 
+    int modules_with_prob_greater_than_zero = 0;
+
     s.vc_i_options.clear();
+
     for (int i = 0; i < s.n_modules; i++) {
-        addVCOptions(s, i, s.config["modules"][i]["prob"].get<int>());
+        const int probability = s.config["modules"][i]["prob"].get<int>();
+
+        if (probability > 0) {
+            modules_with_prob_greater_than_zero++;
+            addVCOptions(s, i, probability);
+        }
+    }
+
+    if(s.verbose)
+        cout << "Modules with probability greater than zero: " << modules_with_prob_greater_than_zero << endl;
+
+    if (modules_with_prob_greater_than_zero < s.active_module_indices.size()) {
+        cout << "Warning: not enough modules have greater than 0 probability to fill all active slots" << endl;
+        assert(false && "Not enough modules with probability greater than zero to fill all active slots");
     }
 
     s.onsetSwitchProb = checkJsonKey(s.config, "onset-switch-prob", 1.0);

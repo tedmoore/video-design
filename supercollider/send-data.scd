@@ -1,19 +1,22 @@
 
 (
-var folder = thisProcess.nowExecutingPath.dirname+/+"data-renders";
 s.options.numInputBusChannels_(10);
+s.options.numOutputBusChannels = 4;
 s.options.numWireBufs_(64*2);
 s.options.sampleRate_(44100);
 s.options.device_("Fireface UC Mac (24006457)");
+s.reboot;
+)
 // s.options.device_("ZoomAudioD");
+(
+var folder = thisProcess.nowExecutingPath.dirname+/+"data-renders";
 s.waitForBoot({
-	var analysis_bus = Bus.audio(s,2);
 	var frame_rate = 30;
 	var start_sec = 20;
 	var outpath = folder+/+Date.localtime.stamp;
 	var outfile, render_data = false, loop = true;
 	var nVecChans = 106;
-
+	var analysis_bus;
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183254-mvt-2-tape.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/_ideas/from-with-luke/from-with-luke-000.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183450-mvt-3-tape.wav");
@@ -21,6 +24,13 @@ s.waitForBoot({
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183254-mvt-2-tape.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183450-mvt-3-tape.wav");
 	// var audio_buf = Buffer.read(s,"/Users/ted/Documents/_PROJECT-FILES/arco/perf-materials/240317/240317_183911-mvt-5-tape.wav");
+
+	// var audio_buf = Buffer.read(s,"/Volumes/2026-Jan-03-Ted-Moore/LUL/sounds/fin-mmmaudio-outputs/fin_output_14.wav");
+	var audio_buf = Buffer.read(s,"/Users/ted/dev/MMMAudio/output.wav");
+
+	s.sync;
+
+	analysis_bus = Bus.audio(s,audio_buf.numChannels);
 
 	outpath.postln;
 
@@ -35,11 +45,11 @@ s.waitForBoot({
 
 	~synth = {
 		arg t_force_onset = 0, onset_thresh = 0.2, allow_onsets = 1, nMels = 40;
-		// var sig = PlayBuf.ar(2,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
-		var sig = SoundIn.ar([8,9]);
-		var sig_mono = Mix(sig) * 0.5;
+		var sig = PlayBuf.ar(audio_buf.numChannels,audio_buf,BufRateScale.ir(audio_buf),startPos:audio_buf.sampleRate * start_sec,loop:loop.asInteger);
+		// var sig = SoundIn.ar([8,9]);
+		var sig_mono = Mix(sig);
 
-		var fft = FFT(LocalBuf(2048),sig_mono);
+		var fft = FFT(LocalBuf(256),sig_mono);
 		var trig = Impulse.kr(frame_rate);
 		var spec = FluidSpectralShape.kr(sig_mono);
 		var pitch = FluidPitch.kr(sig_mono);
@@ -60,15 +70,15 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		// Out.ar(0,sig * -20.dbamp);
+		Out.ar(0,sig * -20.dbamp);
 		nil;
 	}.play;
 
 	~waveformDisplay = Window(bounds:Rect(0,0,1000,400));
-	~msViews = Array.newClear(2);
+	~msViews = Array.newClear(audio_buf.numChannels);
 
 	// s.sync;
-	2.do{
+	audio_buf.numChannels.do{
 		arg i;
 		~msViews[i] = MultiSliderView()
 		.elasticMode_(true)
@@ -79,7 +89,7 @@ s.waitForBoot({
 		WaveformToOSC(s,analysis_bus,i,~oF,i,phase_tracking:false,outfile:if(render_data){outpath+/+"waveform-%.csv".format(i)}{nil},callback:{
 			arg samps;
 			// samps.size.postln;
-			// defer{~msViews[i].value_(samps.linlin(-1,1,0,1))};
+			defer{~msViews[i].value_(samps.linlin(-1,1,0,1))};
 		});
 	};
 

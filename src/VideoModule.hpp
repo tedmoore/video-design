@@ -143,6 +143,7 @@ class VideoModule : public VisualModule {
     ParamFloat tile_offset_scale;
     ParamFloat i_x;
     ParamFloat i_y;
+    ParamFloat random_y_offset_pct;
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
@@ -166,6 +167,8 @@ class VideoModule : public VisualModule {
 
     ofLight light;
     glm::vec3 lightPosition = {0, 0, 0};
+
+    int yoffset = 0;
 
     void printStatus() override {}
 
@@ -254,6 +257,11 @@ class VideoModule : public VisualModule {
         i_y.name = "i_y";
         i_y.setup(0.f, 1.f, 1.f, 0.f);
         params.push_back(&i_y);
+
+        // random_y_offset_pct
+        random_y_offset_pct.name = "random_y_offset_pct";
+        random_y_offset_pct.setup(0.f, 0.4f, 1.f, 0.2f);
+        params.push_back(&random_y_offset_pct);
 
         // tiles_alpha
         tiles_alpha.name = "tiles_alpha";
@@ -354,6 +362,12 @@ class VideoModule : public VisualModule {
             texture = *videos[currentSubVideoIndex.value]->hap.getTexture();
         }
 
+        // The source alpha is a hard 0/255 cut with black RGB where transparent. GL_LINEAR
+        // filtering blends across that boundary (even at 1:1 texel/pixel mapping, due to
+        // texel-center vs pixel-center offset), pulling in the black and darkening the edge.
+        // GL_NEAREST avoids sampling across the boundary at all.
+        texture.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+
         if (bTile.value) {
             ofSetColor(255, tiles_alpha.value);
             int w = s.fbo.getWidth() * tile_scale.value;
@@ -368,8 +382,11 @@ class VideoModule : public VisualModule {
             (this->*unfold_tiles_strategies[unfold_tiles_order])(params);
         } else {
             ofSetColor(255, alpha);
-            texture.draw(points[0], points[1], points[2], points[3]);
+            glm::vec3 yoffsetglm = glm::vec3(0, yoffset, 0);
+            texture.draw(points[0] + yoffsetglm, points[1] + yoffsetglm, points[2] + yoffsetglm, points[3] + yoffsetglm);
         }
+
+        ofEnableBlendMode(s.blendMode);
     }
 
     void drawLRTB(const DrawTiledParams& params) {
@@ -627,6 +644,8 @@ class VideoModule : public VisualModule {
         lightPosition.z = ofRandom(s.fbo.getHeight());
 
         light.setPosition(lightPosition);
+
+        yoffset = int(ofRandom(-random_y_offset_pct.value,random_y_offset_pct.value) * s.fbo.getHeight());
     }
 
     void interact(SystemState& s, VisualModule* other) override {}

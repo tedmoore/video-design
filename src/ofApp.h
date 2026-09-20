@@ -144,6 +144,12 @@ inline void onsetActions(SystemState &s) {
     if (s.verbose) {
         cout << "Post-glitch onset triggered." << endl;
     }
+
+    s.when_to_add_glitch_fx = s.when_to_add_glitch_fx_pool[int(ofRandom(s.when_to_add_glitch_fx_pool.size()))];
+
+    if (s.verbose) {
+        cout << "When to add glitch FX set to: " << s.when_to_add_glitch_fx << endl;
+    }
 }
 
 inline void onsetFromSeed(SystemState &s, unsigned long seed) {

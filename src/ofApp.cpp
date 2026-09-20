@@ -306,6 +306,12 @@ void renderFrame(SystemState &s) {
                 }
                 s.modules[index]->display(s);
             }
+
+            if (s.when_to_add_glitch_fx == i) {
+                s.fbo.end();
+                s.postGlitch.generateFx(s.features);
+                s.fbo.begin();
+            }
         }
     } else {
         displayIncomingData(s);
@@ -314,7 +320,7 @@ void renderFrame(SystemState &s) {
     s.fbo.end();
 
     // TODO: maybe the fx should be generated in between the modules sometimes?
-    s.postGlitch.generateFx(s.features);
+    // s.postGlitch.generateFx(s.features);
 }
 
 void ofApp::runNrtRender(SystemState& s) {

@@ -36,6 +36,9 @@ struct SystemState {
     ofBlendMode blendModes[6] = {OF_BLENDMODE_ADD, OF_BLENDMODE_ALPHA, OF_BLENDMODE_SCREEN, OF_BLENDMODE_DISABLED, OF_BLENDMODE_MULTIPLY, OF_BLENDMODE_SUBTRACT};
     vector<int> blendModePool;
     MessageParser messageParser;
+
+    int when_to_add_glitch_fx = 3;
+    vector<int> when_to_add_glitch_fx_pool = {0,1,2,3,3};
 };
 
 #endif // SYSTEMSTATE_H

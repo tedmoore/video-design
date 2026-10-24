@@ -265,6 +265,7 @@ class Waveform : public VisualModule {
     }
 
     void drawTwoTriangles(SystemState &s, int x, int y, int side, int counter) {
+        // ofNoStroke();
         ofPushMatrix();
         int half_side = side / 2;
         ofTranslate(x + half_side, y + half_side);

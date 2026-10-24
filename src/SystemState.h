@@ -38,6 +38,7 @@ struct SystemState {
     MessageParser messageParser;
 
     int when_to_add_glitch_fx = 3;
+    // TODO: put this in config json
     vector<int> when_to_add_glitch_fx_pool = {0,1,2,3,3};
 };
 

@@ -143,7 +143,8 @@ class VideoModule : public VisualModule {
     ParamFloat tile_offset_scale;
     ParamFloat i_x;
     ParamFloat i_y;
-    ParamFloat random_y_offset_pct;
+    float random_y_offset_pct;
+    float flip_h_prob;
     ParamInt tiles_alpha;
     ParamBool bZShiftBoxes;
     ParamFloat nrtPlayHead;
@@ -169,6 +170,7 @@ class VideoModule : public VisualModule {
     glm::vec3 lightPosition = {0, 0, 0};
 
     int yoffset = 0;
+    bool flip_h = false;
 
     void printStatus() override {}
 
@@ -259,9 +261,13 @@ class VideoModule : public VisualModule {
         params.push_back(&i_y);
 
         // random_y_offset_pct
-        random_y_offset_pct.name = "random_y_offset_pct";
-        random_y_offset_pct.setup(0.f, 0.4f, 1.f, 0.2f);
-        params.push_back(&random_y_offset_pct);
+        random_y_offset_pct = checkJsonKey(config, "random-y-offset-pct", 0.2);
+        // random_y_offset_pct.name = "random_y_offset_pct";
+        // random_y_offset_pct.setup(0.f, 0.4f, 1.f, 0.2f);
+        // params.push_back(&random_y_offset_pct);
+
+        // flip_h_prob
+        flip_h_prob = checkJsonKey(config, "flip-h-prob", 0.5);
 
         // tiles_alpha
         tiles_alpha.name = "tiles_alpha";
@@ -383,7 +389,15 @@ class VideoModule : public VisualModule {
         } else {
             ofSetColor(255, alpha);
             glm::vec3 yoffsetglm = glm::vec3(0, yoffset, 0);
+            if (flip_h) {
+                ofPushMatrix();
+                ofScale(-1, 1, 1);
+                ofTranslate(-s.fbo.getWidth(), 0, 0);
+            }
             texture.draw(points[0] + yoffsetglm, points[1] + yoffsetglm, points[2] + yoffsetglm, points[3] + yoffsetglm);
+            if (flip_h) {
+                ofPopMatrix();
+            }
         }
 
         ofEnableBlendMode(s.blendMode);
@@ -645,7 +659,9 @@ class VideoModule : public VisualModule {
 
         light.setPosition(lightPosition);
 
-        yoffset = int(ofRandom(-random_y_offset_pct.value,random_y_offset_pct.value) * s.fbo.getHeight());
+        yoffset = int(ofRandom(-random_y_offset_pct,random_y_offset_pct) * s.fbo.getHeight());
+
+        flip_h = ofRandom(1.0) < flip_h_prob;
     }
 
     void interact(SystemState& s, VisualModule* other) override {}

@@ -12,12 +12,12 @@
 
     "max-frames": -1,
     "use-sc-onsets": false,
-    "initial-active-modules": [0,1,2,3],
-    "module-indexes-unlocked": [true,true,true,true],
+    "initial-active-modules": [0,1,2,3,4],
+    "module-indexes-unlocked": [true,true,true,true,true],
     "initial-onset": true,
     "verbose": false,
     "width":3840,
-    "height":720,
+    "height":2160,
 
     "force-onset-frames":false,
     "force-onset-min-frames": 300,
@@ -29,7 +29,7 @@
     "blend-mode-probs": [1,1,1,0,1,1],
 
     "feedback-prob": 0.25,
-    "feedback-max": 255,
+    "feedback-max": 150,
     "flow-field-resolution": 20,
     "onset-switch-prob": 1.0,
 
@@ -41,7 +41,7 @@
             "prob": 35,
             "waveform-type-default": 2,
             "_comment-waveform-type-weights": "NORM = 0, LISSAJOUS = 1, IKEDA = 2, GRID = 3, BITS = 4",
-            "waveform-type-weights": [0,0,0.2,0.7,0.1],
+            "waveform-type-weights": [0,0,0.45,0.45,0.1],
             "lissajous-line-width": 1.0,
             "waveform-line-width": 1.0,
             "max-waveforms": 2
@@ -890,9 +890,9 @@
         "glow-prob": 0.2,
         "shaker-prob": 0.01,
         "cut_slider-prob": 0.01,
-        "twist-prob": 0.01,
+        "twist-prob": 0.0,
         "outline-prob": 0.03,
-        "noise-prob": 0.05,
+        "noise-prob": 0.03,
         "slitscan-prob": 0.01,
         "swell-prob": 0.01,
         "invert-prob": 0.06,

@@ -169,6 +169,7 @@ class VideoModule : public VisualModule {
     ofLight light;
     glm::vec3 lightPosition = {0, 0, 0};
 
+    size_t lastDisplayFrame = 0;
     int yoffset = 0;
     bool flip_h = false;
 
@@ -324,9 +325,14 @@ class VideoModule : public VisualModule {
             while (nrtPlayHead.value < 0) nrtPlayHead.value += total_frames;
             while (nrtPlayHead.value >= total_frames) nrtPlayHead.value -= total_frames;
         } else {
+            // Only the sub-video that is actually being displayed decodes/reads from disk;
+            // every other player is paused so dozens of large hap files don't compete for I/O.
+            bool displayed = s.frame_num <= lastDisplayFrame + 2;
             for (int i = 0; i < videos.size(); i++) {
                 videos[i]->mini_vid.update();
-                videos[i]->hap.setSpeed(getSpeed());
+                bool shouldPlay = displayed && (i == currentSubVideoIndex.value);
+                videos[i]->hap.setPaused(!shouldPlay);
+                if (shouldPlay) videos[i]->hap.setSpeed(getSpeed());
             }
         }
     }
@@ -365,7 +371,9 @@ class VideoModule : public VisualModule {
             img.load(videos[currentSubVideoIndex.value]->pngs[int(nrtPlayHead.value)].getAbsolutePath());
             texture = img.getTexture();
         } else {
-            texture = *videos[currentSubVideoIndex.value]->hap.getTexture();
+            ofTexture* hapTex = videos[currentSubVideoIndex.value]->hap.getTexture();
+            if (hapTex == nullptr || !hapTex->isAllocated()) return;  // first frame not decoded yet
+            texture = *hapTex;
         }
 
         // The source alpha is a hard 0/255 cut with black RGB where transparent. GL_LINEAR
@@ -574,6 +582,7 @@ class VideoModule : public VisualModule {
     }
 
     void display(SystemState& s) override {
+        lastDisplayFrame = s.frame_num;
         if (s.verbose) {
             cout << "VideoModule::display\n";
             cout << "\tsrc: " << videos[currentSubVideoIndex.value]->src_path << endl;

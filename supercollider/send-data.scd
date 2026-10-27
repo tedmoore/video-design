@@ -70,7 +70,7 @@ s.waitForBoot({
 		SendReply.kr(trig,"/vector",vector);
 
 		Out.ar(analysis_bus,sig);
-		Out.ar(0,sig * -20.dbamp);
+		Out.ar(0,Splay.ar(sig) * -20.dbamp);
 		nil;
 	}.play;
 
@@ -128,7 +128,7 @@ s.waitForBoot({
 )
 
 ~synth.set(\t_force_onset,1);
-~synth.set(\onset_thresh,0.5);
+~synth.set(\onset_thresh,0.7);
 ~synth.set(\allow_onsets,0);
 ~synth.set(\allow_onsets,1);
 
